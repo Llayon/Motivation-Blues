@@ -16,6 +16,23 @@
 - Экспорт готовых постов в `.txt` или буфер обмена.
 - Supabase CLI-проект, миграции, RLS и RPC для облачной базы.
 
+## LLM-First Workflow
+
+Этот репозиторий подготовлен для разработки через LLM-агентов.
+
+Стартовые документы:
+
+- `AGENTS.md` - обязательные инструкции для агентов.
+- `Docs/CONTEXT.md` - краткий контекст продукта.
+- `Docs/PROJECT_MEMORY.md` - память проекта и принятые решения.
+- `Docs/PRODUCT_SPEC.md` - продуктовая спецификация.
+- `Docs/ARCHITECTURE.md` - архитектура и data flow.
+- `Docs/DATA_CONTRACTS.md` - Supabase tables, RPC, RLS.
+- `Docs/TASKS.md` - agent-ready backlog.
+- `Docs/RELEASE_PLAYBOOK.md` - релизный процесс.
+
+Перед крупной задачей агент должен прочитать `AGENTS.md`, `Docs/CONTEXT.md`, `Docs/PROJECT_MEMORY.md` и релевантные документы из `Docs/`.
+
 ## Запуск
 
 ```bash
