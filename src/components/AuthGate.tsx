@@ -78,6 +78,7 @@ export function AuthGate() {
             <button
               type="button"
               className="plain-button"
+              data-testid="start-local-mode"
               onClick={() => startSession(email.trim() || 'local@author.test')}
             >
               Локальный режим

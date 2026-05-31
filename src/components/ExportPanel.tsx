@@ -46,7 +46,7 @@ export function ExportPanel() {
       </article>
       <article className="export-preview glass-panel">
         <h2>Превью</h2>
-        <pre>{exportText || 'Пока нет готовых постов для экспорта.'}</pre>
+        <pre data-testid="export-preview">{exportText || 'Пока нет готовых постов для экспорта.'}</pre>
       </article>
     </section>
   );

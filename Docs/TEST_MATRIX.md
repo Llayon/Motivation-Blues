@@ -20,6 +20,15 @@
 - Open capsule and verify collection updates.
 - Export banked posts.
 
+## Playwright E2E
+- Local mode starts without Supabase session.
+- IndexedDB autosave restores active editor buffer after reload.
+- Banked posts increment visible progress.
+- Daily goal creates sealed capsule.
+- Capsule can be opened into a collectible.
+- Collection shows owned item.
+- Export preview includes banked posts.
+
 ## Supabase
 - `npx supabase migration list` shows local/remote parity.
 - User can read own rows.
@@ -29,6 +38,7 @@
 
 ## Deployment
 - `npm test`.
+- `npm run test:e2e`.
 - `npm run build`.
 - GitHub Pages base-path build.
 - GitHub Actions deploy succeeds.

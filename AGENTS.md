@@ -21,6 +21,7 @@ Motivation Blues is a static React/Vite app for a 40-day writing challenge: writ
 ## Commands
 ```bash
 npm test
+npm run test:e2e
 npm run build
 npx supabase migration list
 ```
@@ -45,6 +46,7 @@ Remove-Item Env:\VITE_BASE_PATH
 ## Definition of Done
 - User-visible behavior matches `Docs/PRODUCT_SPEC.md`.
 - `npm test` passes.
+- `npm run test:e2e` passes for editor/local-mode/core-loop changes.
 - `npm run build` passes.
 - GitHub Pages base-path build passes for deploy-affecting changes.
 - Supabase migrations are additive and pushed when DB behavior changes.

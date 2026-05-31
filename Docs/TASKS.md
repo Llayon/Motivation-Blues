@@ -25,27 +25,22 @@ Verification: build passes and manual injected error test.
 
 ## Medium Priority
 
-### 4. Add Playwright smoke tests
-Goal: cover auth-free local mode, editor autosave, bank post, capsule queue, and export.
-Context: current tests are unit-only.
-Acceptance criteria: `npm run test:e2e` runs locally and in CI if configured.
-
-### 5. Add release checklist automation
+### 4. Add release checklist automation
 Goal: make deploy verification repeatable.
 Context: current release checks are manual CLI commands.
 Acceptance criteria: a script or workflow validates build, test, and Pages URL status.
 
-### 6. Improve collection visuals
+### 5. Improve collection visuals
 Goal: make figurines feel more like glossy collectible toys.
 Context: current models are procedural placeholders.
 Acceptance criteria: no runtime material mutation of imported assets unless intentional.
 
 ## Low Priority
 
-### 7. Add richer phrase library
+### 6. Add richer phrase library
 Goal: expand static classic feedback variety without adding AI.
 Acceptance criteria: phrase bank remains static and typed.
 
-### 8. Add theme polish
+### 7. Add theme polish
 Goal: refine light glassmorphism system and responsive layout.
 Acceptance criteria: mobile editor remains usable.

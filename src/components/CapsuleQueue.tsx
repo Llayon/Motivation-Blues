@@ -28,13 +28,13 @@ export function CapsuleQueue() {
         ) : (
           <div className="capsule-grid">
             {sealedCapsules.map((capsule) => (
-              <article key={capsule.id} className="capsule-card">
+              <article key={capsule.id} className="capsule-card" data-testid="sealed-capsule">
                 <div className="capsule-orb">
                   <span />
                 </div>
                 <h2>{capsule.capsuleType === 'daily' ? 'Капсула дня' : 'Milestone-амфора'}</h2>
                 <p>{capsule.createdFrom}</p>
-                <button className="primary-button" type="button" onClick={() => openCapsule(capsule.id)}>
+                <button className="primary-button" data-testid="open-capsule" type="button" onClick={() => openCapsule(capsule.id)}>
                   Открыть
                 </button>
               </article>
@@ -48,7 +48,7 @@ export function CapsuleQueue() {
         {revealedItem ? (
           <>
             <VoxelShowcase item={revealedItem} mode="reveal" />
-            <h2>{revealedItem.name}</h2>
+            <h2 data-testid="revealed-item">{revealedItem.name}</h2>
             <p>{rarityLabels[revealedItem.rarity]} фигурка добавлена на полку.</p>
             <button className="ghost-button" type="button" onClick={clearReveal}>
               Убрать фокус

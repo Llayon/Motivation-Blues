@@ -205,6 +205,7 @@ export function ZenEditor() {
       <article className="zen-editor glass-panel">
         <input
           className="title-input"
+          data-testid="editor-title"
           placeholder="Заголовок поста"
           value={title}
           onChange={(event) => {
@@ -214,6 +215,7 @@ export function ZenEditor() {
         />
         <textarea
           className="post-textarea"
+          data-testid="editor-content"
           placeholder="Пиши спокойно. В банк уйдет только то, что ты явно сохранишь."
           value={content}
           onChange={(event) => {
@@ -223,6 +225,7 @@ export function ZenEditor() {
         />
         <input
           className="tag-input"
+          data-testid="editor-tags"
           placeholder="Теги через запятую: идеи, личное, продукт"
           value={tags}
           onChange={(event) => {
@@ -234,14 +237,14 @@ export function ZenEditor() {
           <div className="editor-metrics">
             <span>{charCount} знаков</span>
             <span>{wordCount} слов</span>
-            <span className="editor-autosave">{bufferStatus}</span>
+            <span className="editor-autosave" data-testid="autosave-status">{bufferStatus}</span>
             {status ? <span className="positive">{status}</span> : null}
           </div>
           <div className="editor-actions">
-            <button className="ghost-button" type="button" disabled={!canSave || isSaving} onClick={handleSaveDraft}>
+            <button className="ghost-button" data-testid="save-draft" type="button" disabled={!canSave || isSaving} onClick={handleSaveDraft}>
               {isSaving ? 'Сохраняю...' : 'Сохранить черновик'}
             </button>
-            <button className="primary-button" type="button" disabled={!canSave || isSaving} onClick={handleBankPost}>
+            <button className="primary-button" data-testid="bank-post" type="button" disabled={!canSave || isSaving} onClick={handleBankPost}>
               Сохранить в банк
             </button>
             <button className="plain-button" type="button" onClick={() => setActiveView('bank')}>

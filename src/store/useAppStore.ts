@@ -374,11 +374,21 @@ export const useAppStore = create<AppState>()(
           return;
         }
 
-        set({ isHydrating: true, cloudError: null, mode: 'cloud' });
+        set({ isHydrating: true, cloudError: null });
 
         try {
           const session = await requireCloudSession();
           if (!session?.user) {
+            const current = get();
+            if (current.mode === 'local' && current.profile) {
+              set({
+                isHydrating: false,
+                mode: 'local',
+                cloudError: null
+              });
+              return;
+            }
+
             set({
               isHydrating: false,
               profile: null,
@@ -391,6 +401,7 @@ export const useAppStore = create<AppState>()(
           }
 
           const email = session.user.email ?? 'author@example.com';
+          set({ mode: 'cloud' });
           await upsertCloudProfile(session.user.id, getLocalTimezone());
           const cloudData = await loadCloudData(email);
 

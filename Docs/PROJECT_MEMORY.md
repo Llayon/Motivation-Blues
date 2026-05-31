@@ -19,6 +19,7 @@
 - Voxel-style 3D placeholders with R3F.
 - TXT export for banked posts.
 - IndexedDB editor autosave buffer with localStorage fallback.
+- Playwright E2E smoke tests for local mode, IndexedDB recovery, banking, capsules, collection, and export.
 
 ## Key Decisions
 - Supabase is the backend because the app needs Auth, RLS, Postgres, and RPC without a custom server.
@@ -33,12 +34,14 @@
 - Supabase RLS must remain strict: users can only access their own rows.
 - Autosave changes can accidentally weaken recovery guarantees.
 - GitHub Actions currently forces JavaScript actions to Node 24 to avoid upcoming runner deprecation issues.
+- CI now runs unit tests and Playwright E2E before build/deploy.
 
 ## Recent History
 - Created MVP and Supabase cloud project.
 - Deployed to GitHub Pages.
 - Added IndexedDB editor autosave buffer.
 - Added LLM-first documentation plan.
+- Added Playwright E2E tests and fixed local mode reload by waiting for Zustand persist hydration and preserving local mode when no Supabase session exists.
 
 ## Maintenance Rule
 Update this file whenever a change materially affects product behavior, architecture, deployment, database schema, or agent workflow.

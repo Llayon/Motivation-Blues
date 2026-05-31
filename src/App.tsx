@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthGate } from './components/AuthGate';
 import { Bank } from './components/Bank';
 import { CapsuleQueue } from './components/CapsuleQueue';
@@ -35,11 +35,30 @@ function ActiveView() {
 }
 
 export default function App() {
+  const [hasPersistedStoreHydrated, setHasPersistedStoreHydrated] = useState(
+    useAppStore.persist.hasHydrated()
+  );
   const profile = useAppStore((state) => state.profile);
   const isHydrating = useAppStore((state) => state.isHydrating);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
 
   useEffect(() => {
+    const unsubscribe = useAppStore.persist.onFinishHydration(() => {
+      setHasPersistedStoreHydrated(true);
+    });
+
+    if (useAppStore.persist.hasHydrated()) {
+      setHasPersistedStoreHydrated(true);
+    }
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (!hasPersistedStoreHydrated) {
+      return;
+    }
+
     if (!isSupabaseConfigured || !supabase) {
       return;
     }
@@ -52,9 +71,9 @@ export default function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, [hydrateFromSupabase]);
+  }, [hasPersistedStoreHydrated, hydrateFromSupabase]);
 
-  if (isHydrating) {
+  if (!hasPersistedStoreHydrated || isHydrating) {
     return (
       <main className="auth-screen">
         <section className="auth-card glass-panel">
