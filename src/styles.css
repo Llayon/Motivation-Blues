@@ -509,6 +509,11 @@ textarea:focus {
   color: var(--muted);
 }
 
+.editor-autosave {
+  color: #2e78c5;
+  font-weight: 800;
+}
+
 .content-panel {
   min-height: calc(100vh - 7rem);
 }

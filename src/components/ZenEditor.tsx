@@ -1,4 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  clearEditorBuffer,
+  loadEditorBuffer,
+  saveEditorBuffer
+} from '../lib/editorBuffer';
 import { useAppStore } from '../store/useAppStore';
 import type { Post } from '../types';
 
@@ -11,6 +16,7 @@ function inputToTags(value: string) {
 }
 
 export function ZenEditor() {
+  const profile = useAppStore((state) => state.profile);
   const posts = useAppStore((state) => state.posts);
   const saveDraft = useAppStore((state) => state.saveDraft);
   const bankPost = useAppStore((state) => state.bankPost);
@@ -26,10 +32,87 @@ export function ZenEditor() {
   const [tags, setTags] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [bufferStatus, setBufferStatus] = useState('Автосейв готовит буфер...');
+  const hasLoadedBufferRef = useRef(false);
+  const userTypedBeforeRestoreRef = useRef(false);
 
   const charCount = content.trim().length;
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const canSave = charCount > 0;
+
+  useEffect(() => {
+    if (!profile) {
+      return;
+    }
+
+    let isCancelled = false;
+    hasLoadedBufferRef.current = false;
+    userTypedBeforeRestoreRef.current = false;
+    setBufferStatus('Проверяю аварийный буфер...');
+
+    void loadEditorBuffer(profile.id).then((record) => {
+      if (isCancelled) {
+        return;
+      }
+
+      hasLoadedBufferRef.current = true;
+
+      if (record && !userTypedBeforeRestoreRef.current) {
+        setEditingId(record.postId);
+        setTitle(record.title);
+        setContent(record.content);
+        setTags(record.tagsInput);
+        setStatus(
+          `Восстановлен локальный буфер от ${new Date(record.updatedAt).toLocaleTimeString('ru-RU')}.`
+        );
+        setBufferStatus('Терминаторский автосейв включен.');
+        return;
+      }
+
+      setBufferStatus('Терминаторский автосейв включен.');
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [profile]);
+
+  useEffect(() => {
+    if (!profile || !hasLoadedBufferRef.current) {
+      return;
+    }
+
+    const hasAnyInput =
+      title.trim().length > 0 || content.length > 0 || tags.trim().length > 0;
+
+    if (!hasAnyInput) {
+      void clearEditorBuffer(profile.id).catch(() => {
+        setBufferStatus('Автосейв: не удалось очистить локальный буфер.');
+      });
+      setBufferStatus('Буфер пуст. Автосейв включен.');
+      return;
+    }
+
+    const updatedAt = new Date().toISOString();
+    void saveEditorBuffer({
+      userId: profile.id,
+      postId: editingId,
+      title,
+      content,
+      tagsInput: tags,
+      updatedAt
+    })
+      .then(() => {
+        setBufferStatus(`Сохранено локально: ${new Date(updatedAt).toLocaleTimeString('ru-RU')}`);
+      })
+      .catch(() => {
+        setBufferStatus('Автосейв: локальное сохранение не прошло.');
+      });
+  }, [content, editingId, profile, tags, title]);
+
+  function markUserInput() {
+    userTypedBeforeRestoreRef.current = true;
+  }
 
   function loadDraft(post: Post) {
     setEditingId(post.id);
@@ -39,11 +122,15 @@ export function ZenEditor() {
     setStatus(null);
   }
 
-  function resetEditor() {
+  async function resetEditor() {
     setEditingId(undefined);
     setTitle('');
     setContent('');
     setTags('');
+    setStatus(null);
+    if (profile) {
+      await clearEditorBuffer(profile.id);
+    }
   }
 
   async function handleSaveDraft() {
@@ -57,6 +144,16 @@ export function ZenEditor() {
     setIsSaving(false);
     if (id) {
       setEditingId(id);
+      if (profile) {
+        await saveEditorBuffer({
+          userId: profile.id,
+          postId: id,
+          title,
+          content,
+          tagsInput: tags,
+          updatedAt: new Date().toISOString()
+        });
+      }
       setStatus('Черновик сохранен.');
     }
   }
@@ -71,7 +168,10 @@ export function ZenEditor() {
     });
     setIsSaving(false);
     setStatus('Пост сохранен в банк.');
-    resetEditor();
+    if (profile) {
+      await clearEditorBuffer(profile.id);
+    }
+    await resetEditor();
   }
 
   return (
@@ -79,7 +179,7 @@ export function ZenEditor() {
       <aside className="draft-rail glass-panel">
         <div className="section-heading">
           <p className="eyebrow">Черновики</p>
-          <button type="button" onClick={resetEditor}>
+          <button type="button" onClick={() => void resetEditor()}>
             Новый
           </button>
         </div>
@@ -107,24 +207,34 @@ export function ZenEditor() {
           className="title-input"
           placeholder="Заголовок поста"
           value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={(event) => {
+            markUserInput();
+            setTitle(event.target.value);
+          }}
         />
         <textarea
           className="post-textarea"
           placeholder="Пиши спокойно. В банк уйдет только то, что ты явно сохранишь."
           value={content}
-          onChange={(event) => setContent(event.target.value)}
+          onChange={(event) => {
+            markUserInput();
+            setContent(event.target.value);
+          }}
         />
         <input
           className="tag-input"
           placeholder="Теги через запятую: идеи, личное, продукт"
           value={tags}
-          onChange={(event) => setTags(event.target.value)}
+          onChange={(event) => {
+            markUserInput();
+            setTags(event.target.value);
+          }}
         />
         <div className="editor-footer">
           <div className="editor-metrics">
             <span>{charCount} знаков</span>
             <span>{wordCount} слов</span>
+            <span className="editor-autosave">{bufferStatus}</span>
             {status ? <span className="positive">{status}</span> : null}
           </div>
           <div className="editor-actions">
