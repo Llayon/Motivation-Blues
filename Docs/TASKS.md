@@ -9,9 +9,9 @@ Files likely involved: `src/App.tsx`, `src/components/CapsuleQueue.tsx`, `src/co
 Acceptance criteria: dashboard/editor initial route no longer imports R3F synchronously; `npm run build` passes; GitHub Pages build passes.
 Verification: compare build chunk output before/after.
 
-### 2. Improve autosave conflict UX
+### 2. Extend autosave conflict UX to drafts
 Goal: if an IndexedDB buffer exists and user selects a different draft, offer a clear choice instead of silently replacing the editor.
-Context: current autosave restores on editor load and loadDraft overwrites editor state.
+Context: banked-post editing now protects unrelated emergency buffers, but draft selection still needs the same explicit choice.
 Files likely involved: `src/components/ZenEditor.tsx`, `src/lib/editorBuffer.ts`.
 Acceptance criteria: user can keep buffer, load selected draft, or save buffer as draft.
 Verification: manual QA in `Docs/MANUAL_QA.md`.

@@ -494,7 +494,7 @@ textarea:focus {
   line-height: 1.72;
 }
 
-.editor-footer {
+  .editor-footer {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -524,6 +524,52 @@ textarea:focus {
 .season-track {
   display: grid;
   gap: 1rem;
+}
+
+.bank-tools {
+  display: grid;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.bank-tools input {
+  min-height: 3.2rem;
+  padding: 0 1rem;
+}
+
+.tag-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.tag-chip,
+.inline-tag {
+  border: 1px solid rgba(96, 135, 175, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.58);
+  color: #2e78c5;
+  font-weight: 900;
+}
+
+.tag-chip {
+  min-height: 2.45rem;
+  padding: 0 0.85rem;
+}
+
+.tag-chip.active {
+  border-color: rgba(45, 118, 255, 0.4);
+  background: #152033;
+  color: #fff;
+}
+
+.tag-chip span {
+  opacity: 0.72;
+}
+
+.inline-tag {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.9rem;
 }
 
 .post-grid {
@@ -563,11 +609,6 @@ textarea:focus {
   line-height: 1.55;
   -webkit-line-clamp: 8;
   -webkit-box-orient: vertical;
-}
-
-.post-card em {
-  color: #2e78c5;
-  font-style: normal;
 }
 
 .season-summary {
@@ -828,7 +869,7 @@ textarea:focus {
     font-size: 1.1rem;
   }
 
-  .editor-footer {
+.editor-footer {
     align-items: stretch;
   }
 
@@ -841,4 +882,23 @@ textarea:focus {
   .hero-actions button {
     flex: 1 1 100%;
   }
+}
+
+.editor-conflict {
+  border: 1px solid rgba(255, 157, 183, 0.34);
+  border-radius: 1.3rem;
+  padding: 1rem;
+  background: rgba(255, 248, 244, 0.76);
+}
+
+.editor-conflict h2 {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.editor-conflict p {
+  color: var(--muted);
+  line-height: 1.55;
 }

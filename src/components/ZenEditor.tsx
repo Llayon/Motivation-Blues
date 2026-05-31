@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  type EditorBufferRecord,
   clearEditorBuffer,
   loadEditorBuffer,
   saveEditorBuffer
@@ -20,6 +21,9 @@ export function ZenEditor() {
   const posts = useAppStore((state) => state.posts);
   const saveDraft = useAppStore((state) => state.saveDraft);
   const bankPost = useAppStore((state) => state.bankPost);
+  const updateBankedPost = useAppStore((state) => state.updateBankedPost);
+  const editorTargetPostId = useAppStore((state) => state.editorTargetPostId);
+  const clearEditorTarget = useAppStore((state) => state.clearEditorTarget);
   const setActiveView = useAppStore((state) => state.setActiveView);
   const drafts = useMemo(
     () => posts.filter((post) => post.status === 'draft').sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
@@ -33,9 +37,12 @@ export function ZenEditor() {
   const [status, setStatus] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [bufferStatus, setBufferStatus] = useState('Автосейв готовит буфер...');
+  const [conflictPost, setConflictPost] = useState<Post | null>(null);
   const hasLoadedBufferRef = useRef(false);
   const userTypedBeforeRestoreRef = useRef(false);
 
+  const editingPost = editingId ? posts.find((post) => post.id === editingId) : undefined;
+  const isEditingBankedPost = editingPost?.status === 'banked';
   const charCount = content.trim().length;
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const canSave = charCount > 0;
@@ -78,6 +85,45 @@ export function ZenEditor() {
   }, [profile]);
 
   useEffect(() => {
+    if (!profile || !editorTargetPostId) {
+      return;
+    }
+
+    const targetPost = posts.find((post) => post.id === editorTargetPostId);
+    if (!targetPost) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    void loadEditorBuffer(profile.id).then((record) => {
+      if (isCancelled) {
+        return;
+      }
+
+      const hasUnrelatedBuffer =
+        record &&
+        record.postId !== targetPost.id &&
+        (record.title.trim().length > 0 ||
+          record.content.length > 0 ||
+          record.tagsInput.trim().length > 0);
+
+      if (hasUnrelatedBuffer) {
+        setConflictPost(targetPost);
+        setStatus('Есть несохраненный локальный буфер. Выберите, что открыть.');
+        return;
+      }
+
+      loadPostIntoEditor(targetPost, record?.postId === targetPost.id ? record : undefined);
+      clearEditorTarget();
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [clearEditorTarget, editorTargetPostId, posts, profile]);
+
+  useEffect(() => {
     if (!profile || !hasLoadedBufferRef.current) {
       return;
     }
@@ -114,12 +160,17 @@ export function ZenEditor() {
     userTypedBeforeRestoreRef.current = true;
   }
 
-  function loadDraft(post: Post) {
+  function loadPostIntoEditor(post: Post, buffer?: EditorBufferRecord) {
     setEditingId(post.id);
-    setTitle(post.title);
-    setContent(post.content);
-    setTags(tagsToInput(post.tags));
-    setStatus(null);
+    setTitle(buffer?.title ?? post.title);
+    setContent(buffer?.content ?? post.content);
+    setTags(buffer?.tagsInput ?? tagsToInput(post.tags));
+    setConflictPost(null);
+    setStatus(post.status === 'banked' ? 'Редактируется пост из банка.' : null);
+  }
+
+  function loadDraft(post: Post) {
+    loadPostIntoEditor(post);
   }
 
   async function resetEditor() {
@@ -128,6 +179,8 @@ export function ZenEditor() {
     setContent('');
     setTags('');
     setStatus(null);
+    setConflictPost(null);
+    clearEditorTarget();
     if (profile) {
       await clearEditorBuffer(profile.id);
     }
@@ -174,6 +227,43 @@ export function ZenEditor() {
     await resetEditor();
   }
 
+  async function handleUpdateBankedPost() {
+    setIsSaving(true);
+    const didUpdate = await updateBankedPost({
+      id: editingId,
+      title,
+      content,
+      tags: inputToTags(tags)
+    });
+    setIsSaving(false);
+
+    if (!didUpdate) {
+      setStatus('Не удалось обновить пост в банке.');
+      return;
+    }
+
+    if (profile) {
+      await clearEditorBuffer(profile.id);
+    }
+    await resetEditor();
+    setActiveView('bank');
+  }
+
+  async function keepBufferFromConflict() {
+    setConflictPost(null);
+    clearEditorTarget();
+  }
+
+  async function editConflictPost() {
+    if (!profile || !conflictPost) {
+      return;
+    }
+
+    await clearEditorBuffer(profile.id);
+    loadPostIntoEditor(conflictPost);
+    clearEditorTarget();
+  }
+
   return (
     <section className="editor-layout">
       <aside className="draft-rail glass-panel">
@@ -203,6 +293,24 @@ export function ZenEditor() {
       </aside>
 
       <article className="zen-editor glass-panel">
+        {conflictPost ? (
+          <div className="editor-conflict" data-testid="editor-conflict">
+            <p className="eyebrow">Аварийный буфер</p>
+            <h2>Не перезаписываю несохраненный текст</h2>
+            <p>
+              Сейчас в редакторе восстановлен локальный буфер. Можно оставить его
+              или явно перейти к редактированию поста «{conflictPost.title || 'Без названия'}».
+            </p>
+            <div className="hero-actions">
+              <button className="ghost-button" type="button" onClick={keepBufferFromConflict}>
+                Восстановить буфер
+              </button>
+              <button className="primary-button" type="button" onClick={editConflictPost}>
+                Редактировать выбранный пост
+              </button>
+            </div>
+          </div>
+        ) : null}
         <input
           className="title-input"
           data-testid="editor-title"
@@ -241,12 +349,25 @@ export function ZenEditor() {
             {status ? <span className="positive">{status}</span> : null}
           </div>
           <div className="editor-actions">
-            <button className="ghost-button" data-testid="save-draft" type="button" disabled={!canSave || isSaving} onClick={handleSaveDraft}>
-              {isSaving ? 'Сохраняю...' : 'Сохранить черновик'}
-            </button>
-            <button className="primary-button" data-testid="bank-post" type="button" disabled={!canSave || isSaving} onClick={handleBankPost}>
-              Сохранить в банк
-            </button>
+            {isEditingBankedPost ? (
+              <>
+                <button className="ghost-button" type="button" disabled={isSaving} onClick={() => void resetEditor()}>
+                  Отменить
+                </button>
+                <button className="primary-button" data-testid="update-banked-post" type="button" disabled={!canSave || isSaving} onClick={handleUpdateBankedPost}>
+                  {isSaving ? 'Обновляю...' : 'Обновить в банке'}
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="ghost-button" data-testid="save-draft" type="button" disabled={!canSave || isSaving} onClick={handleSaveDraft}>
+                  {isSaving ? 'Сохраняю...' : 'Сохранить черновик'}
+                </button>
+                <button className="primary-button" data-testid="bank-post" type="button" disabled={!canSave || isSaving} onClick={handleBankPost}>
+                  Сохранить в банк
+                </button>
+              </>
+            )}
             <button className="plain-button" type="button" onClick={() => setActiveView('bank')}>
               Банк постов
             </button>

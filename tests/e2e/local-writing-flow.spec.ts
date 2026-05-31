@@ -20,12 +20,93 @@ async function openEditor(page: Page) {
 }
 
 async function writePost(page: Page, index: number) {
-  await page.getByTestId('editor-title').fill(`Пост автотеста ${index}`);
+  await writePostFields(
+    page,
+    `Пост автотеста ${index}`,
+    `Текст автотеста ${index}. Это готовый пост для проверки банка и капсул.`,
+    'autotest, flow'
+  );
+}
+
+async function writePostFields(page: Page, title: string, content: string, tags: string) {
+  await page.getByTestId('editor-title').fill(title);
   await page
     .getByTestId('editor-content')
-    .fill(`Текст автотеста ${index}. Это готовый пост для проверки банка и капсул.`);
-  await page.getByTestId('editor-tags').fill('autotest, flow');
+    .fill(content);
+  await page.getByTestId('editor-tags').fill(tags);
   await expect(page.getByTestId('autosave-status')).toContainText(/Сохранено локально|автосейв/i);
+}
+
+async function waitForEditorBufferTags(page: Page, expectedTags: string) {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(async () => {
+          const storage = window.localStorage.getItem('post-season-storage');
+          const profileId = storage ? JSON.parse(storage).state?.profile?.id : null;
+
+          if (!profileId) {
+            return null;
+          }
+
+          try {
+            const db = await new Promise<IDBDatabase>((resolve, reject) => {
+              const request = window.indexedDB.open('motivation-blues-editor-buffer', 1);
+              request.onerror = () => reject(request.error);
+              request.onsuccess = () => resolve(request.result);
+            });
+            const transaction = db.transaction('active-editor-buffers', 'readonly');
+            const request = transaction.objectStore('active-editor-buffers').get(profileId);
+            const record = await new Promise<{ tagsInput?: string } | undefined>((resolve, reject) => {
+              request.onerror = () => reject(request.error);
+              request.onsuccess = () => resolve(request.result);
+            });
+            db.close();
+
+            return record?.tagsInput ?? null;
+          } catch {
+            const fallback = window.localStorage.getItem(`motivation-blues-editor-buffer:${profileId}`);
+            return fallback ? JSON.parse(fallback).tagsInput : null;
+          }
+        }),
+      { timeout: 5_000 }
+    )
+    .toBe(expectedTags);
+}
+
+async function bankCurrentPost(page: Page) {
+  await page.getByTestId('bank-post').click();
+}
+
+async function bankPostFromEditor(page: Page, title: string, content: string, tags: string) {
+  await openEditor(page);
+  await writePostFields(page, title, content, tags);
+  await bankCurrentPost(page);
+}
+
+async function openBank(page: Page) {
+  await page.getByRole('button', { name: 'Банк', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Готовые посты' })).toBeVisible();
+}
+
+async function expectProgress(page: Page, progress: string) {
+  await page.getByRole('button', { name: 'Кабинет', exact: true }).click();
+  await expect(page.getByText(progress)).toBeVisible();
+}
+
+async function expectBankCards(page: Page, count: number) {
+  await expect(page.getByTestId('bank-post-card')).toHaveCount(count);
+}
+
+async function openFirstBankedPostForEdit(page: Page) {
+  await openBank(page);
+  await page.getByTestId('edit-banked-post').first().click();
+  await expect(page.getByTestId('editor-content')).toBeVisible();
+}
+
+async function updateCurrentBankedPost(page: Page) {
+  await page.getByTestId('update-banked-post').click();
+  await expect(page.getByRole('heading', { name: 'Готовые посты' })).toBeVisible();
 }
 
 test('IndexedDB autosave restores active editor buffer after reload', async ({ page }) => {
@@ -38,6 +119,7 @@ test('IndexedDB autosave restores active editor buffer after reload', async ({ p
     .fill('Этот текст должен пережить перезагрузку страницы до последней запятой, вот так.');
   await page.getByTestId('editor-tags').fill('autosave, recovery');
   await expect(page.getByTestId('autosave-status')).toContainText('Сохранено локально');
+  await waitForEditorBufferTags(page, 'autosave, recovery');
 
   await page.reload();
   await expect(page.getByTestId('editor-content')).toBeVisible();
@@ -55,15 +137,13 @@ test('local writing loop banks posts, creates capsule, opens collectible, and ex
   await openEditor(page);
 
   await writePost(page, 1);
-  await page.getByTestId('bank-post').click();
-  await page.getByRole('button', { name: 'Кабинет', exact: true }).click();
-  await expect(page.getByText('1/100 постов в банке')).toBeVisible();
+  await bankCurrentPost(page);
+  await expectProgress(page, '1/100 постов в банке');
 
   await openEditor(page);
   await writePost(page, 2);
-  await page.getByTestId('bank-post').click();
-  await page.getByRole('button', { name: 'Кабинет', exact: true }).click();
-  await expect(page.getByText('2/100 постов в банке')).toBeVisible();
+  await bankCurrentPost(page);
+  await expectProgress(page, '2/100 постов в банке');
 
   await page.getByRole('button', { name: 'Капсулы', exact: true }).click();
   await expect(page.getByTestId('sealed-capsule')).toHaveCount(1);
@@ -76,4 +156,101 @@ test('local writing loop banks posts, creates capsule, opens collectible, and ex
   await page.getByRole('button', { name: 'Экспорт', exact: true }).click();
   await expect(page.getByTestId('export-preview')).toContainText('Пост автотеста 1');
   await expect(page.getByTestId('export-preview')).toContainText('Пост автотеста 2');
+});
+
+test('banked post can be edited without adding progress or capsules', async ({ page }) => {
+  await startLocalMode(page);
+  await bankPostFromEditor(
+    page,
+    'Исходный пост',
+    'Исходный текст для проверки редактирования банка.',
+    'draft, original'
+  );
+  await expectProgress(page, '1/100 постов в банке');
+
+  await openFirstBankedPostForEdit(page);
+  await expect(page.getByTestId('editor-title')).toHaveValue('Исходный пост');
+  await page.getByTestId('editor-title').fill('Обновленный пост');
+  await page
+    .getByTestId('editor-content')
+    .fill('Обновленный текст остается тем же banked-постом без новой награды.');
+  await page.getByTestId('editor-tags').fill('edited, product');
+  await updateCurrentBankedPost(page);
+
+  await expect(page.getByText('Обновленный пост')).toBeVisible();
+  await expect(page.getByText('Обновленный текст остается тем же banked-постом без новой награды.')).toBeVisible();
+  await expect(
+    page.getByTestId('bank-post-card').getByRole('button', { name: '#edited' })
+  ).toBeVisible();
+  await expectProgress(page, '1/100 постов в банке');
+
+  await page.getByRole('button', { name: 'Капсулы', exact: true }).click();
+  await expect(page.getByTestId('sealed-capsule')).toHaveCount(0);
+});
+
+test('bank tag chips and search navigate banked posts', async ({ page }) => {
+  await startLocalMode(page);
+  await bankPostFromEditor(
+    page,
+    'Product launch',
+    'Launch mechanics for a channel.',
+    'product, launch'
+  );
+  await bankPostFromEditor(
+    page,
+    'Personal story',
+    'Reflection about writing discipline.',
+    'personal'
+  );
+  await bankPostFromEditor(
+    page,
+    'Product diary',
+    'Daily product reflection.',
+    'product, personal'
+  );
+
+  await openBank(page);
+  await expectBankCards(page, 3);
+
+  await page.getByTestId('tag-filter').filter({ hasText: '#product' }).click();
+  await expectBankCards(page, 2);
+  await expect(page.getByText('Product launch')).toBeVisible();
+  await expect(page.getByText('Product diary')).toBeVisible();
+
+  await page.getByTestId('tag-filter').filter({ hasText: '#personal' }).click();
+  await expectBankCards(page, 1);
+  await expect(page.getByText('Product diary')).toBeVisible();
+
+  await page.getByTestId('reset-bank-filters').click();
+  await page.getByTestId('bank-search').fill('story');
+  await expectBankCards(page, 1);
+  await expect(page.getByText('Personal story')).toBeVisible();
+});
+
+test('opening banked edit does not silently overwrite unrelated autosave buffer', async ({
+  page
+}) => {
+  await startLocalMode(page);
+  await bankPostFromEditor(
+    page,
+    'Пост из банка',
+    'Текст, который уже готов и лежит в банке.',
+    'banked'
+  );
+
+  await openEditor(page);
+  await writePostFields(
+    page,
+    'Несохраненный буфер',
+    'Этот локальный текст нельзя потерять при открытии другого поста.',
+    'buffer'
+  );
+
+  await openFirstBankedPostForEdit(page);
+  await expect(page.getByTestId('editor-conflict')).toBeVisible();
+  await expect(page.getByTestId('editor-title')).toHaveValue('Несохраненный буфер');
+
+  await page.getByRole('button', { name: 'Редактировать выбранный пост' }).click();
+  await expect(page.getByTestId('editor-conflict')).toBeHidden();
+  await expect(page.getByTestId('editor-title')).toHaveValue('Пост из банка');
 });

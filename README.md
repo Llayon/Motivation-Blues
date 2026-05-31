@@ -8,6 +8,7 @@
 - Zustand-состояние с Supabase cloud sync и локальным fallback через `localStorage`.
 - Дзен-редактор: черновики, сохранение в банк, счетчики знаков и слов, теги.
 - Терминаторский автосейв редактора в IndexedDB с восстановлением аварийного буфера.
+- Банк постов: редактирование готовых текстов без повторного начисления прогресса, поиск и навигация по тегам.
 - Цель `100` постов за `40` дней с нормой `2/3/2`.
 - Season Pass на `20` уровней по `5` постов.
 - Очередь капсул без валюты и тикетов.
@@ -28,10 +29,25 @@
 - `Docs/PRODUCT_SPEC.md` - продуктовая спецификация.
 - `Docs/ARCHITECTURE.md` - архитектура и data flow.
 - `Docs/DATA_CONTRACTS.md` - Supabase tables, RPC, RLS.
+- `Docs/SEARCH_ASSIST.md` - быстрые поисковые маршруты для LLM-агентов.
 - `Docs/TASKS.md` - agent-ready backlog.
 - `Docs/RELEASE_PLAYBOOK.md` - релизный процесс.
 
 Перед крупной задачей агент должен прочитать `AGENTS.md`, `Docs/CONTEXT.md`, `Docs/PROJECT_MEMORY.md` и релевантные документы из `Docs/`.
+
+Коммиты должны быть в формате Conventional Commits:
+
+```text
+feat: add bank search
+fix: preserve editor buffer on reload
+docs: update release playbook
+```
+
+Проверка последнего коммита:
+
+```bash
+npm run commitlint:last
+```
 
 ## Запуск
 
@@ -46,6 +62,8 @@ npm run dev
 npm test
 npm run test:e2e
 npm run build
+npm run search:assist -- "bankPost"
+npm run commitlint:last
 ```
 
 ## GitHub Pages Deploy

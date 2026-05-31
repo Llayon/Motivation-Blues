@@ -10,6 +10,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:all": "npm test && npm run build && npm run test:e2e",
+    "search:assist": "rg --line-number --hidden --glob \"!node_modules\" --glob \"!dist\" --glob \"!coverage\" --glob \"!supabase/.temp\"",
+    "commitlint:last": "commitlint --last --verbose",
+    "commitlint:range": "commitlint --verbose",
     "preview": "vite preview",
     "supabase:login": "supabase login",
     "supabase:link": "supabase link",
@@ -28,6 +31,8 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
     "@playwright/test": "^1.60.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

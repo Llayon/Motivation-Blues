@@ -25,6 +25,15 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Active editor state is local-first and autosaved to IndexedDB.
 - User can save as draft or save to bank.
 - Saving to bank is explicit and should not happen automatically.
+- User can reopen a banked post for editing.
+- Updating a banked post keeps the same post and must not add progress, capsules, or classic feedback as if it were newly banked.
+- If a banked edit would collide with an unrelated emergency buffer, the UI must ask before replacing local text.
+
+## Bank
+- Shows only banked posts.
+- Supports text search across title, content, and tags.
+- Supports tag chips for navigation.
+- Multiple selected tags narrow results using AND semantics.
 
 ## Season Pass
 - 20 levels.

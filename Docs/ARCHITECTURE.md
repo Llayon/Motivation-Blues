@@ -25,6 +25,15 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Purpose: protect active text even before draft/bank save.
 - Save behavior: every title/content/tag change writes to the local buffer.
 - Clear behavior: explicit new editor or successful bank save clears the buffer.
+- Banked edit flow: `Bank` calls `openPostInEditor(postId)`, Zustand stores `editorTargetPostId`, and `ZenEditor` loads that post after checking the local buffer.
+- Conflict behavior: unrelated emergency buffers are kept visible until the user explicitly keeps the buffer or opens the selected banked post.
+
+## Bank Navigation
+- Component: `src/components/Bank.tsx`.
+- Filtering helper: `src/lib/bankFilters.ts`.
+- Search checks post title, content, and tags.
+- Tag filters use AND semantics for multiple selected tags.
+- Updating an existing banked post uses `updateBankedPost` and must not call reward/progress banking logic.
 
 ## Supabase
 - Client: `src/services/supabase.ts`.

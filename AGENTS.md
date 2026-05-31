@@ -16,13 +16,16 @@ Motivation Blues is a static React/Vite app for a 40-day writing challenge: writ
 2. `Docs/PROJECT_MEMORY.md`
 3. `Docs/ARCHITECTURE.md`
 4. `Docs/TASKS.md`
-5. Relevant ADR under `Docs/adr/`
+5. `Docs/SEARCH_ASSIST.md` when locating behavior or tests
+6. Relevant ADR under `Docs/adr/`
 
 ## Commands
 ```bash
 npm test
 npm run test:e2e
 npm run build
+npm run search:assist -- "pattern"
+npm run commitlint:last
 npx supabase migration list
 ```
 
@@ -40,6 +43,7 @@ Remove-Item Env:\VITE_BASE_PATH
 - Keep GitHub Pages subpath support: `VITE_BASE_PATH=/Motivation-Blues/`.
 - Keep magic-link redirects compatible with `https://llayon.github.io/Motivation-Blues/`.
 - Preserve local-first editor safety. Changes to the editor must not weaken IndexedDB autosave/recovery.
+- Use Conventional Commits for all new commits, for example `feat: add bank search`.
 - Avoid adding AI text-generation features unless the product spec explicitly changes.
 - Avoid adding currency, tickets, store, or Telegram integration in MVP scope.
 
@@ -48,6 +52,7 @@ Remove-Item Env:\VITE_BASE_PATH
 - `npm test` passes.
 - `npm run test:e2e` passes for editor/local-mode/core-loop changes.
 - `npm run build` passes.
+- Commit messages pass `npm run commitlint:last` after committing.
 - GitHub Pages base-path build passes for deploy-affecting changes.
 - Supabase migrations are additive and pushed when DB behavior changes.
 - Update `Docs/PROJECT_MEMORY.md` after significant architecture/product changes.

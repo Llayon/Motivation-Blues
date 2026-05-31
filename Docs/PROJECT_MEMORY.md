@@ -19,7 +19,11 @@
 - Voxel-style 3D placeholders with R3F.
 - TXT export for banked posts.
 - IndexedDB editor autosave buffer with localStorage fallback.
+- Banked posts can be reopened in the editor and updated without duplicating season progress or capsules.
+- Bank view supports text search and tag chips for navigation.
 - Playwright E2E smoke tests for local mode, IndexedDB recovery, banking, capsules, collection, and export.
+- Search Assist docs and `npm run search:assist -- "pattern"` support LLM navigation through the codebase.
+- Conventional Commits are enforced in GitHub Actions on push.
 
 ## Key Decisions
 - Supabase is the backend because the app needs Auth, RLS, Postgres, and RPC without a custom server.
@@ -27,6 +31,8 @@
 - `VITE_BASE_PATH=/Motivation-Blues/` is required for GitHub Pages.
 - The editor must be local-first: active writing state is saved to IndexedDB independently from Supabase.
 - Capsules are queued and opened manually so writing flow is not interrupted.
+- Editing a banked post is a content update, not a new banking event; it must not increment counters or create rewards.
+- Tag filtering in the bank uses AND semantics when multiple tags are selected.
 
 ## Known Risks
 - Three/R3F is bundled eagerly and creates a large JS chunk.
@@ -42,6 +48,7 @@
 - Added IndexedDB editor autosave buffer.
 - Added LLM-first documentation plan.
 - Added Playwright E2E tests and fixed local mode reload by waiting for Zustand persist hydration and preserving local mode when no Supabase session exists.
+- Added banked-post editing, bank search/tag navigation, Search Assist, and Conventional Commit checks.
 
 ## Maintenance Rule
 Update this file whenever a change materially affects product behavior, architecture, deployment, database schema, or agent workflow.

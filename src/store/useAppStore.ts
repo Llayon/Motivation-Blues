@@ -36,12 +36,16 @@ interface AppState {
   inventory: InventoryItem[];
   feedback: ClassicFeedback | null;
   latestRevealItemId: string | null;
+  editorTargetPostId: string | null;
   setActiveView: (view: ViewId) => void;
+  openPostInEditor: (postId: string) => void;
+  clearEditorTarget: () => void;
   hydrateFromSupabase: () => Promise<void>;
   startSession: (email: string) => void;
   signOut: () => Promise<void>;
   saveDraft: (input: PostInput) => Promise<string | null>;
   bankPost: (input: PostInput) => Promise<void>;
+  updateBankedPost: (input: PostInput) => Promise<boolean>;
   archivePost: (postId: string) => Promise<void>;
   clearFeedback: () => void;
   openCapsule: (capsuleId: string) => Promise<void>;
@@ -367,7 +371,14 @@ export const useAppStore = create<AppState>()(
       inventory: [],
       feedback: null,
       latestRevealItemId: null,
+      editorTargetPostId: null,
       setActiveView: (view) => set({ activeView: view }),
+      openPostInEditor: (postId) =>
+        set({
+          editorTargetPostId: postId,
+          activeView: 'editor'
+        }),
+      clearEditorTarget: () => set({ editorTargetPostId: null }),
       hydrateFromSupabase: async () => {
         if (!supabase) {
           set({ isHydrating: false, mode: 'local', cloudError: null });
@@ -433,6 +444,7 @@ export const useAppStore = create<AppState>()(
           dailyProgress: [],
           capsules: [],
           inventory: [],
+          editorTargetPostId: null,
           activeView: 'dashboard'
         });
       },
@@ -451,6 +463,7 @@ export const useAppStore = create<AppState>()(
           inventory: [],
           feedback: null,
           latestRevealItemId: null,
+          editorTargetPostId: null,
           cloudError: null
         });
       },
@@ -595,6 +608,41 @@ export const useAppStore = create<AppState>()(
           feedback: createClassicFeedback(nextPost.charCount)
         });
       },
+      updateBankedPost: async (input) => {
+        const { profile, posts, mode } = get();
+        if (!profile || !input.id || input.content.trim().length === 0) {
+          return false;
+        }
+
+        const existing = posts.find((post) => post.id === input.id);
+        if (!existing || existing.status !== 'banked') {
+          return false;
+        }
+
+        if (mode === 'cloud' && supabase) {
+          try {
+            const updated = await saveCloudPost(profile, posts, input, 'banked');
+            set({
+              posts: posts.map((post) => (post.id === updated.id ? updated : post)),
+              editorTargetPostId: null,
+              cloudError: null
+            });
+            await get().hydrateFromSupabase();
+            return true;
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Banked post update failed.';
+            set({ cloudError: message });
+            return false;
+          }
+        }
+
+        const updated = updatePost(existing, input, 'banked');
+        set({
+          posts: posts.map((post) => (post.id === updated.id ? updated : post)),
+          editorTargetPostId: null
+        });
+        return true;
+      },
       archivePost: async (postId) => {
         const { posts, mode } = get();
 
@@ -695,7 +743,8 @@ export const useAppStore = create<AppState>()(
         posts: state.mode === 'local' ? state.posts : [],
         dailyProgress: state.mode === 'local' ? state.dailyProgress : [],
         capsules: state.mode === 'local' ? state.capsules : [],
-        inventory: state.mode === 'local' ? state.inventory : []
+        inventory: state.mode === 'local' ? state.inventory : [],
+        editorTargetPostId: state.mode === 'local' ? state.editorTargetPostId : null
       })
     }
   )

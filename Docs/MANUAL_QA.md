@@ -2,6 +2,7 @@
 
 ## Before QA
 - Run `npm test`.
+- Run `npm run test:e2e`.
 - Run `npm run build`.
 - For deploy changes, run GitHub Pages base-path build.
 
@@ -27,6 +28,11 @@
 - Confirm classic toast appears.
 - Confirm editor clears.
 - Confirm bank count increases.
+- Reopen the banked post with `Редактировать`.
+- Update title, content, and tags.
+- Confirm the post updates without increasing progress or creating a new capsule.
+- Search by title/body text.
+- Filter by one tag chip and then by two tag chips.
 - Confirm exported text includes the post.
 
 ## Capsules
