@@ -29,6 +29,30 @@ npm test
 npm run build
 ```
 
+## GitHub Pages Deploy
+
+Production URL:
+
+```text
+https://llayon.github.io/Motivation-Blues/
+```
+
+Деплой идет через GitHub Actions из `.github/workflows/deploy-pages.yml` на каждый push в `main`.
+
+GitHub Actions env:
+
+- `VITE_SUPABASE_URL` хранится как repository variable.
+- `VITE_SUPABASE_ANON_KEY` хранится как repository secret.
+- `VITE_BASE_PATH=/Motivation-Blues/` задается в workflow.
+
+Локальная проверка GitHub Pages base path:
+
+```powershell
+$env:VITE_BASE_PATH='/Motivation-Blues/'
+npm run build
+Remove-Item Env:\VITE_BASE_PATH
+```
+
 ## Supabase Cloud
 
 Проект подключен к Supabase:

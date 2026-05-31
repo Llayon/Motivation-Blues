@@ -17,10 +17,11 @@ export function AuthGate() {
     }
 
     setIsSending(true);
+    const redirectUrl = new URL(import.meta.env.BASE_URL, window.location.origin).toString();
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: window.location.origin
+        emailRedirectTo: redirectUrl
       }
     });
     setIsSending(false);
