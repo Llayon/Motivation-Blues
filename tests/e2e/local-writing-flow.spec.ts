@@ -2,13 +2,19 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function startLocalMode(page: Page) {
   await page.goto('/');
+  await expect(
+    page.getByRole('heading', { name: '100 постов за 40 дней. Пиши для себя.' })
+  ).toBeVisible();
+  await expect(page.getByPlaceholder('Твой лучший email')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Начать марафон' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Вернуться к текстам' })).toBeVisible();
 
   const localMode = page.getByTestId('start-local-mode');
   if (await localMode.isVisible({ timeout: 12_000 }).catch(() => false)) {
     await localMode.click();
   } else {
-    await page.getByPlaceholder('author@example.com').fill('local@author.test');
-    await page.getByRole('button', { name: 'Начать сезон' }).click();
+    await page.getByPlaceholder('Твой лучший email').fill('local@author.test');
+    await page.getByRole('button', { name: 'Начать марафон' }).click();
   }
 
   await expect(page.getByText(/Local .*local@author\.test|Local .*author/i)).toBeVisible();

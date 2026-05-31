@@ -13,6 +13,7 @@ export function AuthGate() {
   async function handleMagicLink(event?: FormEvent) {
     event?.preventDefault();
     if (!supabase || !email.trim()) {
+      setStatus('Введите email, чтобы начать марафон.');
       return;
     }
 
@@ -31,11 +32,24 @@ export function AuthGate() {
   function handleStartLocal(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!email.trim()) {
-      setStatus('Введите email, чтобы создать локальный профиль сезона.');
+      setStatus('Введите email, чтобы начать марафон.');
       return;
     }
 
     startSession(email.trim());
+  }
+
+  async function handleReturnToTexts() {
+    setStatus(null);
+
+    if (isSupabaseConfigured) {
+      await hydrateFromSupabase();
+      if (useAppStore.getState().profile) {
+        return;
+      }
+    }
+
+    startSession(email.trim() || 'local@author.test');
   }
 
   return (
@@ -43,52 +57,44 @@ export function AuthGate() {
       <div className="aurora aurora-one" />
       <div className="aurora aurora-two" />
       <section className="auth-card glass-panel">
-        <p className="eyebrow">40-дневный челлендж</p>
-        <h1>100 постов в банк, без Telegram и без ИИ.</h1>
-        <p className="hero-copy">
-          Дзен-редактор для начинающего блогера: пишешь в стол, закрываешь норму,
-          копишь капсулы вдохновения и собираешь глянцевых воксельных классиков.
-        </p>
+        <p className="eyebrow">Челлендж + эмоция</p>
+        <h1>100 постов за 40 дней. Пиши для себя.</h1>
+        <h2>
+          Дзен-редактор, который лечит писательский блок. Пиши «в стол»,
+          закрывай дневную норму и собирай уникальные награды за каждую победу
+          над чистым листом.
+        </h2>
         <form
           onSubmit={isSupabaseConfigured ? handleMagicLink : handleStartLocal}
           className="auth-form"
         >
           <label>
-            Email
+            Твой лучший email
             <input
+              data-testid="auth-email"
               type="email"
-              placeholder="author@example.com"
+              placeholder="Твой лучший email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
           </label>
-          <button type="submit" className="primary-button">
-            {isSupabaseConfigured ? 'Отправить magic link' : 'Начать сезон'}
+          <button type="submit" className="primary-button" disabled={isSending}>
+            {isSending ? 'Отправляю...' : 'Начать марафон'}
           </button>
         </form>
-        {isSupabaseConfigured ? (
-          <div className="auth-secondary">
-            <button
-              type="button"
-              className="ghost-button"
-              onClick={() => void hydrateFromSupabase()}
-            >
-              Я уже вошел, обновить сессию
-            </button>
-            <button
-              type="button"
-              className="plain-button"
-              data-testid="start-local-mode"
-              onClick={() => startSession(email.trim() || 'local@author.test')}
-            >
-              Локальный режим
-            </button>
-          </div>
-        ) : (
-          <p className="muted">
-            Supabase env не настроены, поэтому MVP запускается в локальном режиме.
-          </p>
-        )}
+        <div className="auth-secondary">
+          <button
+            type="button"
+            className="ghost-button"
+            data-testid="start-local-mode"
+            onClick={() => void handleReturnToTexts()}
+          >
+            Вернуться к текстам
+          </button>
+        </div>
+        {!isSupabaseConfigured ? (
+          <p className="muted">Облачный вход не настроен, тексты будут храниться локально.</p>
+        ) : null}
         {cloudError ? <p className="status-line negative">{cloudError}</p> : null}
         {status ? <p className="status-line">{status}</p> : null}
       </section>

@@ -9,6 +9,13 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Progress only counts posts explicitly saved to the bank.
 - Drafts and active editor buffer do not count.
 
+## Landing
+- H1: `100 постов за 40 дней. Пиши для себя.`
+- H2: `Дзен-редактор, который лечит писательский блок. Пиши «в стол», закрывай дневную норму и собирай уникальные награды за каждую победу над чистым листом.`
+- Email input copy: `Твой лучший email`.
+- Primary CTA: `Начать марафон`.
+- Secondary CTA: `Вернуться к текстам`.
+
 ## Daily Schedule
 - Days 1-10: 2 posts per day.
 - Days 11-30: 3 posts per day.
