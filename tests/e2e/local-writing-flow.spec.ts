@@ -124,8 +124,11 @@ async function saveCurrentDraft(page: Page) {
 }
 
 async function selectEditorText(page: Page, text: string) {
-  await page.getByTestId('editor-content').evaluate((element, targetText) => {
+  const expectedSelection = await page.getByTestId('editor-content').evaluate(async (element, targetText) => {
     const textarea = element as HTMLTextAreaElement;
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
     const start = textarea.value.indexOf(targetText as string);
 
     if (start < 0) {
@@ -136,7 +139,16 @@ async function selectEditorText(page: Page, text: string) {
     textarea.setSelectionRange(start, start + String(targetText).length);
     textarea.dispatchEvent(new Event('select', { bubbles: true }));
     textarea.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    return { start, end: start + String(targetText).length };
   }, text);
+  await expect
+    .poll(() =>
+      page.getByTestId('editor-content').evaluate((element) => {
+        const textarea = element as HTMLTextAreaElement;
+        return `${textarea.selectionStart}:${textarea.selectionEnd}`;
+      })
+    )
+    .toBe(`${expectedSelection.start}:${expectedSelection.end}`);
   await expect(page.getByTestId('formatting-menu')).toBeVisible();
 }
 
