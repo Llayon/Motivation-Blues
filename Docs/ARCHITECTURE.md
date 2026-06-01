@@ -26,7 +26,17 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Save behavior: every title/content/tag change writes to the local buffer.
 - Clear behavior: explicit new editor or successful bank save clears the buffer.
 - Banked edit flow: `Bank` calls `openPostInEditor(postId)`, Zustand stores `editorTargetPostId`, and `ZenEditor` loads that post after checking the local buffer.
-- Conflict behavior: unrelated emergency buffers are kept visible until the user explicitly keeps the buffer or opens the selected banked post.
+- Conflict behavior: unrelated emergency buffers are kept visible until the user explicitly keeps the buffer or opens the selected draft/banked post.
+
+## Editor Formatting
+- Content remains a plain `string`; no Supabase or IndexedDB schema change is required.
+- Formatting helper: `src/lib/telegramFormatting.ts`.
+- Supported markup: `*bold*`, `_italic_`, `[text](url)`.
+- `ZenEditor` applies markup to the selected textarea range from a floating menu.
+- Bank preview renderer: `src/components/TelegramMarkup.tsx`.
+- Preview rendering must not use `dangerouslySetInnerHTML`.
+- Safe clickable links are limited to `http`, `https`, and `mailto`.
+- Export keeps raw markup.
 
 ## Bank Navigation
 - Component: `src/components/Bank.tsx`.
@@ -34,6 +44,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Search checks post title, content, and tags.
 - Tag filters use AND semantics for multiple selected tags.
 - Updating an existing banked post uses `updateBankedPost` and must not call reward/progress banking logic.
+- Bank cards render supported Telegram-style markup through `TelegramMarkup`.
 
 ## Supabase
 - Client: `src/services/supabase.ts`.

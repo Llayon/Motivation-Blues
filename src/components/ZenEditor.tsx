@@ -5,6 +5,7 @@ import {
   loadEditorBuffer,
   saveEditorBuffer
 } from '../lib/editorBuffer';
+import { applyTelegramFormat, type TelegramFormat } from '../lib/telegramFormatting';
 import { useAppStore } from '../store/useAppStore';
 import type { Post } from '../types';
 
@@ -14,6 +15,60 @@ function tagsToInput(tags: string[]) {
 
 function inputToTags(value: string) {
   return value.split(',').map((tag) => tag.trim()).filter(Boolean);
+}
+
+function formatEditorTime(value: string) {
+  return new Date(value).toLocaleTimeString('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function getManuscriptStatus(wordCount: number) {
+  if (wordCount > 1000) {
+    return 'Толстой одобряет';
+  }
+
+  if (wordCount > 500) {
+    return 'Уверенный лонгрид';
+  }
+
+  if (wordCount >= 200) {
+    return 'Колонка';
+  }
+
+  if (wordCount >= 50) {
+    return 'Заметка';
+  }
+
+  return 'Эскиз';
+}
+
+function getDraftShelfStatus(updatedAt: string) {
+  const updated = new Date(updatedAt);
+  const today = new Date();
+  const updatedDate = new Date(updated.getFullYear(), updated.getMonth(), updated.getDate());
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const diffDays = Math.floor((todayDate.getTime() - updatedDate.getTime()) / 86_400_000);
+
+  if (diffDays <= 0) {
+    return 'Чернила еще сохнут';
+  }
+
+  if (diffDays > 3) {
+    return 'Собирает пыль';
+  }
+
+  return 'Ждет искры';
+}
+
+function hasBufferContent(record: EditorBufferRecord | null | undefined) {
+  return Boolean(
+    record &&
+      (record.title.trim().length > 0 ||
+        record.content.length > 0 ||
+        record.tagsInput.trim().length > 0)
+  );
 }
 
 export function ZenEditor() {
@@ -38,6 +93,8 @@ export function ZenEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [bufferStatus, setBufferStatus] = useState('Автосейв готовит буфер...');
   const [conflictPost, setConflictPost] = useState<Post | null>(null);
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const hasLoadedBufferRef = useRef(false);
   const userTypedBeforeRestoreRef = useRef(false);
 
@@ -45,7 +102,9 @@ export function ZenEditor() {
   const isEditingBankedPost = editingPost?.status === 'banked';
   const charCount = content.trim().length;
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+  const manuscriptStatus = getManuscriptStatus(wordCount);
   const canSave = charCount > 0;
+  const hasTextareaSelection = selection.end > selection.start;
 
   useEffect(() => {
     if (!profile) {
@@ -69,14 +128,12 @@ export function ZenEditor() {
         setTitle(record.title);
         setContent(record.content);
         setTags(record.tagsInput);
-        setStatus(
-          `Восстановлен локальный буфер от ${new Date(record.updatedAt).toLocaleTimeString('ru-RU')}.`
-        );
-        setBufferStatus('Терминаторский автосейв включен.');
+        setStatus(`Рукопись вернулась из стола: ${formatEditorTime(record.updatedAt)}.`);
+        setBufferStatus('Автосейв готов.');
         return;
       }
 
-      setBufferStatus('Терминаторский автосейв включен.');
+      setBufferStatus('Автосейв готов.');
     });
 
     return () => {
@@ -96,25 +153,18 @@ export function ZenEditor() {
 
     let isCancelled = false;
 
-    void loadEditorBuffer(profile.id).then((record) => {
+    void getPostOpenDecision(targetPost).then((decision) => {
       if (isCancelled) {
         return;
       }
 
-      const hasUnrelatedBuffer =
-        record &&
-        record.postId !== targetPost.id &&
-        (record.title.trim().length > 0 ||
-          record.content.length > 0 ||
-          record.tagsInput.trim().length > 0);
-
-      if (hasUnrelatedBuffer) {
+      if (decision.kind === 'conflict') {
         setConflictPost(targetPost);
-        setStatus('Есть несохраненный локальный буфер. Выберите, что открыть.');
+        setStatus('В столе уже лежит незавершенный текст.');
         return;
       }
 
-      loadPostIntoEditor(targetPost, record?.postId === targetPost.id ? record : undefined);
+      loadPostIntoEditor(targetPost, decision.buffer);
       clearEditorTarget();
     });
 
@@ -133,9 +183,9 @@ export function ZenEditor() {
 
     if (!hasAnyInput) {
       void clearEditorBuffer(profile.id).catch(() => {
-        setBufferStatus('Автосейв: не удалось очистить локальный буфер.');
+        setBufferStatus('Не удалось очистить стол.');
       });
-      setBufferStatus('Буфер пуст. Автосейв включен.');
+      setBufferStatus('Стол пуст. Автосейв готов.');
       return;
     }
 
@@ -149,15 +199,52 @@ export function ZenEditor() {
       updatedAt
     })
       .then(() => {
-        setBufferStatus(`Сохранено локально: ${new Date(updatedAt).toLocaleTimeString('ru-RU')}`);
+        setBufferStatus(`Сохранено в ${formatEditorTime(updatedAt)}`);
       })
       .catch(() => {
-        setBufferStatus('Автосейв: локальное сохранение не прошло.');
+        setBufferStatus('Не удалось сохранить в стол.');
       });
   }, [content, editingId, profile, tags, title]);
 
   function markUserInput() {
     userTypedBeforeRestoreRef.current = true;
+  }
+
+  function syncTextareaSelection() {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      return;
+    }
+
+    setSelection({
+      start: textarea.selectionStart,
+      end: textarea.selectionEnd
+    });
+  }
+
+  function handleApplyFormat(format: TelegramFormat) {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      return;
+    }
+
+    const result = applyTelegramFormat({
+      value: content,
+      selectionStart: textarea.selectionStart,
+      selectionEnd: textarea.selectionEnd
+    }, format);
+
+    markUserInput();
+    setContent(result.value);
+    setSelection({
+      start: result.selectionStart,
+      end: result.selectionEnd
+    });
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(result.selectionStart, result.selectionEnd);
+    });
   }
 
   function loadPostIntoEditor(post: Post, buffer?: EditorBufferRecord) {
@@ -166,11 +253,61 @@ export function ZenEditor() {
     setContent(buffer?.content ?? post.content);
     setTags(buffer?.tagsInput ?? tagsToInput(post.tags));
     setConflictPost(null);
-    setStatus(post.status === 'banked' ? 'Редактируется пост из банка.' : null);
+    setStatus(post.status === 'banked' ? 'Архив. Нет предела совершенству (Вне фокуса дня).' : null);
   }
 
-  function loadDraft(post: Post) {
-    loadPostIntoEditor(post);
+  function isEditorDirty() {
+    const hasAnyInput =
+      title.trim().length > 0 || content.length > 0 || tags.trim().length > 0;
+
+    if (!hasAnyInput) {
+      return false;
+    }
+
+    if (!editingPost) {
+      return true;
+    }
+
+    return (
+      title !== editingPost.title ||
+      content !== editingPost.content ||
+      tags !== tagsToInput(editingPost.tags)
+    );
+  }
+
+  async function getPostOpenDecision(targetPost: Post): Promise<
+    | { kind: 'open'; buffer?: EditorBufferRecord }
+    | { kind: 'conflict' }
+  > {
+    const record = profile ? await loadEditorBuffer(profile.id) : null;
+    const hasDirtyVisibleBuffer = editingId !== targetPost.id && isEditorDirty();
+    const hasUnrelatedStoredBuffer =
+      record &&
+      record.postId !== targetPost.id &&
+      hasBufferContent(record) &&
+      (!editingId || record.postId !== editingId || isEditorDirty());
+
+    if (hasDirtyVisibleBuffer || hasUnrelatedStoredBuffer) {
+      return { kind: 'conflict' };
+    }
+
+    return {
+      kind: 'open',
+      buffer: record?.postId === targetPost.id ? record : undefined
+    };
+  }
+
+  async function openPostWithBufferGuard(post: Post) {
+    const decision = await getPostOpenDecision(post);
+
+    if (decision.kind === 'conflict') {
+      setConflictPost(post);
+      setStatus('В столе уже лежит незавершенный текст.');
+      return;
+    }
+
+    loadPostIntoEditor(post, decision.buffer);
+    clearEditorTarget();
   }
 
   async function resetEditor() {
@@ -207,7 +344,7 @@ export function ZenEditor() {
           updatedAt: new Date().toISOString()
         });
       }
-      setStatus('Черновик сохранен.');
+      setStatus('Убрано в стол.');
     }
   }
 
@@ -220,7 +357,7 @@ export function ZenEditor() {
       tags: inputToTags(tags)
     });
     setIsSaving(false);
-    setStatus('Пост сохранен в банк.');
+    setStatus('Отправлено в банк.');
     if (profile) {
       await clearEditorBuffer(profile.id);
     }
@@ -252,6 +389,7 @@ export function ZenEditor() {
   async function keepBufferFromConflict() {
     setConflictPost(null);
     clearEditorTarget();
+    setStatus('Продолжаем текущую рукопись.');
   }
 
   async function editConflictPost() {
@@ -275,17 +413,17 @@ export function ZenEditor() {
         </div>
         <div className="draft-list">
           {drafts.length === 0 ? (
-            <p className="muted">Пока пусто. Первый черновик появится после сохранения.</p>
+            <p className="muted">В столе пока пусто.</p>
           ) : (
             drafts.map((draft) => (
               <button
                 key={draft.id}
                 type="button"
                 className={draft.id === editingId ? 'draft-card active' : 'draft-card'}
-                onClick={() => loadDraft(draft)}
+                onClick={() => void openPostWithBufferGuard(draft)}
               >
                 <strong>{draft.title || 'Без названия'}</strong>
-                <span>{draft.charCount} знаков</span>
+                <span>{getDraftShelfStatus(draft.updatedAt)} · {draft.charCount} знаков</span>
               </button>
             ))
           )}
@@ -296,17 +434,17 @@ export function ZenEditor() {
         {conflictPost ? (
           <div className="editor-conflict" data-testid="editor-conflict">
             <p className="eyebrow">Аварийный буфер</p>
-            <h2>Не перезаписываю несохраненный текст</h2>
+            <h2>В столе уже лежит незавершенный текст</h2>
             <p>
-              Сейчас в редакторе восстановлен локальный буфер. Можно оставить его
-              или явно перейти к редактированию поста «{conflictPost.title || 'Без названия'}».
+              Можно продолжить текущую рукопись или открыть выбранный текст
+              «{conflictPost.title || 'Без названия'}».
             </p>
             <div className="hero-actions">
               <button className="ghost-button" type="button" onClick={keepBufferFromConflict}>
-                Восстановить буфер
+                Оставить текущий
               </button>
               <button className="primary-button" type="button" onClick={editConflictPost}>
-                Редактировать выбранный пост
+                Открыть выбранный
               </button>
             </div>
           </div>
@@ -314,27 +452,71 @@ export function ZenEditor() {
         <input
           className="title-input"
           data-testid="editor-title"
-          placeholder="Заголовок поста"
+          placeholder="Как назовем?"
           value={title}
           onChange={(event) => {
             markUserInput();
             setTitle(event.target.value);
           }}
         />
-        <textarea
-          className="post-textarea"
-          data-testid="editor-content"
-          placeholder="Пиши спокойно. В банк уйдет только то, что ты явно сохранишь."
-          value={content}
-          onChange={(event) => {
-            markUserInput();
-            setContent(event.target.value);
-          }}
-        />
+        <div className="editor-textarea-shell">
+          {hasTextareaSelection ? (
+            <div className="formatting-menu glass-panel" data-testid="formatting-menu">
+              <button
+                aria-label="Жирный"
+                data-testid="format-bold"
+                type="button"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  handleApplyFormat('bold');
+                }}
+              >
+                B
+              </button>
+              <button
+                aria-label="Курсив"
+                data-testid="format-italic"
+                type="button"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  handleApplyFormat('italic');
+                }}
+              >
+                I
+              </button>
+              <button
+                aria-label="Ссылка"
+                data-testid="format-link"
+                type="button"
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  handleApplyFormat('link');
+                }}
+              >
+                Link
+              </button>
+            </div>
+          ) : null}
+          <textarea
+            ref={textareaRef}
+            className="post-textarea"
+            data-testid="editor-content"
+            placeholder="Рукописи не горят. Начинай..."
+            value={content}
+            onChange={(event) => {
+              markUserInput();
+              setContent(event.target.value);
+              syncTextareaSelection();
+            }}
+            onKeyUp={syncTextareaSelection}
+            onMouseUp={syncTextareaSelection}
+            onSelect={syncTextareaSelection}
+          />
+        </div>
         <input
           className="tag-input"
           data-testid="editor-tags"
-          placeholder="Теги через запятую: идеи, личное, продукт"
+          placeholder="Теги: идеи, личное, продукт"
           value={tags}
           onChange={(event) => {
             markUserInput();
@@ -345,6 +527,7 @@ export function ZenEditor() {
           <div className="editor-metrics">
             <span>{charCount} знаков</span>
             <span>{wordCount} слов</span>
+            <span>{manuscriptStatus}</span>
             <span className="editor-autosave" data-testid="autosave-status">{bufferStatus}</span>
             {status ? <span className="positive">{status}</span> : null}
           </div>
@@ -355,16 +538,16 @@ export function ZenEditor() {
                   Отменить
                 </button>
                 <button className="primary-button" data-testid="update-banked-post" type="button" disabled={!canSave || isSaving} onClick={handleUpdateBankedPost}>
-                  {isSaving ? 'Обновляю...' : 'Обновить в банке'}
+                  {isSaving ? 'Обновляю...' : 'Обновить в архиве'}
                 </button>
               </>
             ) : (
               <>
                 <button className="ghost-button" data-testid="save-draft" type="button" disabled={!canSave || isSaving} onClick={handleSaveDraft}>
-                  {isSaving ? 'Сохраняю...' : 'Сохранить черновик'}
+                  {isSaving ? 'Убираю...' : 'Убрать в стол'}
                 </button>
                 <button className="primary-button" data-testid="bank-post" type="button" disabled={!canSave || isSaving} onClick={handleBankPost}>
-                  Сохранить в банк
+                  {isSaving ? 'Отправляю...' : 'Отправить в банк'}
                 </button>
               </>
             )}

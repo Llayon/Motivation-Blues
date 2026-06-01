@@ -7,6 +7,7 @@
 - Level calculation.
 - Export formatting.
 - Bank tag counts and filter semantics.
+- Telegram-style formatting helpers and safe-link parsing.
 
 ## Manual Smoke
 - Open production URL.
@@ -15,6 +16,7 @@
 - Create draft.
 - Reload editor and verify IndexedDB recovery.
 - Save draft.
+- Apply editor formatting for bold, italic, and link.
 - Save to bank.
 - Edit a banked post and confirm progress/capsules do not change.
 - Search banked posts by text.
@@ -23,6 +25,7 @@
 - Meet daily goal and verify sealed capsule appears.
 - Open capsule and verify collection updates.
 - Export banked posts.
+- Confirm export keeps raw Telegram-style markup.
 
 ## Playwright E2E
 - Local mode starts without Supabase session.
@@ -35,6 +38,8 @@
 - Banked post can be edited without adding progress or capsules.
 - Bank tag chips and search navigate banked posts.
 - Opening a banked post for edit does not silently overwrite an unrelated autosave buffer.
+- Editor formatting menu inserts raw markup and Bank preview renders it safely.
+- Draft selection asks before replacing an unfinished manuscript.
 
 ## Supabase
 - `npx supabase migration list` shows local/remote parity.

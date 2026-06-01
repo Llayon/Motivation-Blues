@@ -10,6 +10,8 @@
 - Open editor.
 - Type a title, body, and tags.
 - Confirm autosave status updates.
+- Select text and apply bold, italic, and link formatting.
+- Confirm textarea stores raw markup: `*text*`, `_text_`, `[text](https://example.com)`.
 - Reload page.
 - Confirm text restores.
 - Click `Новый`.
@@ -28,12 +30,15 @@
 - Confirm classic toast appears.
 - Confirm editor clears.
 - Confirm bank count increases.
+- Confirm supported formatting renders in bank cards.
+- Confirm unsafe links are not clickable.
 - Reopen the banked post with `Редактировать`.
 - Update title, content, and tags.
 - Confirm the post updates without increasing progress or creating a new capsule.
 - Search by title/body text.
 - Filter by one tag chip and then by two tag chips.
 - Confirm exported text includes the post.
+- Confirm exported text keeps raw Telegram-style markup.
 
 ## Capsules
 - Bank enough posts to meet daily goal.

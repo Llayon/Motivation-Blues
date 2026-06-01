@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { filterBankedPosts, getTagCounts } from '../lib/bankFilters';
 import { useAppStore } from '../store/useAppStore';
+import { TelegramMarkup } from './TelegramMarkup';
 
 export function Bank() {
   const posts = useAppStore((state) => state.posts);
@@ -90,7 +91,9 @@ export function Bank() {
                     <span>{new Date(post.bankedAt ?? post.updatedAt).toLocaleDateString('ru-RU')}</span>
                   </div>
                   <h2>{post.title || 'Без названия'}</h2>
-                  <p>{post.content}</p>
+                  <p>
+                    <TelegramMarkup text={post.content} />
+                  </p>
                   <footer>
                     <span>{post.charCount} знаков</span>
                     {post.tags.map((tag) => (

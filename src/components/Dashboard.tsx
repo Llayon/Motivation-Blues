@@ -7,6 +7,20 @@ import {
 } from '../lib/season';
 import { useAppStore } from '../store/useAppStore';
 
+function getCapsuleLabel(count: number) {
+  if (count === 1) {
+    return 'Доступна 1 капсула ✨';
+  }
+
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+  const noun = lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)
+    ? 'капсулы'
+    : 'капсул';
+
+  return `Доступно ${count} ${noun} ✨`;
+}
+
 export function Dashboard() {
   const profile = useAppStore((state) => state.profile)!;
   const posts = useAppStore((state) => state.posts);
@@ -26,7 +40,9 @@ export function Dashboard() {
   const draftsCount = posts.filter((post) => post.status === 'draft').length;
   const sealedCapsules = capsules.filter((capsule) => capsule.status === 'sealed').length;
   const plannedTotal = getPlannedTotalByDay(seasonDay);
-  const delta = profile.totalBankedPosts - plannedTotal;
+  const plannedBeforeToday = seasonDay === 1 ? 0 : getPlannedTotalByDay(seasonDay - 1);
+  const overduePosts = Math.max(0, plannedBeforeToday - profile.totalBankedPosts);
+  const capsuleLabel = getCapsuleLabel(sealedCapsules);
 
   return (
     <section className="dashboard-grid">
@@ -38,18 +54,17 @@ export function Dashboard() {
           <span style={{ width: `${getProgressPercent(profile.totalBankedPosts)}%` }} />
         </div>
         <p className="hero-copy">
-          Сегодняшняя норма: {goalPosts}.{' '}
-          {remainingToday === 0
-            ? 'Норма закрыта, капсула вдохновения уже ждет на полке.'
-            : `Осталось сохранить в банк: ${remainingToday}.`}
+          Фокус дня: {goalPosts} текста. Еще {remainingToday} текста — и вы великолепны ✨
         </p>
         <div className="hero-actions">
           <button className="primary-button" onClick={() => setActiveView('editor')} type="button">
             Открыть редактор
           </button>
-          <button className="ghost-button" onClick={() => setActiveView('capsules')} type="button">
-            Капсулы: {sealedCapsules}
-          </button>
+          {sealedCapsules > 0 ? (
+            <button className="ghost-button" onClick={() => setActiveView('capsules')} type="button">
+              {capsuleLabel}
+            </button>
+          ) : null}
         </div>
         {cloudError ? <p className="status-line negative">{cloudError}</p> : null}
       </article>
@@ -57,27 +72,29 @@ export function Dashboard() {
       <article className="stat-card glass-panel">
         <span>План к этому дню</span>
         <strong>{plannedTotal}</strong>
-        <p className={delta >= 0 ? 'positive' : 'negative'}>
-          {delta >= 0 ? `+${delta} к плану` : `${delta} от плана`}
-        </p>
+        {overduePosts > 0 ? (
+          <p className="negative">-{overduePosts} просрочено</p>
+        ) : (
+          <p>Цель на сегодня: {goalPosts} поста</p>
+        )}
       </article>
       <article className="stat-card glass-panel">
         <span>Черновики</span>
         <strong>{draftsCount}</strong>
-        <p>Можно довести до банка без нового пустого листа.</p>
+        <p>Тексты, которые ждут финальной шлифовки.</p>
       </article>
       <article className="stat-card glass-panel">
         <span>Фигурки</span>
         <strong>{inventory.length}</strong>
-        <p>Дубликаты остаются на полке как копии коллекции.</p>
+        <p>Твоя коллекция классиков.</p>
       </article>
 
       <article className="focus-note glass-panel">
         <p className="eyebrow">Правило фокуса</p>
-        <h2>Пишем здесь, награды открываем потом.</h2>
+        <h2>Текст — на первом месте.</h2>
         <p>
-          Приложение не прерывает поток анбоксингом. После дневной нормы капсула
-          тихо добавляется в очередь, а ритуал открытия запускается вручную.
+          Мы не отвлекаем тебя всплывающими окнами. Закрой дневную норму, и твоя
+          награда тихо добавится в инвентарь. Открой её, когда будешь готов.
         </p>
       </article>
     </section>

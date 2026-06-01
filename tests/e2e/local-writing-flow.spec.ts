@@ -23,6 +23,9 @@ async function startLocalMode(page: Page) {
 async function openEditor(page: Page) {
   await page.getByRole('button', { name: 'Редактор', exact: true }).click();
   await expect(page.getByTestId('editor-content')).toBeVisible();
+  await expect(page.getByPlaceholder('Как назовем?')).toBeVisible();
+  await expect(page.getByPlaceholder('Рукописи не горят. Начинай...')).toBeVisible();
+  await expect(page.getByPlaceholder('Теги: идеи, личное, продукт')).toBeVisible();
 }
 
 async function writePost(page: Page, index: number) {
@@ -40,7 +43,7 @@ async function writePostFields(page: Page, title: string, content: string, tags:
     .getByTestId('editor-content')
     .fill(content);
   await page.getByTestId('editor-tags').fill(tags);
-  await expect(page.getByTestId('autosave-status')).toContainText(/Сохранено локально|автосейв/i);
+  await expect(page.getByTestId('autosave-status')).toContainText(/Сохранено в/i);
 }
 
 async function waitForEditorBufferTags(page: Page, expectedTags: string) {
@@ -115,6 +118,28 @@ async function updateCurrentBankedPost(page: Page) {
   await expect(page.getByRole('heading', { name: 'Готовые посты' })).toBeVisible();
 }
 
+async function saveCurrentDraft(page: Page) {
+  await page.getByTestId('save-draft').click();
+  await expect(page.getByText('Убрано в стол.')).toBeVisible();
+}
+
+async function selectEditorText(page: Page, text: string) {
+  await page.getByTestId('editor-content').evaluate((element, targetText) => {
+    const textarea = element as HTMLTextAreaElement;
+    const start = textarea.value.indexOf(targetText as string);
+
+    if (start < 0) {
+      throw new Error(`Text not found: ${targetText}`);
+    }
+
+    textarea.focus();
+    textarea.setSelectionRange(start, start + String(targetText).length);
+    textarea.dispatchEvent(new Event('select', { bubbles: true }));
+    textarea.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+  }, text);
+  await expect(page.getByTestId('formatting-menu')).toBeVisible();
+}
+
 test('IndexedDB autosave restores active editor buffer after reload', async ({ page }) => {
   await startLocalMode(page);
   await openEditor(page);
@@ -124,7 +149,7 @@ test('IndexedDB autosave restores active editor buffer after reload', async ({ p
     .getByTestId('editor-content')
     .fill('Этот текст должен пережить перезагрузку страницы до последней запятой, вот так.');
   await page.getByTestId('editor-tags').fill('autosave, recovery');
-  await expect(page.getByTestId('autosave-status')).toContainText('Сохранено локально');
+  await expect(page.getByTestId('autosave-status')).toContainText('Сохранено в');
   await waitForEditorBufferTags(page, 'autosave, recovery');
 
   await page.reload();
@@ -134,6 +159,58 @@ test('IndexedDB autosave restores active editor buffer after reload', async ({ p
     'Этот текст должен пережить перезагрузку страницы до последней запятой, вот так.'
   );
   await expect(page.getByTestId('editor-tags')).toHaveValue('autosave, recovery');
+});
+
+test('editor uses literary focus copy and manuscript length statuses', async ({ page }) => {
+  await startLocalMode(page);
+  await openEditor(page);
+
+  await expect(page.getByText('В столе пока пусто.')).toBeVisible();
+  await expect(page.getByText('Эскиз')).toBeVisible();
+
+  await page.getByTestId('editor-content').fill(Array(60).fill('слово').join(' '));
+  await expect(page.getByText('Заметка')).toBeVisible();
+
+  await page.getByTestId('editor-content').fill(Array(1001).fill('слово').join(' '));
+  await expect(page.getByText('Толстой одобряет')).toBeVisible();
+});
+
+test('telegram formatting menu inserts markup and bank renders it safely', async ({ page }) => {
+  await startLocalMode(page);
+  await openEditor(page);
+
+  await page.getByTestId('editor-title').fill('Форматированный пост');
+  await page.getByTestId('editor-content').fill('жирный курсив ссылка');
+  await page.getByTestId('editor-tags').fill('formatting');
+
+  await selectEditorText(page, 'жирный');
+  await page.getByTestId('format-bold').click();
+  await expect(page.getByTestId('editor-content')).toHaveValue('*жирный* курсив ссылка');
+
+  await selectEditorText(page, 'курсив');
+  await page.getByTestId('format-italic').click();
+  await expect(page.getByTestId('editor-content')).toHaveValue('*жирный* _курсив_ ссылка');
+
+  await selectEditorText(page, 'ссылка');
+  await page.getByTestId('format-link').click();
+  await expect(page.getByTestId('editor-content')).toHaveValue(
+    '*жирный* _курсив_ [ссылка](https://example.com)'
+  );
+  await expect(page.getByTestId('autosave-status')).toContainText('Сохранено в');
+
+  await bankCurrentPost(page);
+  await openBank(page);
+  await expect(page.getByTestId('bank-post-card').locator('p strong')).toHaveText('жирный');
+  await expect(page.getByTestId('bank-post-card').locator('p em')).toHaveText('курсив');
+  await expect(page.getByTestId('bank-post-card').locator('p a')).toHaveAttribute(
+    'href',
+    'https://example.com'
+  );
+
+  await page.getByRole('button', { name: 'Экспорт', exact: true }).click();
+  await expect(page.getByTestId('export-preview')).toContainText(
+    '*жирный* _курсив_ [ссылка](https://example.com)'
+  );
 });
 
 test('local writing loop banks posts, creates capsule, opens collectible, and exports text', async ({
@@ -175,6 +252,7 @@ test('banked post can be edited without adding progress or capsules', async ({ p
   await expectProgress(page, '1/100 постов в банке');
 
   await openFirstBankedPostForEdit(page);
+  await expect(page.getByText('Архив. Нет предела совершенству (Вне фокуса дня).')).toBeVisible();
   await expect(page.getByTestId('editor-title')).toHaveValue('Исходный пост');
   await page.getByTestId('editor-title').fill('Обновленный пост');
   await page
@@ -256,7 +334,48 @@ test('opening banked edit does not silently overwrite unrelated autosave buffer'
   await expect(page.getByTestId('editor-conflict')).toBeVisible();
   await expect(page.getByTestId('editor-title')).toHaveValue('Несохраненный буфер');
 
-  await page.getByRole('button', { name: 'Редактировать выбранный пост' }).click();
+  await page.getByRole('button', { name: 'Открыть выбранный' }).click();
   await expect(page.getByTestId('editor-conflict')).toBeHidden();
   await expect(page.getByTestId('editor-title')).toHaveValue('Пост из банка');
+});
+
+test('draft selection asks before replacing an unfinished manuscript', async ({ page }) => {
+  await startLocalMode(page);
+  await openEditor(page);
+
+  await writePostFields(
+    page,
+    'Первый черновик',
+    'Первый текст лежит в столе и ждет продолжения.',
+    'draft'
+  );
+  await saveCurrentDraft(page);
+  await page.getByRole('button', { name: 'Новый' }).click();
+
+  await writePostFields(
+    page,
+    'Второй черновик',
+    'Второй текст тоже пока не готов к банку.',
+    'draft'
+  );
+  await saveCurrentDraft(page);
+
+  await page.getByRole('button', { name: /Первый черновик/ }).click();
+  await expect(page.getByTestId('editor-title')).toHaveValue('Первый черновик');
+
+  await page
+    .getByTestId('editor-content')
+    .fill('Первый текст получил важное продолжение, которое нельзя потерять.');
+  await expect(page.getByTestId('autosave-status')).toContainText('Сохранено в');
+
+  await page.getByRole('button', { name: /Второй черновик/ }).click();
+  await expect(page.getByTestId('editor-conflict')).toBeVisible();
+  await expect(page.getByTestId('editor-title')).toHaveValue('Первый черновик');
+  await expect(page.getByTestId('editor-content')).toHaveValue(
+    'Первый текст получил важное продолжение, которое нельзя потерять.'
+  );
+
+  await page.getByRole('button', { name: 'Открыть выбранный' }).click();
+  await expect(page.getByTestId('editor-conflict')).toBeHidden();
+  await expect(page.getByTestId('editor-title')).toHaveValue('Второй черновик');
 });

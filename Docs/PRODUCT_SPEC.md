@@ -34,13 +34,29 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Saving to bank is explicit and should not happen automatically.
 - User can reopen a banked post for editing.
 - Updating a banked post keeps the same post and must not add progress, capsules, or classic feedback as if it were newly banked.
-- If a banked edit would collide with an unrelated emergency buffer, the UI must ask before replacing local text.
+- If a banked edit or draft switch would collide with an unrelated emergency buffer, the UI must ask before replacing local text.
+- Editor copy should feel like a cozy, lightly ironic literary club rather than a generic productivity tool.
+- Draft save CTA copy is `Убрать в стол`; bank CTA copy is `Отправить в банк`.
+
+## Formatting
+- Content remains plain text.
+- Supported Telegram-style markup: `*жирный*`, `_курсив_`, `[текст](https://example.com)`.
+- Formatting controls appear as a small floating menu when text is selected in the editor.
+- Export keeps raw markup exactly as stored.
+- Bank cards may render supported markup as preview UI, but storage must remain raw text.
+- Unsafe links such as `javascript:` must not become clickable.
 
 ## Bank
 - Shows only banked posts.
 - Supports text search across title, content, and tags.
 - Supports tag chips for navigation.
 - Multiple selected tags narrow results using AND semantics.
+- Bank preview safely renders supported Telegram-style markup without using HTML injection.
+
+## Dashboard
+- Main daily status should be supportive and premium, not punitive.
+- Capsule button is hidden when there are no sealed capsules.
+- Overdue/red plan copy appears only for missed previous days, not for day 1 or normal progress.
 
 ## Season Pass
 - 20 levels.
@@ -83,4 +99,4 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Currency or monetization.
 - Social features.
 - Public profiles.
-- Rich text editing.
+- WYSIWYG rich text editing.

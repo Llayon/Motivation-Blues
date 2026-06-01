@@ -21,6 +21,9 @@
 - IndexedDB editor autosave buffer with localStorage fallback.
 - Banked posts can be reopened in the editor and updated without duplicating season progress or capsules.
 - Bank view supports text search and tag chips for navigation.
+- Editor supports Telegram-style plain-text formatting for bold, italic, and links.
+- Bank preview safely renders supported formatting without HTML injection.
+- Dashboard copy is intentionally supportive: daily focus, hidden empty capsule CTA, and no red plan debt unless previous days are missed.
 - Playwright E2E smoke tests for local mode, IndexedDB recovery, banking, capsules, collection, and export.
 - Search Assist docs and `npm run search:assist -- "pattern"` support LLM navigation through the codebase.
 - Conventional Commits are enforced in GitHub Actions on push.
@@ -33,6 +36,9 @@
 - Capsules are queued and opened manually so writing flow is not interrupted.
 - Editing a banked post is a content update, not a new banking event; it must not increment counters or create rewards.
 - Tag filtering in the bank uses AND semantics when multiple tags are selected.
+- Formatting is stored as raw plain text, not WYSIWYG document state.
+- Telegram-style markup is not Telegram integration; export/copy remain app-local MVP behavior.
+- Unsafe links must render as text, not clickable anchors.
 
 ## Known Risks
 - Three/R3F is bundled eagerly and creates a large JS chunk.
@@ -49,6 +55,7 @@
 - Added LLM-first documentation plan.
 - Added Playwright E2E tests and fixed local mode reload by waiting for Zustand persist hydration and preserving local mode when no Supabase session exists.
 - Added banked-post editing, bank search/tag navigation, Search Assist, and Conventional Commit checks.
+- Refined dashboard/editor copy toward a literary-club tone and added Telegram-style formatting with safe bank preview.
 
 ## Maintenance Rule
 Update this file whenever a change materially affects product behavior, architecture, deployment, database schema, or agent workflow.
