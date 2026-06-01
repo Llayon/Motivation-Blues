@@ -14,7 +14,8 @@
 - 40-day season with 100 banked posts.
 - Daily goals: days 1-10 = 2 posts, days 11-30 = 3 posts, days 31-40 = 2 posts.
 - 20-level Season Pass, 5 posts per level.
-- Static classic feedback phrases, no AI.
+- Static classic feedback phrases, organized by distinct motivational personas (no AI).
+- Optional visual avatars for classic authors in feedback toast notifications.
 - Capsule queue without currency or tickets.
 - Voxel-style 3D placeholders with R3F.
 - TXT export for banked posts.
@@ -56,6 +57,7 @@
 - Added Playwright E2E tests and fixed local mode reload by waiting for Zustand persist hydration and preserving local mode when no Supabase session exists.
 - Added banked-post editing, bank search/tag navigation, Search Assist, and Conventional Commit checks.
 - Refined dashboard/editor copy toward a literary-club tone and added Telegram-style formatting with safe bank preview.
+- Generated `GEMINI.md` context file, rewrote classic phrases into a structured motivation matrix, and implemented avatar support for Pushkin and Gogol.
 
 ## Maintenance Rule
 Update this file whenever a change materially affects product behavior, architecture, deployment, database schema, or agent workflow.

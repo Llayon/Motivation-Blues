@@ -829,6 +829,24 @@ textarea:focus {
   padding: 1rem 3rem 1rem 1rem;
   border-radius: 1.35rem;
   animation: toast-in 220ms ease both;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.classic-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.classic-toast-content {
+  display: flex;
+  flex-direction: column;
 }
 
 .classic-toast span {
