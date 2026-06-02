@@ -36,6 +36,7 @@ These rules keep LLM-generated changes from crossing layers accidentally.
 
 - Preserve the calm, premium, lightly ironic literary-club tone.
 - Reward animations and capsule opening must not interrupt typing.
+- Three/R3F imports should stay behind lazy reward screens and must not move into always-loaded dashboard/editor routes.
 - Red or punitive progress copy should appear only for real missed previous days.
 - Follow `Docs/COPY_GUIDE.md` for copy changes.
 
@@ -49,5 +50,5 @@ These rules keep LLM-generated changes from crossing layers accidentally.
 
 - Prettier controls formatting through `npm run format:check`.
 - ESLint controls static code quality through `npm run lint`.
-- Size budgets are advisory through `npm run size:check` until oversized legacy modules are split.
-- Knip runs in report-only mode through `npm run deadcode`.
+- Size budgets are advisory through `npm run size:check`, but the current source tree should stay warning-free unless a follow-up task documents the exception.
+- Knip runs in report-only mode through `npm run deadcode`, and new findings should be removed or documented intentionally.

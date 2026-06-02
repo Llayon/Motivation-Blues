@@ -20,6 +20,7 @@
 - Optional visual avatars for classic authors in feedback toast notifications.
 - Capsule queue without currency or tickets.
 - Voxel-style 3D placeholders with R3F.
+- Capsule and collection 3D surfaces are lazy-loaded so the writing flow does not import R3F/Three upfront.
 - TXT export for banked posts.
 - IndexedDB editor autosave buffer with localStorage fallback.
 - Bounded Supabase boot hydration with local-first fallback when cloud checks stall or fail.
@@ -33,6 +34,8 @@
 - CODEMAP, TRACEABILITY, BOUNDARIES, REGRESSIONS, HANDOFF, COPY_GUIDE, and COMMIT_CHECKLIST document the LLM-first workflow.
 - `npm run verify`, `npm run verify:full`, and `npm run verify:pages` provide repeatable verification commands.
 - Prettier, ESLint, architecture boundary checks, advisory size budgets, and Knip reporting are wired into quality scripts.
+- Oversized editor/store/style files were split into controller/helper modules and stylesheet slices; `npm run size:check` is clean.
+- Knip dead-code reporting is clean after removing accidental public exports and configuring expected binaries.
 - GitHub Actions warns when code changes ship without accompanying docs updates.
 - GitHub Actions fails architecture-sensitive pushes that do not include an ADR update.
 - Conventional Commits are enforced in GitHub Actions on push.
@@ -58,9 +61,7 @@
 
 ## Known Risks
 
-- Three/R3F is bundled eagerly and creates a large JS chunk.
-- `src/store/useAppStore.ts`, `src/components/ZenEditor.tsx`, and `src/styles.css` exceed advisory size budgets and should be refactored gradually.
-- Knip currently reports unused exports in `src/lib/season.ts` and exported status/type aliases in `src/types.ts`; dead-code cleanup is planned separately.
+- The lazy 3D chunk is intentionally large; avoid importing R3F/Three from always-loaded views.
 - Magic-link redirect must keep the GitHub Pages subpath.
 - Supabase RLS must remain strict: users can only access their own rows.
 - Autosave changes can accidentally weaken recovery guarantees.
@@ -81,6 +82,8 @@
 - Added cloud hydration timeout/fallback so the startup loader cannot block access indefinitely when Supabase is slow or unreachable.
 - Hardened LLM-first workflow with code map, traceability, boundary rules, regression log, handoff notes, copy guide, commit checklist, ADR/feature templates, verify scripts, CI docs reminder, and CI ADR enforcement.
 - Added code quality automation with Prettier, ESLint, architecture boundary checks, advisory size budgets, Knip report-only dead-code detection, and aggregate quality scripts.
+- Lazy-loaded 3D reward screens, split oversized editor/store/style files, and cleaned Knip dead-code findings.
+- Updated Vitest to 4.1.8 so full `npm audit` reports 0 vulnerabilities.
 
 ## Maintenance Rule
 

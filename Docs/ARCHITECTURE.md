@@ -7,10 +7,10 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 ## Frontend
 
 - Entry: `src/main.tsx`.
-- Root view routing: `src/App.tsx` with Zustand `activeView`.
+- Root view routing: `src/App.tsx` with Zustand `activeView`; 3D reward screens are lazy-loaded.
 - UI components: `src/components/`.
 - Domain constants and helpers: `src/lib/`, `src/data/`.
-- Global state: `src/store/useAppStore.ts`.
+- Global state: `src/store/useAppStore.ts`; cloud mapping/loading helpers live in `src/store/cloudData.ts`.
 
 ## State Flow
 
@@ -23,7 +23,8 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 
 ## Editor Autosave
 
-- File: `src/lib/editorBuffer.ts`.
+- Buffer file: `src/lib/editorBuffer.ts`.
+- UI/controller files: `src/components/ZenEditor.tsx`, `src/components/editor/useZenEditorController.ts`, and `src/components/editor/*`.
 - Storage: IndexedDB object store `active-editor-buffers`.
 - Key: `userId`.
 - Fallback: `localStorage`.
@@ -56,7 +57,8 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 ## Supabase
 
 - Client: `src/services/supabase.ts`.
-- Cloud data loading and mutations: `src/store/useAppStore.ts`.
+- Cloud data loading and post persistence helpers: `src/store/cloudData.ts`.
+- Store actions, local mode, and RPC orchestration: `src/store/useAppStore.ts`.
 - Cloud boot timeout helper: `src/lib/cloudHydration.ts`.
 - Initial hydration may block UI only up to `CLOUD_HYDRATION_TIMEOUT_MS`; auth-state refreshes and post/capsule refetches run in background mode.
 - Hydration uses an internal request id so late responses from older Supabase requests cannot overwrite newer app state.
@@ -78,6 +80,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 
 ## 3D
 
-- File: `src/components/VoxelShowcase.tsx`.
+- Files: `src/components/CapsuleQueue.tsx`, `src/components/Collection.tsx`, `src/components/VoxelShowcase.tsx`.
+- `CapsuleQueue` and `Collection` are imported with `React.lazy` from `src/App.tsx` so Three/R3F is not part of the initial dashboard/editor route.
 - Current implementation uses procedural placeholder voxel-style meshes.
 - Future GLTF assets should preserve source materials; lighting can be adjusted but model materials should not be rewritten unless deliberately updating asset art.

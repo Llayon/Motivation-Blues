@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { AuthGate } from './components/AuthGate';
 import { Bank } from './components/Bank';
-import { CapsuleQueue } from './components/CapsuleQueue';
 import { ClassicToast } from './components/ClassicToast';
-import { Collection } from './components/Collection';
 import { Dashboard } from './components/Dashboard';
 import { ExportPanel } from './components/ExportPanel';
 import { Nav } from './components/Nav';
@@ -11,6 +9,13 @@ import { SeasonPass } from './components/SeasonPass';
 import { ZenEditor } from './components/ZenEditor';
 import { isSupabaseConfigured, supabase } from './services/supabase';
 import { useAppStore } from './store/useAppStore';
+
+const CapsuleQueue = lazy(() =>
+  import('./components/CapsuleQueue').then((module) => ({ default: module.CapsuleQueue }))
+);
+const Collection = lazy(() =>
+  import('./components/Collection').then((module) => ({ default: module.Collection }))
+);
 
 function ActiveView() {
   const activeView = useAppStore((state) => state.activeView);
@@ -23,9 +28,17 @@ function ActiveView() {
     case 'season':
       return <SeasonPass />;
     case 'capsules':
-      return <CapsuleQueue />;
+      return (
+        <Suspense fallback={<p className="muted">Готовлю капсулы...</p>}>
+          <CapsuleQueue />
+        </Suspense>
+      );
     case 'collection':
-      return <Collection />;
+      return (
+        <Suspense fallback={<p className="muted">Протираю полку...</p>}>
+          <Collection />
+        </Suspense>
+      );
     case 'export':
       return <ExportPanel />;
     case 'dashboard':

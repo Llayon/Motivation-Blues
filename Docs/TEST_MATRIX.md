@@ -50,6 +50,7 @@
 - Editor formatting menu inserts raw markup and Bank preview renders it safely.
 - Draft selection asks before replacing an unfinished manuscript.
 - Cloud hydration failure falls back to the start screen instead of blocking the app.
+- Capsule and collection routes lazy-load reward chunks without breaking navigation.
 
 ## Supabase
 
@@ -73,7 +74,8 @@
 - `npm run quality` runs the normal local quality gate.
 - `npm run quality:full` adds E2E, Pages build, and dead-code reporting.
 - `npm run size:check` is advisory unless `SIZE_BUDGET_STRICT=1` is set.
-- `npm run deadcode` uses Knip in report-only mode.
+- `npm run size:check` should be clean for current source budgets.
+- `npm run deadcode` uses Knip in report-only mode and should be clean unless a deliberate exception is documented.
 
 ## Deployment
 
@@ -87,6 +89,7 @@
 - `npm run test:e2e`.
 - `npm run build`.
 - `npm run verify:pages`.
+- Build output keeps the main `index` chunk below 500 kB and emits the 3D chunk separately.
 - `npm run search:assist -- "bankPost"` returns code/docs locations.
 - `npm run commitlint:last` after committing.
 - GitHub Actions deploy succeeds.

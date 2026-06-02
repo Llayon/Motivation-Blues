@@ -5,12 +5,13 @@ Use this file as the first map before broad code search. It points an LLM agent 
 ## App Entry And Routing
 
 - `src/main.tsx`: React root.
-- `src/App.tsx`: top-level hydration, auth gate, active view switch.
+- `src/App.tsx`: top-level hydration, auth gate, active view switch, and lazy 3D reward routes.
 - `src/components/Nav.tsx`: main navigation between dashboard, editor, bank, season, capsules, collection, and export.
 
 ## Global State And Product Loop
 
-- `src/store/useAppStore.ts`: central Zustand store for mode, profile, posts, daily progress, capsules, inventory, feedback, and Supabase mutations.
+- `src/store/useAppStore.ts`: central Zustand store for mode, profile, posts, daily progress, capsules, inventory, feedback, local actions, and RPC orchestration.
+- `src/store/cloudData.ts`: Supabase profile/post/progress/capsule/inventory loading and post persistence mapping.
 - `src/types.ts`: shared product types.
 - `src/lib/season.ts`: 40-day schedule, daily goals, season days, levels, milestones.
 - `src/lib/random.ts`: random item and rarity helpers.
@@ -18,15 +19,19 @@ Use this file as the first map before broad code search. It points an LLM agent 
 ## Supabase And Cloud Boot
 
 - `src/services/supabase.ts`: Supabase client setup.
-- `src/store/useAppStore.ts`: cloud data loading, cloud writes, RPC calls.
+- `src/store/cloudData.ts`: cloud data loading and post writes.
+- `src/store/useAppStore.ts`: cloud hydration orchestration and RPC calls.
 - `src/lib/cloudHydration.ts`: bounded cloud hydration timeout.
 - `supabase/migrations/`: schema, RLS, RPC definitions.
 - `Docs/DATA_CONTRACTS.md`: table and RPC contracts.
 
 ## Local-First Editor Safety
 
-- `src/components/ZenEditor.tsx`: editor UI, draft rail, formatting menu, conflict UX.
+- `src/components/ZenEditor.tsx`: editor render shell.
+- `src/components/editor/useZenEditorController.ts`: editor state, local-first autosave, formatting command, and conflict UX.
+- `src/components/editor/`: draft rail, conflict banner, formatting menu, and footer subcomponents.
 - `src/lib/editorBuffer.ts`: IndexedDB autosave buffer with localStorage fallback.
+- `src/lib/editorText.ts`: editor text/tag/status helpers.
 - `src/store/useAppStore.ts`: draft, bank, banked-edit, and editor target actions.
 - `Docs/adr/0003-indexeddb-autosave.md`: accepted autosave decision.
 - `tests/e2e/local-writing-flow.spec.ts`: autosave and conflict E2E coverage.
@@ -35,7 +40,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 
 - `src/lib/telegramFormatting.ts`: plain-text formatting and safe parsing helpers.
 - `src/components/TelegramMarkup.tsx`: safe preview renderer without `dangerouslySetInnerHTML`.
-- `src/components/ZenEditor.tsx`: floating formatting controls.
+- `src/components/editor/EditorFormattingMenu.tsx`: floating formatting controls.
 - `src/lib/telegramFormatting.test.ts`: unit tests.
 - `tests/e2e/local-writing-flow.spec.ts`: formatting E2E test.
 
@@ -59,6 +64,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `src/components/CapsuleQueue.tsx`: sealed capsule queue and manual opening.
 - `src/components/Collection.tsx`: owned collectibles.
 - `src/components/VoxelShowcase.tsx`: procedural voxel-style 3D placeholders.
+- `src/App.tsx`: lazy-load boundary for capsule and collection screens.
 - `src/data/items.ts`: collectible catalog.
 - `src/store/useAppStore.ts`: local/cloud capsule opening.
 
@@ -81,6 +87,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `scripts/size-budget-check.mjs`: advisory file-size budget report.
 - `knip.json`: Knip dead-code entry/project configuration.
 - `package.json`: aggregate `quality` and `quality:full` scripts.
+- `src/styles.css`: imports split global styles from `src/styles/`.
 
 ## LLM-First Docs
 

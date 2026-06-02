@@ -1,10 +1,10 @@
-export const SEASON_TOTAL_DAYS = 40;
-export const SEASON_TOTAL_POSTS = 100;
+const SEASON_TOTAL_DAYS = 40;
+const SEASON_TOTAL_POSTS = 100;
 export const POSTS_PER_LEVEL = 5;
 export const SEASON_LEVELS = SEASON_TOTAL_POSTS / POSTS_PER_LEVEL;
-export const MILESTONES = [10, 25, 50, 75, 100] as const;
+const MILESTONES = [10, 25, 50, 75, 100] as const;
 
-export function clampSeasonDay(day: number): number {
+function clampSeasonDay(day: number): number {
   return Math.min(SEASON_TOTAL_DAYS, Math.max(1, day));
 }
 

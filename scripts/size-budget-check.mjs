@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 const budgets = [
-  { pattern: /^src\/components\/[^/]+\.tsx$/, lines: 350, label: 'component' },
+  { pattern: /^src\/components\/.*\.tsx$/, lines: 350, label: 'component' },
+  { pattern: /^src\/components\/.*\.ts$/, lines: 400, label: 'component helper' },
   { pattern: /^src\/lib\/[^/]+\.ts$/, lines: 250, label: 'lib module' },
   { pattern: /^src\/store\/[^/]+\.ts$/, lines: 650, label: 'store module' },
   { pattern: /^scripts\/[^/]+\.mjs$/, lines: 250, label: 'script' },

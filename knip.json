@@ -1,17 +1,5 @@
 {
-  "entry": [
-    "src/main.tsx",
-    "vite.config.ts",
-    "playwright.config.ts",
-    "scripts/*.mjs",
-    "tests/e2e/*.ts"
-  ],
+  "entry": ["scripts/*.mjs", "tests/e2e/*.ts"],
   "project": ["src/**/*.{ts,tsx}", "tests/**/*.ts", "scripts/*.mjs", "*.ts", "*.js", "*.cjs"],
-  "ignore": [
-    "dist/**",
-    "coverage/**",
-    "playwright-report/**",
-    "test-results/**",
-    "supabase/.temp/**"
-  ]
+  "ignoreBinaries": ["rg"]
 }

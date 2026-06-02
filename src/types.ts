@@ -7,9 +7,9 @@ export type ViewId =
   | 'collection'
   | 'export';
 
-export type PostStatus = 'draft' | 'banked' | 'archived';
-export type CapsuleStatus = 'sealed' | 'opened';
-export type CapsuleType = 'daily' | 'milestone';
+type PostStatus = 'draft' | 'banked' | 'archived';
+type CapsuleStatus = 'sealed' | 'opened';
+type CapsuleType = 'daily' | 'milestone';
 export type ClassicId =
   | 'pushkin'
   | 'tolstoy'

@@ -9,34 +9,26 @@ Use this file to give the next LLM session a compact starting point. Update it a
 - Supabase boot hydration is bounded by timeout and fails open to local/AuthGate access.
 - Banked posts can be edited without duplicating progress or capsules.
 - Telegram-style formatting is stored as raw text and safely previewed.
+- Capsule and collection screens lazy-load the 3D/R3F chunk; initial dashboard/editor bundle stays below 500 kB.
 - LLM-first workflow docs now include code map, traceability, boundaries, regression log, copy guide, checklists, and ADR/feature templates.
 - CI enforces ADR updates for architecture-sensitive changes through `npm run adr:check`.
-- Code quality automation now includes Prettier, ESLint, architecture boundary checks, advisory size budgets, Knip reporting, and aggregate quality scripts.
+- Code quality automation now includes Prettier, ESLint, architecture boundary checks, advisory size budgets, clean Knip reporting, and aggregate quality scripts.
+- Store/editor/style oversized files have been split into smaller modules and `npm run size:check` is clean.
 
 ## Last Verified
 
-- `npm run docs:changed-check`
-- `npm run adr:check`
-- `npm run quality:full`
-- `npm run verify:full`
-- `npm test`
-- `npm run test:e2e`
-- `npm run build`
-- `npm run verify:pages`
+- 2026-06-02: `npm audit`
+- 2026-06-02: `npm run quality:full` (`format:check`, `lint`, `architecture:check`, `size:check`, `adr:check`, docs check, unit tests, build, Playwright E2E, Pages build, Knip)
 
 ## Known Risks
 
-- Three/R3F is still eagerly bundled and keeps the main JS chunk large.
+- The lazy 3D chunk remains large by design; do not import R3F from always-loaded views.
 - Supabase contract/RLS tests are planned but not automated yet.
 - Visual QA remains manual; no screenshot regression suite yet.
-- `src/store/useAppStore.ts`, `src/components/ZenEditor.tsx`, and `src/styles.css` exceed advisory size budgets.
-- Knip reports unused exports that need a deliberate cleanup pass.
 
 ## Next Best Tasks
 
-1. Lazy-load 3D screens to reduce the initial JS chunk.
-2. Add an ErrorBoundary so runtime UI errors do not blank the app.
-3. Refactor oversized store/editor/style modules behind existing tests.
-4. Review and resolve Knip dead-code findings.
-5. Add Supabase contract tests for RLS and RPC behavior.
-6. Add screenshot-based visual QA for landing, dashboard, editor, bank, and capsule screens.
+1. Add an ErrorBoundary so runtime UI errors do not blank the app.
+2. Add Supabase contract tests for RLS and RPC behavior.
+3. Add screenshot-based visual QA for landing, dashboard, editor, bank, and capsule screens.
+4. Improve capsule/collection visuals while preserving lazy 3D loading.
