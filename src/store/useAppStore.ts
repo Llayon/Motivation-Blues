@@ -3,6 +3,10 @@ import { persist } from 'zustand/middleware';
 import { collectibleItems } from '../data/items';
 import { createClassicFeedback } from '../data/classicPhrases';
 import {
+  CLOUD_HYDRATION_TIMEOUT_MS,
+  withCloudTimeout
+} from '../lib/cloudHydration';
+import {
   getCrossedMilestones,
   getDailyGoal,
   getLocalDateKey,
@@ -24,6 +28,11 @@ import type {
 
 type AppMode = 'local' | 'cloud';
 
+type HydrateFromSupabaseOptions = {
+  blockUi?: boolean;
+  timeoutMs?: number;
+};
+
 interface AppState {
   activeView: ViewId;
   mode: AppMode;
@@ -40,7 +49,7 @@ interface AppState {
   setActiveView: (view: ViewId) => void;
   openPostInEditor: (postId: string) => void;
   clearEditorTarget: () => void;
-  hydrateFromSupabase: () => Promise<void>;
+  hydrateFromSupabase: (options?: HydrateFromSupabaseOptions) => Promise<void>;
   startSession: (email: string) => void;
   signOut: () => Promise<void>;
   saveDraft: (input: PostInput) => Promise<string | null>;
@@ -103,6 +112,20 @@ type DbInventoryItem = {
   capsule_id: string;
   acquired_at: string;
 };
+
+type CloudData = {
+  profile: UserProfile;
+  posts: Post[];
+  dailyProgress: DailyProgress[];
+  capsules: Capsule[];
+  inventory: InventoryItem[];
+};
+
+type CloudHydrationSnapshot =
+  | { kind: 'anonymous' }
+  | { kind: 'authenticated'; cloudData: CloudData };
+
+let latestHydrationRequestId = 0;
 
 function countWords(content: string): number {
   return content.trim().split(/\s+/).filter(Boolean).length;
@@ -271,13 +294,7 @@ async function upsertCloudProfile(userId: string, timezone: string) {
   }
 }
 
-async function loadCloudData(email: string): Promise<{
-  profile: UserProfile;
-  posts: Post[];
-  dailyProgress: DailyProgress[];
-  capsules: Capsule[];
-  inventory: InventoryItem[];
-}> {
+async function loadCloudData(email: string): Promise<CloudData> {
   if (!supabase) {
     throw new Error('Supabase is not configured.');
   }
@@ -321,6 +338,19 @@ async function loadCloudData(email: string): Promise<{
     capsules: (capsulesResult.data ?? []).map(mapCapsule),
     inventory: (inventoryResult.data ?? []).map(mapInventoryItem)
   };
+}
+
+async function loadCloudHydrationSnapshot(): Promise<CloudHydrationSnapshot> {
+  const session = await requireCloudSession();
+  if (!session?.user) {
+    return { kind: 'anonymous' };
+  }
+
+  const email = session.user.email ?? 'author@example.com';
+  await upsertCloudProfile(session.user.id, getLocalTimezone());
+  const cloudData = await loadCloudData(email);
+
+  return { kind: 'authenticated', cloudData };
 }
 
 async function saveCloudPost(
@@ -379,17 +409,30 @@ export const useAppStore = create<AppState>()(
           activeView: 'editor'
         }),
       clearEditorTarget: () => set({ editorTargetPostId: null }),
-      hydrateFromSupabase: async () => {
+      hydrateFromSupabase: async (options = {}) => {
+        const requestId = ++latestHydrationRequestId;
+        const blockUi = options.blockUi ?? true;
+        const timeoutMs = options.timeoutMs ?? CLOUD_HYDRATION_TIMEOUT_MS;
+
         if (!supabase) {
           set({ isHydrating: false, mode: 'local', cloudError: null });
           return;
         }
 
-        set({ isHydrating: true, cloudError: null });
+        if (blockUi) {
+          set({ isHydrating: true, cloudError: null });
+        } else {
+          set({ cloudError: null });
+        }
 
         try {
-          const session = await requireCloudSession();
-          if (!session?.user) {
+          const snapshot = await withCloudTimeout(loadCloudHydrationSnapshot(), timeoutMs);
+
+          if (requestId !== latestHydrationRequestId) {
+            return;
+          }
+
+          if (snapshot.kind === 'anonymous') {
             const current = get();
             if (current.mode === 'local' && current.profile) {
               set({
@@ -411,18 +454,17 @@ export const useAppStore = create<AppState>()(
             return;
           }
 
-          const email = session.user.email ?? 'author@example.com';
-          set({ mode: 'cloud' });
-          await upsertCloudProfile(session.user.id, getLocalTimezone());
-          const cloudData = await loadCloudData(email);
-
           set({
-            ...cloudData,
+            ...snapshot.cloudData,
             isHydrating: false,
             mode: 'cloud',
             cloudError: null
           });
         } catch (error) {
+          if (requestId !== latestHydrationRequestId) {
+            return;
+          }
+
           const message = error instanceof Error ? error.message : 'Supabase sync failed.';
           set({ isHydrating: false, cloudError: message });
         }
@@ -445,7 +487,9 @@ export const useAppStore = create<AppState>()(
           capsules: [],
           inventory: [],
           editorTargetPostId: null,
-          activeView: 'dashboard'
+          activeView: 'dashboard',
+          cloudError: null,
+          isHydrating: false
         });
       },
       signOut: async () => {
@@ -521,7 +565,7 @@ export const useAppStore = create<AppState>()(
               }
             }
 
-            await get().hydrateFromSupabase();
+            await get().hydrateFromSupabase({ blockUi: false });
             set({
               feedback: createClassicFeedback(savedPost.charCount),
               cloudError: null
@@ -627,7 +671,7 @@ export const useAppStore = create<AppState>()(
               editorTargetPostId: null,
               cloudError: null
             });
-            await get().hydrateFromSupabase();
+            await get().hydrateFromSupabase({ blockUi: false });
             return true;
           } catch (error) {
             const message = error instanceof Error ? error.message : 'Banked post update failed.';
@@ -657,7 +701,7 @@ export const useAppStore = create<AppState>()(
             return;
           }
 
-          await get().hydrateFromSupabase();
+          await get().hydrateFromSupabase({ blockUi: false });
           return;
         }
 
@@ -690,7 +734,7 @@ export const useAppStore = create<AppState>()(
               throw error;
             }
 
-            await get().hydrateFromSupabase();
+            await get().hydrateFromSupabase({ blockUi: false });
             set({
               latestRevealItemId:
                 typeof data === 'object' && data && 'item_id' in data

@@ -8,6 +8,7 @@
 - Export formatting.
 - Bank tag counts and filter semantics.
 - Telegram-style formatting helpers and safe-link parsing.
+- Cloud hydration timeout helper.
 
 ## Manual Smoke
 - Open production URL.
@@ -26,6 +27,7 @@
 - Open capsule and verify collection updates.
 - Export banked posts.
 - Confirm export keeps raw Telegram-style markup.
+- Simulate unavailable Supabase and confirm the app leaves the startup loader.
 
 ## Playwright E2E
 - Local mode starts without Supabase session.
@@ -40,6 +42,7 @@
 - Opening a banked post for edit does not silently overwrite an unrelated autosave buffer.
 - Editor formatting menu inserts raw markup and Bank preview renders it safely.
 - Draft selection asks before replacing an unfinished manuscript.
+- Cloud hydration failure falls back to the start screen instead of blocking the app.
 
 ## Supabase
 - `npx supabase migration list` shows local/remote parity.
@@ -47,6 +50,7 @@
 - User cannot access another user's rows.
 - `bank_post` is idempotent for already-banked posts.
 - `open_capsule` rejects opened or foreign capsules.
+- Startup remains usable if Supabase Auth/REST is unavailable or slow.
 
 ## Deployment
 - `npm test`.

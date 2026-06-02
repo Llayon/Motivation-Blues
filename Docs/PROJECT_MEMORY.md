@@ -20,6 +20,7 @@
 - Voxel-style 3D placeholders with R3F.
 - TXT export for banked posts.
 - IndexedDB editor autosave buffer with localStorage fallback.
+- Bounded Supabase boot hydration with local-first fallback when cloud checks stall or fail.
 - Banked posts can be reopened in the editor and updated without duplicating season progress or capsules.
 - Bank view supports text search and tag chips for navigation.
 - Editor supports Telegram-style plain-text formatting for bold, italic, and links.
@@ -34,6 +35,7 @@
 - GitHub Pages is acceptable because the app is a static SPA and Supabase provides backend services.
 - `VITE_BASE_PATH=/Motivation-Blues/` is required for GitHub Pages.
 - The editor must be local-first: active writing state is saved to IndexedDB independently from Supabase.
+- Cloud hydration must fail open: Supabase may be slow or unavailable, but the app should leave the startup loader after a short timeout and let the user continue locally.
 - Capsules are queued and opened manually so writing flow is not interrupted.
 - Editing a banked post is a content update, not a new banking event; it must not increment counters or create rewards.
 - Tag filtering in the bank uses AND semantics when multiple tags are selected.
@@ -46,6 +48,7 @@
 - Magic-link redirect must keep the GitHub Pages subpath.
 - Supabase RLS must remain strict: users can only access their own rows.
 - Autosave changes can accidentally weaken recovery guarantees.
+- Supabase Auth/REST requests can stall on startup; the app mitigates this with a bounded hydration timeout, background refreshes, and a visible retry path.
 - GitHub Actions currently forces JavaScript actions to Node 24 to avoid upcoming runner deprecation issues.
 - CI now runs unit tests and Playwright E2E before build/deploy.
 
@@ -58,6 +61,7 @@
 - Added banked-post editing, bank search/tag navigation, Search Assist, and Conventional Commit checks.
 - Refined dashboard/editor copy toward a literary-club tone and added Telegram-style formatting with safe bank preview.
 - Generated `GEMINI.md` context file, rewrote classic phrases into a structured motivation matrix, and implemented avatar support for Pushkin and Gogol.
+- Added cloud hydration timeout/fallback so the startup loader cannot block access indefinitely when Supabase is slow or unreachable.
 
 ## Maintenance Rule
 Update this file whenever a change materially affects product behavior, architecture, deployment, database schema, or agent workflow.

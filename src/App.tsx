@@ -63,11 +63,11 @@ export default function App() {
       return;
     }
 
-    void hydrateFromSupabase();
+    void hydrateFromSupabase({ blockUi: true });
     const {
       data: { subscription }
     } = supabase.auth.onAuthStateChange(() => {
-      void hydrateFromSupabase();
+      void hydrateFromSupabase({ blockUi: false });
     });
 
     return () => subscription.unsubscribe();

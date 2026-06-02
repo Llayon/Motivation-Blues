@@ -152,6 +152,22 @@ async function selectEditorText(page: Page, text: string) {
   await expect(page.getByTestId('formatting-menu')).toBeVisible();
 }
 
+test('cloud hydration failure falls back to the start screen instead of blocking the app', async ({
+  page
+}) => {
+  await page.route('**/auth/v1/**', (route) => route.abort());
+  await page.route('**/rest/v1/**', (route) => route.abort());
+
+  await page.goto('/');
+  await expect(
+    page.getByRole('heading', { name: '100 постов за 40 дней. Пиши для себя.' })
+  ).toBeVisible({ timeout: 7_000 });
+  await expect(page.getByText('Подключаю облачный сезон...')).toBeHidden();
+
+  await page.getByTestId('start-local-mode').click();
+  await expect(page.getByText(/Local .*local@author\.test|Local .*author/i)).toBeVisible();
+});
+
 test('IndexedDB autosave restores active editor buffer after reload', async ({ page }) => {
   await startLocalMode(page);
   await openEditor(page);

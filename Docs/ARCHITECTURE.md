@@ -11,11 +11,12 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Global state: `src/store/useAppStore.ts`.
 
 ## State Flow
-1. `App` hydrates Supabase session if Supabase env is configured.
+1. `App` waits for Zustand persist hydration, then runs a bounded Supabase session check if Supabase env is configured.
 2. `useAppStore` loads profile, posts, daily progress, capsules, and inventory.
 3. UI reads state directly from Zustand.
 4. Cloud mode writes posts and reward actions through Supabase tables/RPC.
 5. Local mode keeps the same behavior in local Zustand persistence.
+6. If cloud hydration stalls or fails, the app fails open: fullscreen loading ends, local data is preserved when present, and the Auth gate lets the user continue locally or retry cloud sync.
 
 ## Editor Autosave
 - File: `src/lib/editorBuffer.ts`.
@@ -49,6 +50,9 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 ## Supabase
 - Client: `src/services/supabase.ts`.
 - Cloud data loading and mutations: `src/store/useAppStore.ts`.
+- Cloud boot timeout helper: `src/lib/cloudHydration.ts`.
+- Initial hydration may block UI only up to `CLOUD_HYDRATION_TIMEOUT_MS`; auth-state refreshes and post/capsule refetches run in background mode.
+- Hydration uses an internal request id so late responses from older Supabase requests cannot overwrite newer app state.
 - Migrations: `supabase/migrations/`.
 - Config: `supabase/config.toml`.
 - Project ref: `ryvvthzzlnbejyvlrqup`.

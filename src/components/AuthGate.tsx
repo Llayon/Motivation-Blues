@@ -6,6 +6,7 @@ export function AuthGate() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [isRetryingCloud, setIsRetryingCloud] = useState(false);
   const startSession = useAppStore((state) => state.startSession);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
   const cloudError = useAppStore((state) => state.cloudError);
@@ -43,13 +44,26 @@ export function AuthGate() {
     setStatus(null);
 
     if (isSupabaseConfigured) {
-      await hydrateFromSupabase();
+      await hydrateFromSupabase({ blockUi: false });
       if (useAppStore.getState().profile) {
         return;
       }
     }
 
     startSession(email.trim() || 'local@author.test');
+  }
+
+  async function handleCloudRetry() {
+    setIsRetryingCloud(true);
+    setStatus('Проверяю облако еще раз...');
+    await hydrateFromSupabase({ blockUi: false });
+
+    if (useAppStore.getState().profile) {
+      return;
+    }
+
+    setIsRetryingCloud(false);
+    setStatus('Если облако молчит, можно вернуться к текстам локально.');
   }
 
   return (
@@ -91,6 +105,17 @@ export function AuthGate() {
           >
             Вернуться к текстам
           </button>
+          {cloudError && isSupabaseConfigured ? (
+            <button
+              type="button"
+              className="ghost-button"
+              data-testid="retry-cloud-hydration"
+              onClick={() => void handleCloudRetry()}
+              disabled={isRetryingCloud}
+            >
+              {isRetryingCloud ? 'Проверяю...' : 'Проверить облако еще раз'}
+            </button>
+          ) : null}
         </div>
         {!isSupabaseConfigured ? (
           <p className="muted">Облачный вход не настроен, тексты будут храниться локально.</p>

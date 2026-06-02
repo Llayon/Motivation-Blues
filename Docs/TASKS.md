@@ -1,5 +1,11 @@
 # Tasks
 
+## Recently Completed
+
+### Cloud hydration fail-open
+Goal: prevent the startup loader from blocking access when Supabase is slow or unreachable.
+Result: initial cloud hydration is bounded by timeout, local data is preserved when present, AuthGate shows retry, and background Supabase refreshes no longer display the fullscreen loader.
+
 ## High Priority
 
 ### 1. Lazy-load 3D screens
