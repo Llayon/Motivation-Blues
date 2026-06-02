@@ -12,6 +12,7 @@
 
 - Supabase Auth magic-link flow.
 - Telegram Mini App (TMA) integration (SDK initialization, expanded viewport) so the app runs natively inside Telegram.
+- Seamless Telegram Auth via Supabase Edge Functions, providing zero-click auto-login for TMA users without email entry.
 - Cloud-backed posts, progress, capsules, and inventory.
 - Local fallback mode for browser-only sessions.
 - 40-day season with 100 banked posts.
@@ -87,6 +88,7 @@
 - Updated Vitest to 4.1.8 so full `npm audit` reports 0 vulnerabilities.
 - Fixed an autosave readiness race where very fast typing before IndexedDB restore completion could skip the first local buffer write.
 - Integrated the Telegram Web App SDK as an MVP to adapt the client for Telegram Mini Apps (TMA).
+- Implemented Seamless TMA Auth using a Supabase Edge Function to validate `initData` and auto-login users without email/magic-links.
 
 ## Maintenance Rule
 
