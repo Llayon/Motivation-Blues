@@ -13,7 +13,11 @@ export function Bank() {
     () =>
       posts
         .filter((post) => post.status === 'banked')
-        .sort((a, b) => new Date(b.bankedAt ?? b.updatedAt).getTime() - new Date(a.bankedAt ?? a.updatedAt).getTime()),
+        .sort(
+          (a, b) =>
+            new Date(b.bankedAt ?? b.updatedAt).getTime() -
+            new Date(a.bankedAt ?? a.updatedAt).getTime()
+        ),
     [posts]
   );
   const tagCounts = useMemo(() => getTagCounts(bankedPosts), [bankedPosts]);
@@ -49,7 +53,9 @@ export function Bank() {
         </button>
       </div>
       {bankedPosts.length === 0 ? (
-        <p className="empty-state">Пока нет готовых постов. Открой редактор и сохрани первый текст в банк.</p>
+        <p className="empty-state">
+          Пока нет готовых постов. Открой редактор и сохрани первый текст в банк.
+        </p>
       ) : (
         <>
           <div className="bank-tools">
@@ -74,7 +80,12 @@ export function Bank() {
               ))}
             </div>
             {hasFilters ? (
-              <button className="plain-button" data-testid="reset-bank-filters" type="button" onClick={resetFilters}>
+              <button
+                className="plain-button"
+                data-testid="reset-bank-filters"
+                type="button"
+                onClick={resetFilters}
+              >
                 Сбросить фильтры
               </button>
             ) : null}
@@ -88,7 +99,9 @@ export function Bank() {
                 <article className="post-card" data-testid="bank-post-card" key={post.id}>
                   <div className="post-card-header">
                     <span>#{filteredPosts.length - index}</span>
-                    <span>{new Date(post.bankedAt ?? post.updatedAt).toLocaleDateString('ru-RU')}</span>
+                    <span>
+                      {new Date(post.bankedAt ?? post.updatedAt).toLocaleDateString('ru-RU')}
+                    </span>
                   </div>
                   <h2>{post.title || 'Без названия'}</h2>
                   <p>

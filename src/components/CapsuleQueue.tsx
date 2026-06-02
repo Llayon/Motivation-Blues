@@ -34,7 +34,12 @@ export function CapsuleQueue() {
                 </div>
                 <h2>{capsule.capsuleType === 'daily' ? 'Капсула дня' : 'Milestone-амфора'}</h2>
                 <p>{capsule.createdFrom}</p>
-                <button className="primary-button" data-testid="open-capsule" type="button" onClick={() => openCapsule(capsule.id)}>
+                <button
+                  className="primary-button"
+                  data-testid="open-capsule"
+                  type="button"
+                  onClick={() => openCapsule(capsule.id)}
+                >
                   Открыть
                 </button>
               </article>

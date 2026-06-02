@@ -1,6 +1,7 @@
 # Project Memory
 
 ## Current State
+
 - MVP app implemented with React, TypeScript, Vite, Zustand, Supabase, R3F, and GitHub Pages.
 - Supabase project `Motivation blues` exists in region `eu-central-1`.
 - GitHub repository exists at `https://github.com/Llayon/Motivation-Blues`.
@@ -8,6 +9,7 @@
 - GitHub Pages deploy runs through `.github/workflows/deploy-pages.yml`.
 
 ## Implemented Features
+
 - Supabase Auth magic-link flow.
 - Cloud-backed posts, progress, capsules, and inventory.
 - Local fallback mode for browser-only sessions.
@@ -30,11 +32,13 @@
 - Search Assist docs and `npm run search:assist -- "pattern"` support LLM navigation through the codebase.
 - CODEMAP, TRACEABILITY, BOUNDARIES, REGRESSIONS, HANDOFF, COPY_GUIDE, and COMMIT_CHECKLIST document the LLM-first workflow.
 - `npm run verify`, `npm run verify:full`, and `npm run verify:pages` provide repeatable verification commands.
+- Prettier, ESLint, architecture boundary checks, advisory size budgets, and Knip reporting are wired into quality scripts.
 - GitHub Actions warns when code changes ship without accompanying docs updates.
 - GitHub Actions fails architecture-sensitive pushes that do not include an ADR update.
 - Conventional Commits are enforced in GitHub Actions on push.
 
 ## Key Decisions
+
 - Supabase is the backend because the app needs Auth, RLS, Postgres, and RPC without a custom server.
 - GitHub Pages is acceptable because the app is a static SPA and Supabase provides backend services.
 - `VITE_BASE_PATH=/Motivation-Blues/` is required for GitHub Pages.
@@ -50,9 +54,13 @@
 - Architecture changes affecting storage, backend, auth, deploy, schema, editor safety, or state flow require an ADR.
 - CI enforces ADR coverage for architecture-sensitive files through `npm run adr:check`.
 - Requirement/test links should be maintained in `Docs/TRACEABILITY.md`.
+- `npm run quality` is the default local gate for code changes; `npm run quality:full` adds E2E, Pages build, and dead-code reporting.
 
 ## Known Risks
+
 - Three/R3F is bundled eagerly and creates a large JS chunk.
+- `src/store/useAppStore.ts`, `src/components/ZenEditor.tsx`, and `src/styles.css` exceed advisory size budgets and should be refactored gradually.
+- Knip currently reports unused exports in `src/lib/season.ts` and exported status/type aliases in `src/types.ts`; dead-code cleanup is planned separately.
 - Magic-link redirect must keep the GitHub Pages subpath.
 - Supabase RLS must remain strict: users can only access their own rows.
 - Autosave changes can accidentally weaken recovery guarantees.
@@ -61,6 +69,7 @@
 - CI now runs unit tests and Playwright E2E before build/deploy.
 
 ## Recent History
+
 - Created MVP and Supabase cloud project.
 - Deployed to GitHub Pages.
 - Added IndexedDB editor autosave buffer.
@@ -71,6 +80,8 @@
 - Generated `GEMINI.md` context file, rewrote classic phrases into a structured motivation matrix, and implemented avatar support for Pushkin and Gogol.
 - Added cloud hydration timeout/fallback so the startup loader cannot block access indefinitely when Supabase is slow or unreachable.
 - Hardened LLM-first workflow with code map, traceability, boundary rules, regression log, handoff notes, copy guide, commit checklist, ADR/feature templates, verify scripts, CI docs reminder, and CI ADR enforcement.
+- Added code quality automation with Prettier, ESLint, architecture boundary checks, advisory size budgets, Knip report-only dead-code detection, and aggregate quality scripts.
 
 ## Maintenance Rule
+
 Update this file whenever a change materially affects product behavior, architecture, deployment, database schema, or agent workflow.

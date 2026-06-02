@@ -37,7 +37,9 @@ export function Nav() {
         ))}
       </nav>
       <div className="nav-profile">
-        <span>{mode === 'cloud' ? 'Cloud' : 'Local'} · {profile?.email}</span>
+        <span>
+          {mode === 'cloud' ? 'Cloud' : 'Local'} · {profile?.email}
+        </span>
         <button type="button" onClick={() => void signOut()}>
           Выйти
         </button>

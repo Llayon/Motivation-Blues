@@ -1,7 +1,7 @@
 :root {
   color: #182033;
   background: #eef3f7;
-  font-family: "Alegreya Sans", "Trebuchet MS", sans-serif;
+  font-family: 'Alegreya Sans', 'Trebuchet MS', sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --ink: #182033;
@@ -105,7 +105,7 @@ button:disabled {
 .export-layout h1 {
   max-width: 760px;
   margin: 0;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(2.4rem, 7vw, 5.7rem);
   line-height: 0.88;
   letter-spacing: -0.055em;
@@ -255,7 +255,7 @@ textarea:focus {
 }
 
 .brand-mark span {
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.55rem;
   font-weight: 900;
   line-height: 1;
@@ -367,7 +367,7 @@ textarea:focus {
 .stat-card strong {
   display: block;
   margin-top: 0.5rem;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 3.4rem;
   line-height: 0.9;
 }
@@ -413,7 +413,7 @@ textarea:focus {
 .unboxing-panel h2,
 .export-preview h2 {
   margin: 0;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 2rem;
   letter-spacing: -0.025em;
 }
@@ -488,7 +488,7 @@ textarea:focus {
 .title-input {
   border-color: transparent;
   background: transparent;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(2rem, 4vw, 3.8rem);
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -501,7 +501,7 @@ textarea:focus {
   resize: vertical;
   border-color: transparent;
   background: rgba(250, 253, 255, 0.62);
-  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', serif;
   font-size: 1.25rem;
   line-height: 1.72;
 }
@@ -538,7 +538,7 @@ textarea:focus {
   color: #fff;
 }
 
-  .editor-footer {
+.editor-footer {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -681,7 +681,7 @@ textarea:focus {
 
 .season-summary strong {
   display: block;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(2.6rem, 8vw, 5.2rem);
   line-height: 0.9;
 }
@@ -704,7 +704,7 @@ textarea:focus {
 .level-card strong {
   display: block;
   margin-top: 0.3rem;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 2.1rem;
 }
 
@@ -815,7 +815,7 @@ textarea:focus {
   border-radius: 1rem;
   background: rgba(22, 31, 48, 0.9);
   color: #f5f9ff;
-  font-family: "Cascadia Code", "Fira Code", monospace;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
   line-height: 1.55;
   white-space: pre-wrap;
 }
@@ -949,7 +949,7 @@ textarea:focus {
     font-size: 1.1rem;
   }
 
-.editor-footer {
+  .editor-footer {
     align-items: stretch;
   }
 
@@ -973,7 +973,7 @@ textarea:focus {
 
 .editor-conflict h2 {
   margin: 0;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 2rem;
   letter-spacing: -0.03em;
 }

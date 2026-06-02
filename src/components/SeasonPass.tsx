@@ -37,7 +37,10 @@ export function SeasonPass() {
       </div>
       <div className="season-track">
         {levels.map((entry) => (
-          <article key={entry.level} className={entry.unlocked ? 'level-card unlocked' : 'level-card'}>
+          <article
+            key={entry.level}
+            className={entry.unlocked ? 'level-card unlocked' : 'level-card'}
+          >
             <span>Ур. {entry.level}</span>
             <strong>{entry.target}</strong>
             <p>{entry.unlocked ? 'Открыто' : 'Капсула ближе'}</p>

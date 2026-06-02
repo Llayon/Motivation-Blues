@@ -3,7 +3,9 @@
 Architecture Decision Records document decisions that future LLM sessions must not rediscover from scratch.
 
 ## When To Add An ADR
+
 Add an ADR when a change affects:
+
 - Storage or local-first safety.
 - Supabase schema, RLS, RPC, auth, or cloud sync behavior.
 - Deployment, routing, GitHub Pages base path, or magic-link redirects.
@@ -12,6 +14,7 @@ Add an ADR when a change affects:
 - Major rendering or asset pipeline decisions.
 
 ## Naming
+
 Use the next sequential number:
 
 ```text
@@ -19,21 +22,26 @@ Use the next sequential number:
 ```
 
 ## Template
+
 Use `Docs/templates/ADR.md`.
 
 ## Status Values
+
 - `Proposed`
 - `Accepted`
 - `Superseded`
 - `Rejected`
 
 ## Rule
+
 Do not rewrite accepted ADR history to hide a change. Add a new ADR when the decision changes.
 
 ## CI Enforcement
+
 `npm run adr:check` fails when architecture-sensitive files change without an ADR update under `Docs/adr/`.
 
 The enforced sensitive areas include:
+
 - `.github/workflows/`
 - `scripts/`
 - `supabase/`

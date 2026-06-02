@@ -13,6 +13,7 @@
 ### Task 1: Update the Phrase Bank
 
 **Files:**
+
 - Modify: `src/data/classicPhrases.ts`
 
 - [ ] **Step 1: Replace the phraseBank variable**
@@ -151,6 +152,7 @@ Expected: Output showing successful build (no TypeScript errors) and all tests p
 - [ ] **Step 3: Commit the changes**
 
 Run:
+
 ```bash
 git add src/data/classicPhrases.ts
 git commit -m "feat: update classic phrases to new motivation matrix"

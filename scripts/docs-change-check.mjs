@@ -1,11 +1,6 @@
 import { spawnSync } from 'node:child_process';
 
-const DOC_PREFIXES = [
-  'Docs/',
-  'AGENTS.md',
-  'GEMINI.md',
-  'README.md'
-];
+const DOC_PREFIXES = ['Docs/', 'AGENTS.md', 'GEMINI.md', 'README.md'];
 
 const CODE_PREFIXES = [
   'src/',
@@ -45,10 +40,7 @@ let changedFiles = [];
 if (!envBase && !envHead) {
   const workingTreeDiff = runGit(['diff', '--name-only', 'HEAD']);
   if (workingTreeDiff.status === 0) {
-    changedFiles = workingTreeDiff.stdout
-      .split(/\r?\n/)
-      .map(normalizePath)
-      .filter(Boolean);
+    changedFiles = workingTreeDiff.stdout.split(/\r?\n/).map(normalizePath).filter(Boolean);
   }
 }
 
@@ -67,10 +59,7 @@ if (changedFiles.length === 0) {
     process.exit(0);
   }
 
-  changedFiles = diff.stdout
-    .split(/\r?\n/)
-    .map(normalizePath)
-    .filter(Boolean);
+  changedFiles = diff.stdout.split(/\r?\n/).map(normalizePath).filter(Boolean);
 }
 
 const codeChanged = changedFiles.some((file) => hasPrefix(file, CODE_PREFIXES));

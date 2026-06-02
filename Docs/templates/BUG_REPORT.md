@@ -5,11 +5,13 @@
 ## Actual
 
 ## Reproduction Steps
-1. 
-2. 
-3. 
+
+1.
+2.
+3.
 
 ## Affected Area
+
 - Editor
 - Supabase
 - GitHub Pages
@@ -20,7 +22,9 @@
 ## Suspected Cause
 
 ## Acceptance Criteria
-- 
+
+-
 
 ## Verification
-- 
+
+-

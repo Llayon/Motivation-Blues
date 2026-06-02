@@ -2,16 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { collectibleItems } from '../data/items';
 import { createClassicFeedback } from '../data/classicPhrases';
-import {
-  CLOUD_HYDRATION_TIMEOUT_MS,
-  withCloudTimeout
-} from '../lib/cloudHydration';
-import {
-  getCrossedMilestones,
-  getDailyGoal,
-  getLocalDateKey,
-  getSeasonDay
-} from '../lib/season';
+import { CLOUD_HYDRATION_TIMEOUT_MS, withCloudTimeout } from '../lib/cloudHydration';
+import { getCrossedMilestones, getDailyGoal, getLocalDateKey, getSeasonDay } from '../lib/season';
 import { pickRandom, pickWeightedRarity } from '../lib/random';
 import { isSupabaseConfigured, supabase } from '../services/supabase';
 import type {
@@ -36,6 +28,7 @@ type HydrateFromSupabaseOptions = {
 interface AppState {
   activeView: ViewId;
   mode: AppMode;
+  cloudConfigured: boolean;
   isHydrating: boolean;
   cloudError: string | null;
   profile: UserProfile | null;
@@ -50,6 +43,7 @@ interface AppState {
   openPostInEditor: (postId: string) => void;
   clearEditorTarget: () => void;
   hydrateFromSupabase: (options?: HydrateFromSupabaseOptions) => Promise<void>;
+  requestMagicLink: (email: string, redirectUrl: string) => Promise<string | null>;
   startSession: (email: string) => void;
   signOut: () => Promise<void>;
   saveDraft: (input: PostInput) => Promise<string | null>;
@@ -133,11 +127,7 @@ function countWords(content: string): number {
 
 function normalizeTags(tags: string[]): string[] {
   return Array.from(
-    new Set(
-      tags
-        .map((tag) => tag.trim().replace(/^#/, '').toLowerCase())
-        .filter(Boolean)
-    )
+    new Set(tags.map((tag) => tag.trim().replace(/^#/, '').toLowerCase()).filter(Boolean))
   ).slice(0, 8);
 }
 
@@ -174,7 +164,7 @@ function updatePost(existing: Post, input: PostInput, status?: Post['status']): 
     charCount: content.length,
     wordCount: countWords(content),
     updatedAt: now,
-    bankedAt: nextStatus === 'banked' ? existing.bankedAt ?? now : existing.bankedAt
+    bankedAt: nextStatus === 'banked' ? (existing.bankedAt ?? now) : existing.bankedAt
   };
 }
 
@@ -299,31 +289,30 @@ async function loadCloudData(email: string): Promise<CloudData> {
     throw new Error('Supabase is not configured.');
   }
 
-  const [
-    profileResult,
-    postsResult,
-    dailyProgressResult,
-    capsulesResult,
-    inventoryResult
-  ] = await Promise.all([
-    supabase.from('profiles').select('*').single<DbProfile>(),
-    supabase.from('posts').select('*').order('updated_at', { ascending: false }).returns<DbPost[]>(),
-    supabase
-      .from('daily_progress')
-      .select('*')
-      .order('date_key', { ascending: false })
-      .returns<DbDailyProgress[]>(),
-    supabase
-      .from('capsules')
-      .select('*')
-      .order('acquired_at', { ascending: false })
-      .returns<DbCapsule[]>(),
-    supabase
-      .from('user_inventory')
-      .select('*')
-      .order('acquired_at', { ascending: false })
-      .returns<DbInventoryItem[]>()
-  ]);
+  const [profileResult, postsResult, dailyProgressResult, capsulesResult, inventoryResult] =
+    await Promise.all([
+      supabase.from('profiles').select('*').single<DbProfile>(),
+      supabase
+        .from('posts')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .returns<DbPost[]>(),
+      supabase
+        .from('daily_progress')
+        .select('*')
+        .order('date_key', { ascending: false })
+        .returns<DbDailyProgress[]>(),
+      supabase
+        .from('capsules')
+        .select('*')
+        .order('acquired_at', { ascending: false })
+        .returns<DbCapsule[]>(),
+      supabase
+        .from('user_inventory')
+        .select('*')
+        .order('acquired_at', { ascending: false })
+        .returns<DbInventoryItem[]>()
+    ]);
 
   if (profileResult.error) throw profileResult.error;
   if (postsResult.error) throw postsResult.error;
@@ -377,7 +366,12 @@ async function saveCloudPost(
   };
 
   const result = existing
-    ? await supabase.from('posts').update(payload).eq('id', existing.id).select('*').single<DbPost>()
+    ? await supabase
+        .from('posts')
+        .update(payload)
+        .eq('id', existing.id)
+        .select('*')
+        .single<DbPost>()
     : await supabase.from('posts').insert(payload).select('*').single<DbPost>();
 
   if (result.error) {
@@ -392,6 +386,7 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       activeView: 'dashboard',
       mode: isSupabaseConfigured ? 'cloud' : 'local',
+      cloudConfigured: isSupabaseConfigured,
       isHydrating: isSupabaseConfigured,
       cloudError: null,
       profile: null,
@@ -468,6 +463,20 @@ export const useAppStore = create<AppState>()(
           const message = error instanceof Error ? error.message : 'Supabase sync failed.';
           set({ isHydrating: false, cloudError: message });
         }
+      },
+      requestMagicLink: async (email, redirectUrl) => {
+        if (!supabase) {
+          return 'Облачный вход не настроен.';
+        }
+
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: redirectUrl
+          }
+        });
+
+        return error?.message ?? null;
       },
       startSession: (email) => {
         const now = new Date().toISOString();
@@ -596,9 +605,7 @@ export const useAppStore = create<AppState>()(
         const seasonDay = getSeasonDay(profile.seasonStartAt, now);
         const goalPosts = getDailyGoal(seasonDay);
         const progressId = `${profile.id}:${dateKey}`;
-        const existingProgress = dailyProgress.find(
-          (progress) => progress.dateKey === dateKey
-        );
+        const existingProgress = dailyProgress.find((progress) => progress.dateKey === dateKey);
         const previousDailyCount = existingProgress?.bankedCount ?? 0;
         const nextDailyCount = previousDailyCount + 1;
         const nextCapsules = [...capsules];
@@ -610,7 +617,12 @@ export const useAppStore = create<AppState>()(
           !existingTriggerKeys.has(`daily:${dateKey}`)
         ) {
           nextCapsules.unshift(
-            buildCapsule(profile.id, `daily:${dateKey}`, `День ${seasonDay}: дневная норма`, 'daily')
+            buildCapsule(
+              profile.id,
+              `daily:${dateKey}`,
+              `День ${seasonDay}: дневная норма`,
+              'daily'
+            )
           );
           existingTriggerKeys.add(`daily:${dateKey}`);
         }
@@ -631,8 +643,7 @@ export const useAppStore = create<AppState>()(
           seasonDay,
           goalPosts,
           bankedCount: nextDailyCount,
-          goalCapsuleAwarded:
-            existingProgress?.goalCapsuleAwarded || nextDailyCount >= goalPosts
+          goalCapsuleAwarded: existingProgress?.goalCapsuleAwarded || nextDailyCount >= goalPosts
         };
 
         set({
@@ -739,7 +750,7 @@ export const useAppStore = create<AppState>()(
               latestRevealItemId:
                 typeof data === 'object' && data && 'item_id' in data
                   ? String(data.item_id)
-                  : capsule.itemId ?? null,
+                  : (capsule.itemId ?? null),
               cloudError: null
             });
           } catch (error) {

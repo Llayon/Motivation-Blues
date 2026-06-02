@@ -39,9 +39,7 @@ async function writePost(page: Page, index: number) {
 
 async function writePostFields(page: Page, title: string, content: string, tags: string) {
   await page.getByTestId('editor-title').fill(title);
-  await page
-    .getByTestId('editor-content')
-    .fill(content);
+  await page.getByTestId('editor-content').fill(content);
   await page.getByTestId('editor-tags').fill(tags);
   await expect(page.getByTestId('autosave-status')).toContainText(/Сохранено в/i);
 }
@@ -66,15 +64,19 @@ async function waitForEditorBufferTags(page: Page, expectedTags: string) {
             });
             const transaction = db.transaction('active-editor-buffers', 'readonly');
             const request = transaction.objectStore('active-editor-buffers').get(profileId);
-            const record = await new Promise<{ tagsInput?: string } | undefined>((resolve, reject) => {
-              request.onerror = () => reject(request.error);
-              request.onsuccess = () => resolve(request.result);
-            });
+            const record = await new Promise<{ tagsInput?: string } | undefined>(
+              (resolve, reject) => {
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+              }
+            );
             db.close();
 
             return record?.tagsInput ?? null;
           } catch {
-            const fallback = window.localStorage.getItem(`motivation-blues-editor-buffer:${profileId}`);
+            const fallback = window.localStorage.getItem(
+              `motivation-blues-editor-buffer:${profileId}`
+            );
             return fallback ? JSON.parse(fallback).tagsInput : null;
           }
         }),
@@ -124,23 +126,25 @@ async function saveCurrentDraft(page: Page) {
 }
 
 async function selectEditorText(page: Page, text: string) {
-  const expectedSelection = await page.getByTestId('editor-content').evaluate(async (element, targetText) => {
-    const textarea = element as HTMLTextAreaElement;
-    await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => resolve());
-    });
-    const start = textarea.value.indexOf(targetText as string);
+  const expectedSelection = await page
+    .getByTestId('editor-content')
+    .evaluate(async (element, targetText) => {
+      const textarea = element as HTMLTextAreaElement;
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => resolve());
+      });
+      const start = textarea.value.indexOf(targetText as string);
 
-    if (start < 0) {
-      throw new Error(`Text not found: ${targetText}`);
-    }
+      if (start < 0) {
+        throw new Error(`Text not found: ${targetText}`);
+      }
 
-    textarea.focus();
-    textarea.setSelectionRange(start, start + String(targetText).length);
-    textarea.dispatchEvent(new Event('select', { bubbles: true }));
-    textarea.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-    return { start, end: start + String(targetText).length };
-  }, text);
+      textarea.focus();
+      textarea.setSelectionRange(start, start + String(targetText).length);
+      textarea.dispatchEvent(new Event('select', { bubbles: true }));
+      textarea.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      return { start, end: start + String(targetText).length };
+    }, text);
   await expect
     .poll(() =>
       page.getByTestId('editor-content').evaluate((element) => {
@@ -290,7 +294,9 @@ test('banked post can be edited without adding progress or capsules', async ({ p
   await updateCurrentBankedPost(page);
 
   await expect(page.getByText('Обновленный пост')).toBeVisible();
-  await expect(page.getByText('Обновленный текст остается тем же banked-постом без новой награды.')).toBeVisible();
+  await expect(
+    page.getByText('Обновленный текст остается тем же banked-постом без новой награды.')
+  ).toBeVisible();
   await expect(
     page.getByTestId('bank-post-card').getByRole('button', { name: '#edited' })
   ).toBeVisible();
@@ -314,12 +320,7 @@ test('bank tag chips and search navigate banked posts', async ({ page }) => {
     'Reflection about writing discipline.',
     'personal'
   );
-  await bankPostFromEditor(
-    page,
-    'Product diary',
-    'Daily product reflection.',
-    'product, personal'
-  );
+  await bankPostFromEditor(page, 'Product diary', 'Daily product reflection.', 'product, personal');
 
   await openBank(page);
   await expectBankCards(page, 3);

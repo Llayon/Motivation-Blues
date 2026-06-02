@@ -87,9 +87,18 @@ export function VoxelShowcase({ item, mode }: VoxelShowcaseProps) {
         <ambientLight intensity={1.6} />
         <directionalLight position={[3, 4, 2]} intensity={2.2} castShadow />
         <pointLight position={[-2, 1.5, 2]} intensity={1.2} color="#c8f7ff" />
-        {mode === 'sealed' || !item ? <CapsuleOrb /> : <VoxelFigure item={item} locked={mode === 'locked'} />}
+        {mode === 'sealed' || !item ? (
+          <CapsuleOrb />
+        ) : (
+          <VoxelFigure item={item} locked={mode === 'locked'} />
+        )}
         <ContactShadows position={[0, -1.2, 0]} opacity={0.22} scale={5} blur={2.4} far={2} />
-        <OrbitControls enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={mode === 'reveal' ? 2.4 : 1} />
+        <OrbitControls
+          enablePan={false}
+          enableZoom={false}
+          autoRotate
+          autoRotateSpeed={mode === 'reveal' ? 2.4 : 1}
+        />
       </Canvas>
     </div>
   );

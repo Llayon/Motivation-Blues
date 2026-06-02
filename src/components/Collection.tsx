@@ -25,7 +25,11 @@ export function Collection() {
       </div>
       <div className="collection-grid">
         {grouped.map(({ item, count }) => (
-          <article key={item.id} className={count > 0 ? 'collection-card owned' : 'collection-card'} data-testid={count > 0 ? 'owned-collectible' : 'locked-collectible'}>
+          <article
+            key={item.id}
+            className={count > 0 ? 'collection-card owned' : 'collection-card'}
+            data-testid={count > 0 ? 'owned-collectible' : 'locked-collectible'}
+          >
             <VoxelShowcase item={item} mode={count > 0 ? 'figure' : 'locked'} />
             <h2>{item.name}</h2>
             <p>{rarityLabels[item.rarity]}</p>

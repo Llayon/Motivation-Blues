@@ -35,10 +35,20 @@ export function ExportPanel() {
           Экспортируются только тексты со статусом «в банке». Черновики остаются внутри приложения.
         </p>
         <div className="hero-actions">
-          <button className="primary-button" type="button" disabled={!exportText} onClick={handleDownload}>
+          <button
+            className="primary-button"
+            type="button"
+            disabled={!exportText}
+            onClick={handleDownload}
+          >
             Скачать .txt
           </button>
-          <button className="ghost-button" type="button" disabled={!exportText} onClick={handleCopy}>
+          <button
+            className="ghost-button"
+            type="button"
+            disabled={!exportText}
+            onClick={handleCopy}
+          >
             Скопировать
           </button>
         </div>
@@ -46,7 +56,9 @@ export function ExportPanel() {
       </article>
       <article className="export-preview glass-panel">
         <h2>Превью</h2>
-        <pre data-testid="export-preview">{exportText || 'Пока нет готовых постов для экспорта.'}</pre>
+        <pre data-testid="export-preview">
+          {exportText || 'Пока нет готовых постов для экспорта.'}
+        </pre>
       </article>
     </section>
   );

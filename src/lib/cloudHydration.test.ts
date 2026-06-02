@@ -13,7 +13,10 @@ describe('cloud hydration timeout', () => {
       const result = withCloudTimeout(new Promise(() => undefined), 1000);
       const assertion = result.catch((error: unknown) => {
         expect(error).toBeInstanceOf(CloudHydrationTimeoutError);
-        expect(error).toHaveProperty('message', expect.stringContaining('Облако не ответило за 1 сек'));
+        expect(error).toHaveProperty(
+          'message',
+          expect.stringContaining('Облако не ответило за 1 сек')
+        );
       });
 
       await vi.advanceTimersByTimeAsync(1000);

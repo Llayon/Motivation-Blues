@@ -1,9 +1,11 @@
 # AGENTS.md
 
 ## Project
+
 Motivation Blues is a static React/Vite app for a 40-day writing challenge: write 100 posts in a private bank, unlock season progress, collect capsules, and keep text safe with local-first autosave.
 
 ## Stack
+
 - Frontend: React 18, TypeScript, Vite.
 - State: Zustand.
 - Backend: Supabase Auth, Postgres, RLS, RPC.
@@ -12,6 +14,7 @@ Motivation Blues is a static React/Vite app for a 40-day writing challenge: writ
 - Deploy: GitHub Pages via GitHub Actions.
 
 ## Must Read Before Changes
+
 1. `Docs/CONTEXT.md`
 2. `Docs/PROJECT_MEMORY.md`
 3. `Docs/ARCHITECTURE.md`
@@ -25,20 +28,29 @@ For large feature work, create or update a feature brief under `Docs/features/` 
 For architecture changes affecting storage, backend, auth, deployment, schema, editor safety, or state flow, add an ADR using `Docs/templates/ADR.md`.
 
 ## Commands
+
 ```bash
 npm test
 npm run test:e2e
 npm run build
+npm run format:check
+npm run lint
+npm run architecture:check
+npm run size:check
 npm run verify
 npm run verify:full
 npm run verify:pages
+npm run quality
+npm run quality:full
 npm run adr:check
+npm run deadcode
 npm run search:assist -- "pattern"
 npm run commitlint:last
 npx supabase migration list
 ```
 
 GitHub Pages build check:
+
 ```powershell
 $env:VITE_BASE_PATH='/Motivation-Blues/'
 npm run build
@@ -46,6 +58,7 @@ Remove-Item Env:\VITE_BASE_PATH
 ```
 
 ## Hard Rules
+
 - Do not commit `.env`, `.env.local`, `supabase/.temp/`, `dist/`, or `node_modules/`.
 - Do not put Supabase service-role keys in frontend code, docs, or GitHub Actions frontend env.
 - Do not edit already-applied Supabase migrations. Add a new migration instead.
@@ -58,8 +71,10 @@ Remove-Item Env:\VITE_BASE_PATH
 - Respect `Docs/BOUNDARIES.md` when changing state, cloud sync, editor safety, or deployment.
 
 ## Definition of Done
+
 - User-visible behavior matches `Docs/PRODUCT_SPEC.md`.
 - `npm test` passes.
+- `npm run quality` passes for normal code/workflow changes.
 - `npm run test:e2e` passes for editor/local-mode/core-loop changes.
 - `npm run build` passes.
 - `npm run verify:pages` passes for deploy, routing, base-path, or magic-link changes.
@@ -73,13 +88,19 @@ Remove-Item Env:\VITE_BASE_PATH
 - Use `Docs/COMMIT_CHECKLIST.md` before committing.
 
 ## Code Style
+
 - TypeScript strict mode is active.
+- Prettier owns formatting. Run `npm run format` to normalize style.
+- ESLint owns static code quality. Do not silence rules without a concrete reason.
+- `npm run architecture:check` enforces key boundaries from `Docs/BOUNDARIES.md`.
+- `npm run size:check` is advisory until oversized legacy files are refactored.
 - Prefer small domain helpers in `src/lib/`.
 - Keep UI components direct and readable.
 - Keep product constants explicit and documented.
 - Use static phrase banks, not LLM calls, for classic feedback.
 
 ## Deployment
+
 - Repository: `https://github.com/Llayon/Motivation-Blues`
 - Production URL: `https://llayon.github.io/Motivation-Blues/`
 - Workflow: `.github/workflows/deploy-pages.yml`

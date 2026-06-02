@@ -1,18 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import {
-  applyTelegramFormat,
-  isSafeTelegramUrl,
-  parseTelegramMarkup
-} from './telegramFormatting';
+import { applyTelegramFormat, isSafeTelegramUrl, parseTelegramMarkup } from './telegramFormatting';
 
 describe('telegram formatting', () => {
   it('wraps selected text in bold markers', () => {
     expect(
-      applyTelegramFormat({
-        value: 'Пиши смело',
-        selectionStart: 5,
-        selectionEnd: 10
-      }, 'bold')
+      applyTelegramFormat(
+        {
+          value: 'Пиши смело',
+          selectionStart: 5,
+          selectionEnd: 10
+        },
+        'bold'
+      )
     ).toEqual({
       value: 'Пиши *смело*',
       selectionStart: 6,
@@ -22,11 +21,14 @@ describe('telegram formatting', () => {
 
   it('wraps selected text in italic markers', () => {
     expect(
-      applyTelegramFormat({
-        value: 'Пиши смело',
-        selectionStart: 5,
-        selectionEnd: 10
-      }, 'italic')
+      applyTelegramFormat(
+        {
+          value: 'Пиши смело',
+          selectionStart: 5,
+          selectionEnd: 10
+        },
+        'italic'
+      )
     ).toEqual({
       value: 'Пиши _смело_',
       selectionStart: 6,
@@ -36,11 +38,14 @@ describe('telegram formatting', () => {
 
   it('creates link markup from selected text and selects the URL', () => {
     expect(
-      applyTelegramFormat({
-        value: 'Пушкин',
-        selectionStart: 0,
-        selectionEnd: 6
-      }, 'link')
+      applyTelegramFormat(
+        {
+          value: 'Пушкин',
+          selectionStart: 0,
+          selectionEnd: 6
+        },
+        'link'
+      )
     ).toEqual({
       value: '[Пушкин](https://example.com)',
       selectionStart: 9,

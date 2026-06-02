@@ -1,6 +1,7 @@
 # Test Matrix
 
 ## Unit
+
 - Season daily goal schedule.
 - Total planned posts after 40 days.
 - Milestone crossing.
@@ -11,8 +12,10 @@
 - Cloud hydration timeout helper.
 - LLM workflow scripts: `npm run verify`, `npm run verify:pages`, and `npm run docs:changed-check`.
 - ADR enforcement script: `npm run adr:check`.
+- Code quality scripts: `npm run format:check`, `npm run lint`, `npm run architecture:check`, `npm run size:check`, and `npm run deadcode`.
 
 ## Manual Smoke
+
 - Open production URL.
 - Request magic link.
 - Return to app after auth.
@@ -33,6 +36,7 @@
 - For workflow/doc changes, review `Docs/CODEMAP.md`, `Docs/TRACEABILITY.md`, `Docs/BOUNDARIES.md`, and `Docs/COMMIT_CHECKLIST.md` for consistency.
 
 ## Playwright E2E
+
 - Local mode starts without Supabase session.
 - IndexedDB autosave restores active editor buffer after reload.
 - Banked posts increment visible progress.
@@ -48,6 +52,7 @@
 - Cloud hydration failure falls back to the start screen instead of blocking the app.
 
 ## Supabase
+
 - `npx supabase migration list` shows local/remote parity.
 - User can read own rows.
 - User cannot access another user's rows.
@@ -56,6 +61,7 @@
 - Startup remains usable if Supabase Auth/REST is unavailable or slow.
 
 ## LLM Workflow
+
 - `Docs/CODEMAP.md` points to current implementation files.
 - `Docs/TRACEABILITY.md` links requirements to tests.
 - `Docs/BOUNDARIES.md` matches architectural rules in `AGENTS.md`.
@@ -64,9 +70,19 @@
 - `Docs/HANDOFF.md` is updated after substantial workflow, architecture, or product changes.
 - `npm run docs:changed-check` emits a warning, not a failure, when code changes have no docs changes.
 - `npm run adr:check` fails when architecture-sensitive files change without an ADR update.
+- `npm run quality` runs the normal local quality gate.
+- `npm run quality:full` adds E2E, Pages build, and dead-code reporting.
+- `npm run size:check` is advisory unless `SIZE_BUDGET_STRICT=1` is set.
+- `npm run deadcode` uses Knip in report-only mode.
 
 ## Deployment
+
 - `npm test`.
+- `npm run format:check`.
+- `npm run lint`.
+- `npm run architecture:check`.
+- `npm run size:check`.
+- `npm run quality`.
 - `npm run verify`.
 - `npm run test:e2e`.
 - `npm run build`.

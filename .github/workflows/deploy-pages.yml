@@ -54,6 +54,18 @@ jobs:
           ADR_CHECK_BASE: ${{ github.event.before }}
           ADR_CHECK_HEAD: ${{ github.sha }}
 
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Architecture boundaries
+        run: npm run architecture:check
+
+      - name: Size budget
+        run: npm run size:check
+
       - name: Unit tests
         run: npm test
 

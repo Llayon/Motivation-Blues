@@ -1,5 +1,4 @@
-import { FormEvent, useState } from 'react';
-import { isSupabaseConfigured, supabase } from '../services/supabase';
+import { useState, type FormEvent } from 'react';
 import { useAppStore } from '../store/useAppStore';
 
 export function AuthGate() {
@@ -7,27 +6,24 @@ export function AuthGate() {
   const [status, setStatus] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [isRetryingCloud, setIsRetryingCloud] = useState(false);
+  const cloudConfigured = useAppStore((state) => state.cloudConfigured);
   const startSession = useAppStore((state) => state.startSession);
+  const requestMagicLink = useAppStore((state) => state.requestMagicLink);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
   const cloudError = useAppStore((state) => state.cloudError);
 
   async function handleMagicLink(event?: FormEvent) {
     event?.preventDefault();
-    if (!supabase || !email.trim()) {
+    if (!cloudConfigured || !email.trim()) {
       setStatus('Введите email, чтобы начать марафон.');
       return;
     }
 
     setIsSending(true);
     const redirectUrl = new URL(import.meta.env.BASE_URL, window.location.origin).toString();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: redirectUrl
-      }
-    });
+    const errorMessage = await requestMagicLink(email.trim(), redirectUrl);
     setIsSending(false);
-    setStatus(error ? error.message : 'Magic link отправлен. Открой письмо и вернись в приложение.');
+    setStatus(errorMessage ?? 'Magic link отправлен. Открой письмо и вернись в приложение.');
   }
 
   function handleStartLocal(event: FormEvent<HTMLFormElement>) {
@@ -43,7 +39,7 @@ export function AuthGate() {
   async function handleReturnToTexts() {
     setStatus(null);
 
-    if (isSupabaseConfigured) {
+    if (cloudConfigured) {
       await hydrateFromSupabase({ blockUi: false });
       if (useAppStore.getState().profile) {
         return;
@@ -74,14 +70,10 @@ export function AuthGate() {
         <p className="eyebrow">Челлендж + эмоция</p>
         <h1>100 постов за 40 дней. Пиши для себя.</h1>
         <h2>
-          Дзен-редактор, который лечит писательский блок. Пиши «в стол»,
-          закрывай дневную норму и собирай уникальные награды за каждую победу
-          над чистым листом.
+          Дзен-редактор, который лечит писательский блок. Пиши «в стол», закрывай дневную норму и
+          собирай уникальные награды за каждую победу над чистым листом.
         </h2>
-        <form
-          onSubmit={isSupabaseConfigured ? handleMagicLink : handleStartLocal}
-          className="auth-form"
-        >
+        <form onSubmit={cloudConfigured ? handleMagicLink : handleStartLocal} className="auth-form">
           <label>
             Твой лучший email
             <input
@@ -105,7 +97,7 @@ export function AuthGate() {
           >
             Вернуться к текстам
           </button>
-          {cloudError && isSupabaseConfigured ? (
+          {cloudError && cloudConfigured ? (
             <button
               type="button"
               className="ghost-button"
@@ -117,7 +109,7 @@ export function AuthGate() {
             </button>
           ) : null}
         </div>
-        {!isSupabaseConfigured ? (
+        {!cloudConfigured ? (
           <p className="muted">Облачный вход не настроен, тексты будут храниться локально.</p>
         ) : null}
         {cloudError ? <p className="status-line negative">{cloudError}</p> : null}

@@ -124,9 +124,8 @@ export async function loadEditorBuffer(userId: string): Promise<EditorBufferReco
   await (writeChains.get(userId) ?? Promise.resolve()).catch(() => undefined);
 
   try {
-    const record = await runStoreOperation<EditorBufferRecord | undefined>(
-      'readonly',
-      (store) => store.get(userId)
+    const record = await runStoreOperation<EditorBufferRecord | undefined>('readonly', (store) =>
+      store.get(userId)
     );
     return record ?? loadFallback(userId);
   } catch {

@@ -6,7 +6,7 @@ export interface FormattingSelection {
   selectionEnd: number;
 }
 
-export interface FormattingResult extends FormattingSelection {}
+export type FormattingResult = FormattingSelection;
 
 export type TelegramMarkupToken =
   | { type: 'text'; text: string }

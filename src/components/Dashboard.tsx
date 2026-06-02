@@ -14,9 +14,10 @@ function getCapsuleLabel(count: number) {
 
   const lastDigit = count % 10;
   const lastTwoDigits = count % 100;
-  const noun = lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)
-    ? 'капсулы'
-    : 'капсул';
+  const noun =
+    lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)
+      ? 'капсулы'
+      : 'капсул';
 
   return `Доступно ${count} ${noun} ✨`;
 }
@@ -49,7 +50,9 @@ export function Dashboard() {
       <article className="hero-panel glass-panel">
         <p className="eyebrow">День {seasonDay} из 40</p>
         <h1>{profile.totalBankedPosts}/100 постов в банке</h1>
-        <p className="mode-pill">{mode === 'cloud' ? 'Supabase cloud sync' : 'Local browser mode'}</p>
+        <p className="mode-pill">
+          {mode === 'cloud' ? 'Supabase cloud sync' : 'Local browser mode'}
+        </p>
         <div className="large-progress">
           <span style={{ width: `${getProgressPercent(profile.totalBankedPosts)}%` }} />
         </div>
@@ -61,7 +64,11 @@ export function Dashboard() {
             Открыть редактор
           </button>
           {sealedCapsules > 0 ? (
-            <button className="ghost-button" onClick={() => setActiveView('capsules')} type="button">
+            <button
+              className="ghost-button"
+              onClick={() => setActiveView('capsules')}
+              type="button"
+            >
               {capsuleLabel}
             </button>
           ) : null}
@@ -93,8 +100,8 @@ export function Dashboard() {
         <p className="eyebrow">Правило фокуса</p>
         <h2>Текст — на первом месте.</h2>
         <p>
-          Мы не отвлекаем тебя всплывающими окнами. Закрой дневную норму, и твоя
-          награда тихо добавится в инвентарь. Открой её, когда будешь готов.
+          Мы не отвлекаем тебя всплывающими окнами. Закрой дневную норму, и твоя награда тихо
+          добавится в инвентарь. Открой её, когда будешь готов.
         </p>
       </article>
     </section>

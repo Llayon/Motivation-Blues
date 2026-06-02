@@ -61,10 +61,7 @@ function getChangedFiles() {
       .join('\n');
 
     if (output.trim()) {
-      return output
-        .split(/\r?\n/)
-        .map(normalizePath)
-        .filter(Boolean);
+      return output.split(/\r?\n/).map(normalizePath).filter(Boolean);
     }
   }
 
@@ -82,18 +79,14 @@ function getChangedFiles() {
     return [];
   }
 
-  return diff.stdout
-    .split(/\r?\n/)
-    .map(normalizePath)
-    .filter(Boolean);
+  return diff.stdout.split(/\r?\n/).map(normalizePath).filter(Boolean);
 }
 
 const changedFiles = getChangedFiles();
 const adrChanged = changedFiles.some((file) => file.startsWith(ADR_PREFIX));
 const architectureSensitiveChanges = changedFiles.filter(
   (file) =>
-    hasPrefix(file, ARCHITECTURE_SENSITIVE_PREFIXES) ||
-    ARCHITECTURE_SENSITIVE_DOCS.includes(file)
+    hasPrefix(file, ARCHITECTURE_SENSITIVE_PREFIXES) || ARCHITECTURE_SENSITIVE_DOCS.includes(file)
 );
 
 if (architectureSensitiveChanges.length > 0 && !adrChanged) {

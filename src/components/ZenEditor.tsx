@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type EditorBufferRecord,
   clearEditorBuffer,
@@ -14,7 +14,10 @@ function tagsToInput(tags: string[]) {
 }
 
 function inputToTags(value: string) {
-  return value.split(',').map((tag) => tag.trim()).filter(Boolean);
+  return value
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 }
 
 function formatEditorTime(value: string) {
@@ -65,9 +68,9 @@ function getDraftShelfStatus(updatedAt: string) {
 function hasBufferContent(record: EditorBufferRecord | null | undefined) {
   return Boolean(
     record &&
-      (record.title.trim().length > 0 ||
-        record.content.length > 0 ||
-        record.tagsInput.trim().length > 0)
+    (record.title.trim().length > 0 ||
+      record.content.length > 0 ||
+      record.tagsInput.trim().length > 0)
   );
 }
 
@@ -81,7 +84,10 @@ export function ZenEditor() {
   const clearEditorTarget = useAppStore((state) => state.clearEditorTarget);
   const setActiveView = useAppStore((state) => state.setActiveView);
   const drafts = useMemo(
-    () => posts.filter((post) => post.status === 'draft').sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+    () =>
+      posts
+        .filter((post) => post.status === 'draft')
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
     [posts]
   );
 
@@ -105,6 +111,48 @@ export function ZenEditor() {
   const manuscriptStatus = getManuscriptStatus(wordCount);
   const canSave = charCount > 0;
   const hasTextareaSelection = selection.end > selection.start;
+
+  const isEditorDirty = useCallback(() => {
+    const hasAnyInput = title.trim().length > 0 || content.length > 0 || tags.trim().length > 0;
+
+    if (!hasAnyInput) {
+      return false;
+    }
+
+    if (!editingPost) {
+      return true;
+    }
+
+    return (
+      title !== editingPost.title ||
+      content !== editingPost.content ||
+      tags !== tagsToInput(editingPost.tags)
+    );
+  }, [content, editingPost, tags, title]);
+
+  const getPostOpenDecision = useCallback(
+    async (
+      targetPost: Post
+    ): Promise<{ kind: 'open'; buffer?: EditorBufferRecord } | { kind: 'conflict' }> => {
+      const record = profile ? await loadEditorBuffer(profile.id) : null;
+      const hasDirtyVisibleBuffer = editingId !== targetPost.id && isEditorDirty();
+      const hasUnrelatedStoredBuffer =
+        record &&
+        record.postId !== targetPost.id &&
+        hasBufferContent(record) &&
+        (!editingId || record.postId !== editingId || isEditorDirty());
+
+      if (hasDirtyVisibleBuffer || hasUnrelatedStoredBuffer) {
+        return { kind: 'conflict' };
+      }
+
+      return {
+        kind: 'open',
+        buffer: record?.postId === targetPost.id ? record : undefined
+      };
+    },
+    [editingId, isEditorDirty, profile]
+  );
 
   useEffect(() => {
     if (!profile) {
@@ -171,15 +219,14 @@ export function ZenEditor() {
     return () => {
       isCancelled = true;
     };
-  }, [clearEditorTarget, editorTargetPostId, posts, profile]);
+  }, [clearEditorTarget, editorTargetPostId, getPostOpenDecision, posts, profile]);
 
   useEffect(() => {
     if (!profile || !hasLoadedBufferRef.current) {
       return;
     }
 
-    const hasAnyInput =
-      title.trim().length > 0 || content.length > 0 || tags.trim().length > 0;
+    const hasAnyInput = title.trim().length > 0 || content.length > 0 || tags.trim().length > 0;
 
     if (!hasAnyInput) {
       void clearEditorBuffer(profile.id).catch(() => {
@@ -228,11 +275,14 @@ export function ZenEditor() {
       return;
     }
 
-    const result = applyTelegramFormat({
-      value: content,
-      selectionStart: textarea.selectionStart,
-      selectionEnd: textarea.selectionEnd
-    }, format);
+    const result = applyTelegramFormat(
+      {
+        value: content,
+        selectionStart: textarea.selectionStart,
+        selectionEnd: textarea.selectionEnd
+      },
+      format
+    );
 
     markUserInput();
     setContent(result.value);
@@ -253,48 +303,9 @@ export function ZenEditor() {
     setContent(buffer?.content ?? post.content);
     setTags(buffer?.tagsInput ?? tagsToInput(post.tags));
     setConflictPost(null);
-    setStatus(post.status === 'banked' ? 'Архив. Нет предела совершенству (Вне фокуса дня).' : null);
-  }
-
-  function isEditorDirty() {
-    const hasAnyInput =
-      title.trim().length > 0 || content.length > 0 || tags.trim().length > 0;
-
-    if (!hasAnyInput) {
-      return false;
-    }
-
-    if (!editingPost) {
-      return true;
-    }
-
-    return (
-      title !== editingPost.title ||
-      content !== editingPost.content ||
-      tags !== tagsToInput(editingPost.tags)
+    setStatus(
+      post.status === 'banked' ? 'Архив. Нет предела совершенству (Вне фокуса дня).' : null
     );
-  }
-
-  async function getPostOpenDecision(targetPost: Post): Promise<
-    | { kind: 'open'; buffer?: EditorBufferRecord }
-    | { kind: 'conflict' }
-  > {
-    const record = profile ? await loadEditorBuffer(profile.id) : null;
-    const hasDirtyVisibleBuffer = editingId !== targetPost.id && isEditorDirty();
-    const hasUnrelatedStoredBuffer =
-      record &&
-      record.postId !== targetPost.id &&
-      hasBufferContent(record) &&
-      (!editingId || record.postId !== editingId || isEditorDirty());
-
-    if (hasDirtyVisibleBuffer || hasUnrelatedStoredBuffer) {
-      return { kind: 'conflict' };
-    }
-
-    return {
-      kind: 'open',
-      buffer: record?.postId === targetPost.id ? record : undefined
-    };
   }
 
   async function openPostWithBufferGuard(post: Post) {
@@ -423,7 +434,9 @@ export function ZenEditor() {
                 onClick={() => void openPostWithBufferGuard(draft)}
               >
                 <strong>{draft.title || 'Без названия'}</strong>
-                <span>{getDraftShelfStatus(draft.updatedAt)} · {draft.charCount} знаков</span>
+                <span>
+                  {getDraftShelfStatus(draft.updatedAt)} · {draft.charCount} знаков
+                </span>
               </button>
             ))
           )}
@@ -436,8 +449,8 @@ export function ZenEditor() {
             <p className="eyebrow">Аварийный буфер</p>
             <h2>В столе уже лежит незавершенный текст</h2>
             <p>
-              Можно продолжить текущую рукопись или открыть выбранный текст
-              «{conflictPost.title || 'Без названия'}».
+              Можно продолжить текущую рукопись или открыть выбранный текст «
+              {conflictPost.title || 'Без названия'}».
             </p>
             <div className="hero-actions">
               <button className="ghost-button" type="button" onClick={keepBufferFromConflict}>
@@ -528,25 +541,50 @@ export function ZenEditor() {
             <span>{charCount} знаков</span>
             <span>{wordCount} слов</span>
             <span>{manuscriptStatus}</span>
-            <span className="editor-autosave" data-testid="autosave-status">{bufferStatus}</span>
+            <span className="editor-autosave" data-testid="autosave-status">
+              {bufferStatus}
+            </span>
             {status ? <span className="positive">{status}</span> : null}
           </div>
           <div className="editor-actions">
             {isEditingBankedPost ? (
               <>
-                <button className="ghost-button" type="button" disabled={isSaving} onClick={() => void resetEditor()}>
+                <button
+                  className="ghost-button"
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() => void resetEditor()}
+                >
                   Отменить
                 </button>
-                <button className="primary-button" data-testid="update-banked-post" type="button" disabled={!canSave || isSaving} onClick={handleUpdateBankedPost}>
+                <button
+                  className="primary-button"
+                  data-testid="update-banked-post"
+                  type="button"
+                  disabled={!canSave || isSaving}
+                  onClick={handleUpdateBankedPost}
+                >
                   {isSaving ? 'Обновляю...' : 'Обновить в архиве'}
                 </button>
               </>
             ) : (
               <>
-                <button className="ghost-button" data-testid="save-draft" type="button" disabled={!canSave || isSaving} onClick={handleSaveDraft}>
+                <button
+                  className="ghost-button"
+                  data-testid="save-draft"
+                  type="button"
+                  disabled={!canSave || isSaving}
+                  onClick={handleSaveDraft}
+                >
                   {isSaving ? 'Убираю...' : 'Убрать в стол'}
                 </button>
-                <button className="primary-button" data-testid="bank-post" type="button" disabled={!canSave || isSaving} onClick={handleBankPost}>
+                <button
+                  className="primary-button"
+                  data-testid="bank-post"
+                  type="button"
+                  disabled={!canSave || isSaving}
+                  onClick={handleBankPost}
+                >
                   {isSaving ? 'Отправляю...' : 'Отправить в банк'}
                 </button>
               </>

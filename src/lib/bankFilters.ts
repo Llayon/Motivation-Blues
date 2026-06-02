@@ -19,11 +19,7 @@ export function getTagCounts(posts: Post[]): TagCount[] {
     .sort((left, right) => right.count - left.count || left.tag.localeCompare(right.tag));
 }
 
-export function filterBankedPosts(
-  posts: Post[],
-  query: string,
-  selectedTags: string[]
-): Post[] {
+export function filterBankedPosts(posts: Post[], query: string, selectedTags: string[]): Post[] {
   const normalizedQuery = query.trim().toLowerCase();
   const normalizedTags = selectedTags.map((tag) => tag.toLowerCase());
 
@@ -37,10 +33,8 @@ export function filterBankedPosts(
       return true;
     }
 
-    return [
-      post.title,
-      post.content,
-      post.tags.join(' ')
-    ].some((value) => value.toLowerCase().includes(normalizedQuery));
+    return [post.title, post.content, post.tags.join(' ')].some((value) =>
+      value.toLowerCase().includes(normalizedQuery)
+    );
   });
 }
