@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { isTelegramEnvironment } from '../lib/telegramApp';
 
@@ -16,9 +16,16 @@ export function AuthGate() {
   const isHydrating = useAppStore((state) => state.isHydrating);
 
   const isTelegram = isTelegramEnvironment();
+  const hasAttemptedTgAuth = useRef(false);
 
   useEffect(() => {
-    if (isTelegram && cloudConfigured && window.Telegram?.WebApp?.initData) {
+    if (
+      isTelegram &&
+      cloudConfigured &&
+      window.Telegram?.WebApp?.initData &&
+      !hasAttemptedTgAuth.current
+    ) {
+      hasAttemptedTgAuth.current = true;
       // Automatically attempt login when in Telegram
       startTelegramSession(window.Telegram.WebApp.initData);
     }
@@ -86,7 +93,7 @@ export function AuthGate() {
           собирай уникальные награды за каждую победу над чистым листом.
         </h2>
         
-        {isTelegram ? (
+        {isTelegram && !cloudError ? (
            <div className="telegram-auth-status">
               <p>{isHydrating ? 'Связываемся с Telegram...' : 'Вход через Telegram...'}</p>
            </div>
