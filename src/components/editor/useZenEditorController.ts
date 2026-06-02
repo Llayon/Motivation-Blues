@@ -39,11 +39,11 @@ export function useZenEditorController() {
   const [tags, setTags] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isBufferReady, setIsBufferReady] = useState(false);
   const [bufferStatus, setBufferStatus] = useState('Автосейв готовит буфер...');
   const [conflictPost, setConflictPost] = useState<Post | null>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const hasLoadedBufferRef = useRef(false);
   const userTypedBeforeRestoreRef = useRef(false);
 
   const editingPost = editingId ? posts.find((post) => post.id === editingId) : undefined;
@@ -102,7 +102,7 @@ export function useZenEditorController() {
     }
 
     let isCancelled = false;
-    hasLoadedBufferRef.current = false;
+    setIsBufferReady(false);
     userTypedBeforeRestoreRef.current = false;
     setBufferStatus('Проверяю аварийный буфер...');
 
@@ -111,8 +111,6 @@ export function useZenEditorController() {
         return;
       }
 
-      hasLoadedBufferRef.current = true;
-
       if (record && !userTypedBeforeRestoreRef.current) {
         setEditingId(record.postId);
         setTitle(record.title);
@@ -120,10 +118,12 @@ export function useZenEditorController() {
         setTags(record.tagsInput);
         setStatus(`Рукопись вернулась из стола: ${formatEditorTime(record.updatedAt)}.`);
         setBufferStatus('Автосейв готов.');
+        setIsBufferReady(true);
         return;
       }
 
       setBufferStatus('Автосейв готов.');
+      setIsBufferReady(true);
     });
 
     return () => {
@@ -175,7 +175,7 @@ export function useZenEditorController() {
   }, [clearEditorTarget, editorTargetPostId, getPostOpenDecision, posts, profile]);
 
   useEffect(() => {
-    if (!profile || !hasLoadedBufferRef.current) {
+    if (!profile || !isBufferReady) {
       return;
     }
 
@@ -204,7 +204,7 @@ export function useZenEditorController() {
       .catch(() => {
         setBufferStatus('Не удалось сохранить в стол.');
       });
-  }, [content, editingId, profile, tags, title]);
+  }, [content, editingId, isBufferReady, profile, tags, title]);
 
   function markUserInput() {
     userTypedBeforeRestoreRef.current = true;

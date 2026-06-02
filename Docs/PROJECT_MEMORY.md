@@ -84,6 +84,7 @@
 - Added code quality automation with Prettier, ESLint, architecture boundary checks, advisory size budgets, Knip report-only dead-code detection, and aggregate quality scripts.
 - Lazy-loaded 3D reward screens, split oversized editor/store/style files, and cleaned Knip dead-code findings.
 - Updated Vitest to 4.1.8 so full `npm audit` reports 0 vulnerabilities.
+- Fixed an autosave readiness race where very fast typing before IndexedDB restore completion could skip the first local buffer write.
 
 ## Maintenance Rule
 
