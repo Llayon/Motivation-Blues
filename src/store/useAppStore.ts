@@ -47,6 +47,7 @@ interface AppState {
   hydrateFromSupabase: (options?: HydrateFromSupabaseOptions) => Promise<void>;
   requestMagicLink: (email: string, redirectUrl: string) => Promise<string | null>;
   startSession: (email: string) => void;
+  startTelegramSession: (initData: string) => Promise<void>;
   signOut: () => Promise<void>;
   saveDraft: (input: PostInput) => Promise<string | null>;
   bankPost: (input: PostInput) => Promise<void>;
@@ -237,6 +238,35 @@ export const useAppStore = create<AppState>()(
           cloudError: null,
           isHydrating: false
         });
+      },
+      startTelegramSession: async (initData) => {
+        if (!supabase) return;
+        set({ isHydrating: true, cloudError: null });
+
+        try {
+          // 1. Ask Edge Function to validate initData and give us credentials
+          const { data, error: fnError } = await supabase.functions.invoke('telegram-auth', {
+            body: { initData }
+          });
+
+          if (fnError || !data || data.error) {
+            throw new Error(data?.error || fnError?.message || 'Failed to authenticate via Telegram');
+          }
+
+          // 2. Log in with the provided credentials
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: data.email,
+            password: data.password
+          });
+
+          if (signInError) throw signInError;
+
+          // 3. Hydrate state
+          await get().hydrateFromSupabase();
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Telegram auth failed.';
+          set({ isHydrating: false, cloudError: message });
+        }
       },
       signOut: async () => {
         if (supabase) {
