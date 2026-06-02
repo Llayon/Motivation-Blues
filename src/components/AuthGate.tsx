@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useAppStore } from '../store/useAppStore';
+import { isTelegramEnvironment } from '../lib/telegramApp';
 
 export function AuthGate() {
   const [email, setEmail] = useState('');
@@ -11,6 +12,17 @@ export function AuthGate() {
   const requestMagicLink = useAppStore((state) => state.requestMagicLink);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
   const cloudError = useAppStore((state) => state.cloudError);
+  const startTelegramSession = useAppStore((state) => state.startTelegramSession);
+  const isHydrating = useAppStore((state) => state.isHydrating);
+
+  const isTelegram = isTelegramEnvironment();
+
+  useEffect(() => {
+    if (isTelegram && cloudConfigured && window.Telegram?.WebApp?.initData) {
+      // Automatically attempt login when in Telegram
+      startTelegramSession(window.Telegram.WebApp.initData);
+    }
+  }, [isTelegram, cloudConfigured, startTelegramSession]);
 
   async function handleMagicLink(event?: FormEvent) {
     event?.preventDefault();
@@ -73,21 +85,29 @@ export function AuthGate() {
           Дзен-редактор, который лечит писательский блок. Пиши «в стол», закрывай дневную норму и
           собирай уникальные награды за каждую победу над чистым листом.
         </h2>
-        <form onSubmit={cloudConfigured ? handleMagicLink : handleStartLocal} className="auth-form">
-          <label>
-            Твой лучший email
-            <input
-              data-testid="auth-email"
-              type="email"
-              placeholder="Твой лучший email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </label>
-          <button type="submit" className="primary-button" disabled={isSending}>
-            {isSending ? 'Отправляю...' : 'Начать марафон'}
-          </button>
-        </form>
+        
+        {isTelegram ? (
+           <div className="telegram-auth-status">
+              <p>{isHydrating ? 'Связываемся с Telegram...' : 'Вход через Telegram...'}</p>
+           </div>
+        ) : (
+          <form onSubmit={cloudConfigured ? handleMagicLink : handleStartLocal} className="auth-form">
+            <label>
+              Твой лучший email
+              <input
+                data-testid="auth-email"
+                type="email"
+                placeholder="Твой лучший email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </label>
+            <button type="submit" className="primary-button" disabled={isSending}>
+              {isSending ? 'Отправляю...' : 'Начать марафон'}
+            </button>
+          </form>
+        )}
+
         <div className="auth-secondary">
           <button
             type="button"
