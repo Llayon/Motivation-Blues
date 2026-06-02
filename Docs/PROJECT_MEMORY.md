@@ -11,6 +11,7 @@
 ## Implemented Features
 
 - Supabase Auth magic-link flow.
+- Telegram Mini App (TMA) integration (SDK initialization, expanded viewport) so the app runs natively inside Telegram.
 - Cloud-backed posts, progress, capsules, and inventory.
 - Local fallback mode for browser-only sessions.
 - 40-day season with 100 banked posts.
@@ -85,6 +86,7 @@
 - Lazy-loaded 3D reward screens, split oversized editor/store/style files, and cleaned Knip dead-code findings.
 - Updated Vitest to 4.1.8 so full `npm audit` reports 0 vulnerabilities.
 - Fixed an autosave readiness race where very fast typing before IndexedDB restore completion could skip the first local buffer write.
+- Integrated the Telegram Web App SDK as an MVP to adapt the client for Telegram Mini Apps (TMA).
 
 ## Maintenance Rule
 
