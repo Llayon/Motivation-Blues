@@ -1,13 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.47.10"
-import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-function validateTelegramData(initData: string, botToken: string): any {
+async function validateTelegramData(initData: string, botToken: string): Promise<any> {
   const urlParams = new URLSearchParams(initData);
   const hash = urlParams.get('hash');
   urlParams.delete('hash');
@@ -17,10 +16,26 @@ function validateTelegramData(initData: string, botToken: string): any {
     .sort()
     .join('\n');
 
-  const secretKey = hmac("sha256", "WebAppData", botToken, "utf8", "hex");
-  const calculatedHash = hmac("sha256", secretKey, dataCheckString, "hex", "hex");
+  const encoder = new TextEncoder();
+  const secretKey = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode("WebAppData"),
+    { name: "HMAC", hash: "SHA-256" },
+    true,
+    ["sign"]
+  );
+  const secretKeyBuffer = await crypto.subtle.sign("HMAC", secretKey, encoder.encode(botToken));
+  const signingKey = await crypto.subtle.importKey(
+    "raw",
+    secretKeyBuffer,
+    { name: "HMAC", hash: "SHA-256" },
+    true,
+    ["sign"]
+  );
+  const signatureBuffer = await crypto.subtle.sign("HMAC", signingKey, encoder.encode(dataCheckString));
+  const signatureHex = Array.from(new Uint8Array(signatureBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 
-  if (calculatedHash !== hash) {
+  if (signatureHex !== hash) {
     throw new Error('Invalid Telegram signature');
   }
 
@@ -46,11 +61,15 @@ serve(async (req) => {
     const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
     
     if (!botToken) {
-      throw new Error('TELEGRAM_BOT_TOKEN is not configured on the server')
+      console.error('TELEGRAM_BOT_TOKEN is not configured on the server');
+      return new Response(
+        JSON.stringify({ error: "Internal Server Error" }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      )
     }
 
     // 1. Validate the Telegram data
-    const tgUser = validateTelegramData(initData, botToken)
+    const tgUser = await validateTelegramData(initData, botToken)
 
     // 2. Setup Supabase Admin Client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
@@ -59,26 +78,37 @@ serve(async (req) => {
 
     // 3. Generate deterministic credentials for this Telegram user
     const email = `tma_${tgUser.id}@motivation-blues.local`
+    
     // Generate a secure, deterministic password so the client can log in
-    const password = hmac("sha256", botToken, tgUser.id.toString(), "utf8", "hex").toString()
+    const encoder = new TextEncoder();
+    const pwKey = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(botToken),
+      { name: "HMAC", hash: "SHA-256" },
+      true,
+      ["sign"]
+    );
+    const pwBuffer = await crypto.subtle.sign("HMAC", pwKey, encoder.encode(tgUser.id.toString()));
+    const password = Array.from(new Uint8Array(pwBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
 
     // 4. Ensure the user exists in Supabase Auth
-    const { data: { users }, error: searchError } = await supabase.auth.admin.listUsers()
-    
-    let userExists = users.some((u: any) => u.email === email);
+    const { error: createError } = await supabase.auth.admin.createUser({
+      email: email,
+      password: password,
+      email_confirm: true,
+      user_metadata: {
+        telegram_id: tgUser.id,
+        first_name: tgUser.first_name,
+        username: tgUser.username
+      }
+    });
 
-    if (!userExists) {
-      const { error: createError } = await supabase.auth.admin.createUser({
-        email: email,
-        password: password,
-        email_confirm: true,
-        user_metadata: {
-          telegram_id: tgUser.id,
-          first_name: tgUser.first_name,
-          username: tgUser.username
-        }
-      })
-      if (createError) throw createError
+    if (createError) {
+      if (createError.status === 422 || createError.message.includes('already registered')) {
+        // User already exists, which is fine.
+      } else {
+        throw createError;
+      }
     }
 
     // 5. Return credentials to the client
