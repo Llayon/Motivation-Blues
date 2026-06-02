@@ -152,6 +152,7 @@ export const useAppStore = create<AppState>()(
           return;
         }
 
+        // Only block the UI if requested AND we're not already hydrating
         if (blockUi) {
           set({ isHydrating: true, cloudError: null });
         } else {
@@ -161,6 +162,10 @@ export const useAppStore = create<AppState>()(
         try {
           const snapshot = await withCloudTimeout(loadCloudHydrationSnapshot(), timeoutMs);
 
+          // If a newer request has started, this one's results are stale.
+          // However, we MUST ensure isHydrating becomes false if no other
+          // blocking request is active. To simplify, we only let the LATEST
+          // request decide the final state of isHydrating.
           if (requestId !== latestHydrationRequestId) {
             return;
           }
@@ -194,6 +199,9 @@ export const useAppStore = create<AppState>()(
             cloudError: null
           });
         } catch (error) {
+          // Even if we're not the latest request, if we hit a timeout or error,
+          // we should consider if we need to unblock the UI.
+          // But the cleanest way is still to let the latest one win.
           if (requestId !== latestHydrationRequestId) {
             return;
           }
@@ -245,9 +253,12 @@ export const useAppStore = create<AppState>()(
 
         try {
           // 1. Ask Edge Function to validate initData and give us credentials
-          const { data, error: fnError } = await supabase.functions.invoke('telegram-auth', {
-            body: { initData }
-          });
+          // Use the cloud timeout for this call as well
+          const { data, error: fnError } = await withCloudTimeout(
+            supabase.functions.invoke('telegram-auth', {
+              body: { initData }
+            })
+          );
 
           if (fnError || !data || data.error) {
             throw new Error(
@@ -256,10 +267,12 @@ export const useAppStore = create<AppState>()(
           }
 
           // 2. Log in with the provided credentials
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-            email: data.email,
-            password: data.password
-          });
+          const { error: signInError } = await withCloudTimeout(
+            supabase.auth.signInWithPassword({
+              email: data.email,
+              password: data.password
+            })
+          );
 
           if (signInError) throw signInError;
 

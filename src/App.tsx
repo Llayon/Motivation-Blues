@@ -79,8 +79,15 @@ export default function App() {
     void hydrateFromSupabase({ blockUi: true });
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange(() => {
-      void hydrateFromSupabase({ blockUi: false });
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Only hydrate on actual auth state transitions to avoid loops
+      if (
+        event === 'SIGNED_IN' ||
+        event === 'SIGNED_OUT' ||
+        (event === 'INITIAL_SESSION' && session)
+      ) {
+        void hydrateFromSupabase({ blockUi: false });
+      }
     });
 
     return () => subscription.unsubscribe();
