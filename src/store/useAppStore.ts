@@ -250,7 +250,9 @@ export const useAppStore = create<AppState>()(
           });
 
           if (fnError || !data || data.error) {
-            throw new Error(data?.error || fnError?.message || 'Failed to authenticate via Telegram');
+            throw new Error(
+              data?.error || fnError?.message || 'Failed to authenticate via Telegram'
+            );
           }
 
           // 2. Log in with the provided credentials

@@ -16,11 +16,11 @@ declare global {
 
 export function initTelegramApp() {
   const WebApp = window.Telegram?.WebApp;
-  
+
   if (WebApp) {
     // Notify Telegram that the app is fully loaded
     WebApp.ready();
-    
+
     // Expand the mini app to take up the full available height
     WebApp.expand();
   }

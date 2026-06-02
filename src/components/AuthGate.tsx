@@ -92,13 +92,16 @@ export function AuthGate() {
           Дзен-редактор, который лечит писательский блок. Пиши «в стол», закрывай дневную норму и
           собирай уникальные награды за каждую победу над чистым листом.
         </h2>
-        
+
         {isTelegram && !cloudError ? (
-           <div className="telegram-auth-status">
-              <p>{isHydrating ? 'Связываемся с Telegram...' : 'Вход через Telegram...'}</p>
-           </div>
+          <div className="telegram-auth-status">
+            <p>{isHydrating ? 'Связываемся с Telegram...' : 'Вход через Telegram...'}</p>
+          </div>
         ) : (
-          <form onSubmit={cloudConfigured ? handleMagicLink : handleStartLocal} className="auth-form">
+          <form
+            onSubmit={cloudConfigured ? handleMagicLink : handleStartLocal}
+            className="auth-form"
+          >
             <label>
               Твой лучший email
               <input

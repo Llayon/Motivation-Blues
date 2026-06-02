@@ -13,7 +13,8 @@ export default tseslint.config(
       'coverage/**',
       'playwright-report/**',
       'test-results/**',
-      'supabase/.temp/**'
+      'supabase/.temp/**',
+      'supabase/functions/**'
     ]
   },
   js.configs.recommended,
