@@ -28,6 +28,10 @@
 - Dashboard copy is intentionally supportive: daily focus, hidden empty capsule CTA, and no red plan debt unless previous days are missed.
 - Playwright E2E smoke tests for local mode, IndexedDB recovery, banking, capsules, collection, and export.
 - Search Assist docs and `npm run search:assist -- "pattern"` support LLM navigation through the codebase.
+- CODEMAP, TRACEABILITY, BOUNDARIES, REGRESSIONS, HANDOFF, COPY_GUIDE, and COMMIT_CHECKLIST document the LLM-first workflow.
+- `npm run verify`, `npm run verify:full`, and `npm run verify:pages` provide repeatable verification commands.
+- GitHub Actions warns when code changes ship without accompanying docs updates.
+- GitHub Actions fails architecture-sensitive pushes that do not include an ADR update.
 - Conventional Commits are enforced in GitHub Actions on push.
 
 ## Key Decisions
@@ -42,6 +46,10 @@
 - Formatting is stored as raw plain text, not WYSIWYG document state.
 - Telegram-style markup is not Telegram integration; export/copy remain app-local MVP behavior.
 - Unsafe links must render as text, not clickable anchors.
+- Large features should start from `Docs/templates/FEATURE_BRIEF.md` under `Docs/features/`.
+- Architecture changes affecting storage, backend, auth, deploy, schema, editor safety, or state flow require an ADR.
+- CI enforces ADR coverage for architecture-sensitive files through `npm run adr:check`.
+- Requirement/test links should be maintained in `Docs/TRACEABILITY.md`.
 
 ## Known Risks
 - Three/R3F is bundled eagerly and creates a large JS chunk.
@@ -62,6 +70,7 @@
 - Refined dashboard/editor copy toward a literary-club tone and added Telegram-style formatting with safe bank preview.
 - Generated `GEMINI.md` context file, rewrote classic phrases into a structured motivation matrix, and implemented avatar support for Pushkin and Gogol.
 - Added cloud hydration timeout/fallback so the startup loader cannot block access indefinitely when Supabase is slow or unreachable.
+- Hardened LLM-first workflow with code map, traceability, boundary rules, regression log, handoff notes, copy guide, commit checklist, ADR/feature templates, verify scripts, CI docs reminder, and CI ADR enforcement.
 
 ## Maintenance Rule
 Update this file whenever a change materially affects product behavior, architecture, deployment, database schema, or agent workflow.

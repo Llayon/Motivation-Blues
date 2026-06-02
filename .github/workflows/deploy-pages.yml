@@ -40,6 +40,20 @@ jobs:
         if: github.event_name == 'push'
         run: npx commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}" --verbose
 
+      - name: Docs freshness reminder
+        if: github.event_name == 'push'
+        run: npm run docs:changed-check
+        env:
+          DOCS_CHECK_BASE: ${{ github.event.before }}
+          DOCS_CHECK_HEAD: ${{ github.sha }}
+
+      - name: ADR enforcement
+        if: github.event_name == 'push'
+        run: npm run adr:check
+        env:
+          ADR_CHECK_BASE: ${{ github.event.before }}
+          ADR_CHECK_HEAD: ${{ github.sha }}
+
       - name: Unit tests
         run: npm test
 

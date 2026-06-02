@@ -9,6 +9,8 @@
 - Bank tag counts and filter semantics.
 - Telegram-style formatting helpers and safe-link parsing.
 - Cloud hydration timeout helper.
+- LLM workflow scripts: `npm run verify`, `npm run verify:pages`, and `npm run docs:changed-check`.
+- ADR enforcement script: `npm run adr:check`.
 
 ## Manual Smoke
 - Open production URL.
@@ -28,6 +30,7 @@
 - Export banked posts.
 - Confirm export keeps raw Telegram-style markup.
 - Simulate unavailable Supabase and confirm the app leaves the startup loader.
+- For workflow/doc changes, review `Docs/CODEMAP.md`, `Docs/TRACEABILITY.md`, `Docs/BOUNDARIES.md`, and `Docs/COMMIT_CHECKLIST.md` for consistency.
 
 ## Playwright E2E
 - Local mode starts without Supabase session.
@@ -52,12 +55,23 @@
 - `open_capsule` rejects opened or foreign capsules.
 - Startup remains usable if Supabase Auth/REST is unavailable or slow.
 
+## LLM Workflow
+- `Docs/CODEMAP.md` points to current implementation files.
+- `Docs/TRACEABILITY.md` links requirements to tests.
+- `Docs/BOUNDARIES.md` matches architectural rules in `AGENTS.md`.
+- `Docs/REGRESSIONS.md` records fixed bugs and guardrails.
+- `Docs/COPY_GUIDE.md` matches product tone in `Docs/PRODUCT_SPEC.md`.
+- `Docs/HANDOFF.md` is updated after substantial workflow, architecture, or product changes.
+- `npm run docs:changed-check` emits a warning, not a failure, when code changes have no docs changes.
+- `npm run adr:check` fails when architecture-sensitive files change without an ADR update.
+
 ## Deployment
 - `npm test`.
+- `npm run verify`.
 - `npm run test:e2e`.
 - `npm run build`.
+- `npm run verify:pages`.
 - `npm run search:assist -- "bankPost"` returns code/docs locations.
 - `npm run commitlint:last` after committing.
-- GitHub Pages base-path build.
 - GitHub Actions deploy succeeds.
 - Production URL returns HTTP 200.

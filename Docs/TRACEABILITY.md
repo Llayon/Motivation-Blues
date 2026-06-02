@@ -1,0 +1,19 @@
+# Traceability
+
+This matrix connects product requirements to implementation and verification. Update it when a feature, contract, or test changes.
+
+| Requirement | Implementation Files | Automated Tests | Manual QA |
+| --- | --- | --- | --- |
+| Write 100 banked posts across a 40-day season | `src/lib/season.ts`, `src/store/useAppStore.ts`, `src/components/Dashboard.tsx`, `src/components/SeasonPass.tsx` | `src/lib/season.test.ts`, `tests/e2e/local-writing-flow.spec.ts` | `Docs/MANUAL_QA.md` dashboard and bank checks |
+| Active editor text survives reload and network failure | `src/components/ZenEditor.tsx`, `src/lib/editorBuffer.ts`, `src/store/useAppStore.ts` | `tests/e2e/local-writing-flow.spec.ts` autosave test | `Docs/MANUAL_QA.md` editor checks |
+| Drafts do not count toward progress | `src/store/useAppStore.ts`, `src/components/ZenEditor.tsx` | `tests/e2e/local-writing-flow.spec.ts` local writing loop | `Docs/MANUAL_QA.md` drafts and bank checks |
+| Banked post editing does not duplicate progress or capsules | `src/store/useAppStore.ts`, `src/components/Bank.tsx`, `src/components/ZenEditor.tsx` | `tests/e2e/local-writing-flow.spec.ts` banked edit test | `Docs/MANUAL_QA.md` bank checks |
+| Emergency buffers are not silently overwritten | `src/components/ZenEditor.tsx`, `src/lib/editorBuffer.ts` | `tests/e2e/local-writing-flow.spec.ts` banked edit and draft conflict tests | `Docs/MANUAL_QA.md` editor and drafts checks |
+| Cloud boot cannot block the app indefinitely | `src/App.tsx`, `src/store/useAppStore.ts`, `src/lib/cloudHydration.ts`, `src/components/AuthGate.tsx` | `src/lib/cloudHydration.test.ts`, `tests/e2e/local-writing-flow.spec.ts` cloud fallback test | `Docs/MANUAL_QA.md` auth/cloud fallback checks |
+| Telegram-style formatting remains plain text | `src/lib/telegramFormatting.ts`, `src/components/ZenEditor.tsx`, `src/components/TelegramMarkup.tsx` | `src/lib/telegramFormatting.test.ts`, `tests/e2e/local-writing-flow.spec.ts` formatting test | `Docs/MANUAL_QA.md` editor and bank checks |
+| Unsafe links are not clickable | `src/lib/telegramFormatting.ts`, `src/components/TelegramMarkup.tsx` | `src/lib/telegramFormatting.test.ts` | `Docs/MANUAL_QA.md` bank checks |
+| Bank search and tag chips use AND semantics | `src/components/Bank.tsx`, `src/lib/bankFilters.ts` | `src/lib/bankFilters.test.ts`, `tests/e2e/local-writing-flow.spec.ts` tag/search test | `Docs/MANUAL_QA.md` bank checks |
+| Capsules are queued and opened manually | `src/store/useAppStore.ts`, `src/components/CapsuleQueue.tsx`, `src/components/Collection.tsx` | `tests/e2e/local-writing-flow.spec.ts` capsule flow test | `Docs/MANUAL_QA.md` capsule checks |
+| Supabase RLS and RPC contracts protect user data | `supabase/migrations/`, `src/store/useAppStore.ts`, `Docs/DATA_CONTRACTS.md` | Planned Supabase contract tests | `npx supabase migration list`, manual cloud auth checks |
+| GitHub Pages base path remains valid | `vite.config.ts`, `.github/workflows/deploy-pages.yml`, `AGENTS.md` | `npm run verify:pages` | Production URL smoke check |
+| Product tone stays literary and non-punitive | `Docs/COPY_GUIDE.md`, `src/components/`, `src/data/classicPhrases.ts` | Planned copy lint or screenshot review | `Docs/MANUAL_QA.md` visual/copy checks |

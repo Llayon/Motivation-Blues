@@ -6,6 +6,10 @@
 Goal: prevent the startup loader from blocking access when Supabase is slow or unreachable.
 Result: initial cloud hydration is bounded by timeout, local data is preserved when present, AuthGate shows retry, and background Supabase refreshes no longer display the fullscreen loader.
 
+### LLM-first workflow hardening
+Goal: finish partially implemented LLM-first patterns and make future agent work safer.
+Result: added code map, traceability matrix, architecture boundaries, regression log, handoff notes, copy guide, commit checklist, ADR/feature templates, verify scripts, CI docs reminder, and CI ADR enforcement.
+
 ## High Priority
 
 ### 1. Lazy-load 3D screens
@@ -31,22 +35,27 @@ Verification: build passes and manual injected error test.
 
 ## Medium Priority
 
-### 4. Add release checklist automation
-Goal: make deploy verification repeatable.
-Context: current release checks are manual CLI commands.
-Acceptance criteria: a script or workflow validates build, test, and Pages URL status.
+### 4. Add Supabase contract tests
+Goal: automate RLS and RPC checks for user ownership, `bank_post`, and `open_capsule`.
+Context: `Docs/TRACEABILITY.md` currently marks Supabase contract tests as planned.
+Acceptance criteria: tests prove own-row access, foreign-row rejection, idempotent banking, and sealed-capsule validation.
 
-### 5. Improve collection visuals
+### 5. Add visual regression smoke tests
+Goal: catch major layout/copy regressions on landing, dashboard, editor, bank, and capsules.
+Context: UI/copy QA is documented but still manual.
+Acceptance criteria: screenshot or structured Playwright checks run in CI without making tests brittle.
+
+### 6. Improve collection visuals
 Goal: make figurines feel more like glossy collectible toys.
 Context: current models are procedural placeholders.
 Acceptance criteria: no runtime material mutation of imported assets unless intentional.
 
 ## Low Priority
 
-### 6. Add richer phrase library
+### 7. Add richer phrase library
 Goal: expand static classic feedback variety without adding AI.
 Acceptance criteria: phrase bank remains static and typed.
 
-### 7. Add theme polish
+### 8. Add theme polish
 Goal: refine light glassmorphism system and responsive layout.
 Acceptance criteria: mobile editor remains usable.

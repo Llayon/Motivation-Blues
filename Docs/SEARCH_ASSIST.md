@@ -1,6 +1,10 @@
 # Search Assist
 
-Use this file as the first stop when an LLM agent needs to locate behavior quickly without broad, noisy reads.
+Use this file after `Docs/CODEMAP.md` when an LLM agent needs to locate behavior quickly without broad, noisy reads.
+
+## First Step
+
+Read `Docs/CODEMAP.md` to identify the likely feature area, then use the focused commands below.
 
 ## Command
 
@@ -22,6 +26,9 @@ High-signal docs:
 - `Docs/PRODUCT_SPEC.md`
 - `Docs/PROJECT_MEMORY.md`
 - `Docs/CONTEXT.md`
+- `Docs/CODEMAP.md`
+- `Docs/TRACEABILITY.md`
+- `Docs/BOUNDARIES.md`
 - `Docs/adr/`
 
 ## Editor And Autosave
@@ -78,3 +85,4 @@ Default verification for code changes:
 - `npm test`
 - `npm run test:e2e` for editor/local-mode/core-loop changes
 - `npm run build`
+- `npm run verify:pages` for deploy/base-path changes

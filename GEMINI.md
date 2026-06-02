@@ -27,12 +27,13 @@ Welcome to the Motivation Blues project. This file provides essential context, a
 - `supabase/migrations/`: Database schema (PostgreSQL).
 
 ## 📜 Mandatory Rules for Agents
-1. **Read Docs First:** Before any major change, read `AGENTS.md`, `Docs/CONTEXT.md`, and `Docs/ARCHITECTURE.md`.
+1. **Read Docs First:** Before any major change, read `AGENTS.md`, `Docs/CONTEXT.md`, `Docs/PROJECT_MEMORY.md`, `Docs/ARCHITECTURE.md`, and `Docs/CODEMAP.md`.
 2. **Local-First Safety:** Never weaken the IndexedDB autosave logic. The user's active writing must be protected even if the browser crashes or Supabase is offline.
 3. **Conventional Commits:** All commits MUST follow the Conventional Commits format (e.g., `feat: ...`, `fix: ...`, `docs: ...`).
 4. **No AI Generation:** Do not add features that generate text using LLMs/AI. The product is about the user writing their own content.
 5. **Supabase Migrations:** Never edit applied migrations. Always create a new migration for schema changes.
 6. **GitHub Pages Support:** Maintain `VITE_BASE_PATH=/Motivation-Blues/` in build/deploy logic.
+7. **LLM Workflow:** Use `Docs/TRACEABILITY.md`, `Docs/BOUNDARIES.md`, `Docs/COMMIT_CHECKLIST.md`, and ADR/feature templates when the change is large or architectural.
 
 ## 🚀 Key Commands
 ```bash
@@ -44,6 +45,9 @@ npm run dev
 npm test                 # Run Vitest unit tests
 npm run test:e2e         # Run Playwright E2E tests
 npm run build            # Verify build and types
+npm run verify           # Unit tests + build
+npm run verify:full      # Unit tests + build + E2E + Pages base-path build
+npm run verify:pages     # GitHub Pages base-path build
 npm run commitlint:last  # Check commit message format
 
 # Navigation Help
@@ -55,7 +59,7 @@ npm run supabase:push    # Push local migrations to cloud
 ```
 
 ## 🏗️ Architecture & Data Flow
-- **Hydration:** The app waits for Zustand persistence and Supabase session before showing the UI (`src/App.tsx`).
+- **Hydration:** The app waits for Zustand persistence, then runs bounded Supabase hydration that fails open if cloud requests stall (`src/App.tsx`, `src/lib/cloudHydration.ts`).
 - **Modes:** 
   - `cloud`: Syncs with Supabase. Requires auth.
   - `local`: Operates purely in the browser (localStorage). No auth required.

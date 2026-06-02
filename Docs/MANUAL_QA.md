@@ -1,10 +1,10 @@
 # Manual QA Checklist
 
 ## Before QA
-- Run `npm test`.
-- Run `npm run test:e2e`.
-- Run `npm run build`.
-- For deploy changes, run GitHub Pages base-path build.
+- Run `npm run verify`.
+- Run `npm run test:e2e` for editor, local-mode, core-loop, formatting, auth, or navigation changes.
+- For deploy changes, run `npm run verify:pages`.
+- For large releases, run `npm run verify:full`.
 
 ## Editor
 - Open editor.
@@ -50,6 +50,31 @@
 - Request magic link locally.
 - Request magic link on GitHub Pages.
 - Confirm redirect lands inside the app path.
+- Simulate unavailable Supabase or disable network.
+- Confirm the startup loader exits and AuthGate remains usable.
+- Click `Вернуться к текстам`.
+- Confirm local dashboard opens and writing can continue.
+
+## Landing
+- Confirm H1, H2, email input, primary CTA, and secondary CTA match `Docs/PRODUCT_SPEC.md`.
+- Confirm the page feels like a premium writing room, not a generic SaaS landing.
+
+## Dashboard
+- Confirm daily focus copy is supportive.
+- Confirm red missed-plan copy appears only for missed previous days.
+- Confirm empty capsule CTA is hidden when there are no sealed capsules.
+
+## Export
+- Export banked posts.
+- Confirm drafts are not exported.
+- Confirm raw formatting markup is preserved.
+
+## LLM Workflow
+- For large features, confirm a brief exists under `Docs/features/`.
+- For architecture changes, confirm an ADR exists or no ADR is needed.
+- Confirm `Docs/TRACEABILITY.md` references new requirements or tests.
+- Confirm `Docs/REGRESSIONS.md` is updated after bug fixes.
+- Confirm `Docs/HANDOFF.md` reflects current risks and next tasks.
 
 ## Responsive
 - Check desktop width.
