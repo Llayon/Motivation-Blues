@@ -25,6 +25,17 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `supabase/migrations/`: schema, RLS, RPC definitions.
 - `Docs/DATA_CONTRACTS.md`: table and RPC contracts.
 
+## Telegram Mini App
+
+- `index.html`: loads Telegram Web App SDK before the React module.
+- `src/lib/telegramApp.ts`: Telegram WebApp detection, `ready()`, and `expand()`.
+- `src/main.tsx`: initializes Telegram environment before rendering React.
+- `src/App.tsx`: skips the blocking root Supabase loader in Telegram Mini App mode.
+- `src/components/AuthGate.tsx`: starts Telegram auto-login from `window.Telegram.WebApp.initData`.
+- `src/store/useAppStore.ts`: `startTelegramSession` Edge Function/auth flow.
+- `supabase/functions/telegram-auth/index.ts`: validates Telegram `initData` and returns Supabase credentials.
+- `Docs/adr/0007-seamless-telegram-auth.md`: accepted TMA auth decision.
+
 ## Local-First Editor Safety
 
 - `src/components/ZenEditor.tsx`: editor render shell.

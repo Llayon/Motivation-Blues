@@ -21,6 +21,14 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 5. Local mode keeps the same behavior in local Zustand persistence.
 6. If cloud hydration stalls or fails, the app fails open: fullscreen loading ends, local data is preserved when present, and the Auth gate lets the user continue locally or retry cloud sync.
 
+## Telegram Mini App Startup
+
+- File: `src/lib/telegramApp.ts`.
+- `src/main.tsx` initializes Telegram Web App SDK when `window.Telegram.WebApp` exists.
+- `AuthGate` reads `window.Telegram.WebApp.initData` and starts `startTelegramSession`.
+- In Telegram Mini App mode, `App` must not render the blocking Supabase boot loader before `AuthGate`; otherwise Telegram auth cannot start.
+- Root Supabase hydration can still run from auth-state changes after Telegram sign-in.
+
 ## Editor Autosave
 
 - Buffer file: `src/lib/editorBuffer.ts`.

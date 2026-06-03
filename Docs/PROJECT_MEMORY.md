@@ -91,6 +91,7 @@
 - Implemented Seamless TMA Auth using a Supabase Edge Function to validate `initData` and auto-login users without email/magic-links.
 - Fixed a startup hang issue by adding timeouts to the Telegram auth flow and refactoring the hydration logic to be resilient to concurrent request pre-emption.
 - Optimized `App.tsx` auth state listener to avoid redundant hydration calls.
+- Fixed Telegram Mini App startup ordering so `AuthGate` mounts and starts `telegram-auth` without waiting for the root Supabase boot loader.
 
 ## Maintenance Rule
 

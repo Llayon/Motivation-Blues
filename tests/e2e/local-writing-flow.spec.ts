@@ -172,6 +172,45 @@ test('cloud hydration failure falls back to the start screen instead of blocking
   await expect(page.getByText(/Local .*local@author\.test|Local .*author/i)).toBeVisible();
 });
 
+test('Telegram Mini App auth is not blocked by the root Supabase loader', async ({ page }) => {
+  let telegramAuthRequests = 0;
+
+  await page.route('https://telegram.org/js/telegram-web-app.js', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/javascript',
+      body: `
+        window.Telegram = {
+          WebApp: {
+            initData: 'query_id=test&user=%7B%22id%22%3A42%7D&auth_date=1700000000&hash=test',
+            ready: function () {},
+            expand: function () {}
+          }
+        };
+      `
+    });
+  });
+  await page.route('**/auth/v1/**', (route) => route.abort());
+  await page.route('**/rest/v1/**', (route) => route.abort());
+  await page.route('**/functions/v1/telegram-auth', async (route) => {
+    telegramAuthRequests += 1;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'Telegram auth unavailable in test' })
+    });
+  });
+
+  await page.goto('/');
+
+  await expect(
+    page.getByRole('heading', { name: '100 постов за 40 дней. Пиши для себя.' })
+  ).toBeVisible({ timeout: 2_000 });
+  await expect(page.getByText('Подключаю облачный сезон...')).toBeHidden();
+  await expect.poll(() => telegramAuthRequests, { timeout: 2_000 }).toBe(1);
+  await expect(page.getByText('Telegram auth unavailable in test')).toBeVisible();
+});
+
 test('IndexedDB autosave restores active editor buffer after reload', async ({ page }) => {
   await startLocalMode(page);
   await openEditor(page);

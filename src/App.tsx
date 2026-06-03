@@ -7,6 +7,7 @@ import { ExportPanel } from './components/ExportPanel';
 import { Nav } from './components/Nav';
 import { SeasonPass } from './components/SeasonPass';
 import { ZenEditor } from './components/ZenEditor';
+import { isTelegramEnvironment } from './lib/telegramApp';
 import { isSupabaseConfigured, supabase } from './services/supabase';
 import { useAppStore } from './store/useAppStore';
 
@@ -54,6 +55,7 @@ export default function App() {
   const profile = useAppStore((state) => state.profile);
   const isHydrating = useAppStore((state) => state.isHydrating);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
+  const isTelegram = isTelegramEnvironment();
 
   useEffect(() => {
     const unsubscribe = useAppStore.persist.onFinishHydration(() => {
@@ -76,7 +78,10 @@ export default function App() {
       return;
     }
 
-    void hydrateFromSupabase({ blockUi: true });
+    if (!isTelegram) {
+      void hydrateFromSupabase({ blockUi: true });
+    }
+
     const {
       data: { subscription }
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -91,9 +96,9 @@ export default function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, [hasPersistedStoreHydrated, hydrateFromSupabase]);
+  }, [hasPersistedStoreHydrated, hydrateFromSupabase, isTelegram]);
 
-  if (!hasPersistedStoreHydrated || isHydrating) {
+  if (!hasPersistedStoreHydrated || (isHydrating && !isTelegram)) {
     return (
       <main className="auth-screen">
         <section className="auth-card glass-panel">

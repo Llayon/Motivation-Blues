@@ -50,6 +50,7 @@
 - Editor formatting menu inserts raw markup and Bank preview renders it safely.
 - Draft selection asks before replacing an unfinished manuscript.
 - Cloud hydration failure falls back to the start screen instead of blocking the app.
+- Telegram Mini App startup mounts `AuthGate` and starts `telegram-auth` without waiting for root Supabase boot hydration.
 - Capsule and collection routes lazy-load reward chunks without breaking navigation.
 
 ## Supabase
