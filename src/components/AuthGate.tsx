@@ -55,17 +55,13 @@ export function AuthGate() {
     startSession(email.trim());
   }
 
-  async function handleReturnToTexts() {
+  function handleReturnToTexts() {
     setStatus(null);
+    startSession(email.trim() || 'local@author.test');
 
     if (cloudConfigured) {
-      await hydrateFromSupabase({ blockUi: false });
-      if (useAppStore.getState().profile) {
-        return;
-      }
+      void hydrateFromSupabase({ blockUi: false });
     }
-
-    startSession(email.trim() || 'local@author.test');
   }
 
   async function handleCloudRetry() {

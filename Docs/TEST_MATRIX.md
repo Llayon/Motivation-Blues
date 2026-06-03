@@ -32,7 +32,7 @@
 - Open capsule and verify collection updates.
 - Export banked posts.
 - Confirm export keeps raw Telegram-style markup.
-- Simulate unavailable Supabase and confirm the app leaves the startup loader.
+- Simulate unavailable Supabase and confirm the static/start screen appears immediately while cloud sync fails in the background.
 - For workflow/doc changes, review `Docs/CODEMAP.md`, `Docs/TRACEABILITY.md`, `Docs/BOUNDARIES.md`, and `Docs/COMMIT_CHECKLIST.md` for consistency.
 
 ## Playwright E2E
@@ -49,8 +49,8 @@
 - Opening a banked post for edit does not silently overwrite an unrelated autosave buffer.
 - Editor formatting menu inserts raw markup and Bank preview renders it safely.
 - Draft selection asks before replacing an unfinished manuscript.
-- Cloud hydration failure falls back to the start screen instead of blocking the app.
-- Telegram Mini App startup mounts `AuthGate` and starts `telegram-auth` without waiting for root Supabase boot hydration.
+- Cloud hydration failure still renders the static/start screen instead of blocking first render.
+- Telegram Mini App startup mounts `AuthGate` and starts `telegram-auth` without waiting for root cloud hydration.
 - Capsule and collection routes lazy-load reward chunks without breaking navigation.
 
 ## Supabase

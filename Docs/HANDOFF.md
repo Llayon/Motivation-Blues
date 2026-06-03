@@ -6,7 +6,7 @@ Use this file to give the next LLM session a compact starting point. Update it a
 
 - MVP runs as a static React/Vite SPA on GitHub Pages with Supabase Auth/Postgres/RLS/RPC.
 - Editor autosave is local-first through IndexedDB with localStorage fallback.
-- Supabase boot hydration is bounded by timeout and fails open to local/AuthGate access.
+- Boot is static-first: local/AuthGate UI renders immediately and Supabase hydration runs in the background.
 - Banked posts can be edited without duplicating progress or capsules.
 - Telegram-style formatting is stored as raw text and safely previewed.
 - Capsule and collection screens lazy-load the 3D/R3F chunk; initial dashboard/editor bundle stays below 500 kB.

@@ -5,7 +5,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 ## App Entry And Routing
 
 - `src/main.tsx`: React root.
-- `src/App.tsx`: top-level hydration, auth gate, active view switch, and lazy 3D reward routes.
+- `src/App.tsx`: static-first boot, background Supabase hydration, auth gate, active view switch, and lazy 3D reward routes.
 - `src/components/Nav.tsx`: main navigation between dashboard, editor, bank, season, capsules, collection, and export.
 
 ## Global State And Product Loop
@@ -21,7 +21,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `src/services/supabase.ts`: Supabase client setup.
 - `src/store/cloudData.ts`: cloud data loading and post writes.
 - `src/store/useAppStore.ts`: cloud hydration orchestration and RPC calls.
-- `src/lib/cloudHydration.ts`: bounded cloud hydration timeout.
+- `src/lib/cloudHydration.ts`: bounded timeout for background cloud hydration and explicit retry flows.
 - `supabase/migrations/`: schema, RLS, RPC definitions.
 - `Docs/DATA_CONTRACTS.md`: table and RPC contracts.
 
@@ -30,7 +30,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `index.html`: loads Telegram Web App SDK before the React module.
 - `src/lib/telegramApp.ts`: Telegram WebApp detection, `ready()`, and `expand()`.
 - `src/main.tsx`: initializes Telegram environment before rendering React.
-- `src/App.tsx`: skips the blocking root Supabase loader in Telegram Mini App mode.
+- `src/App.tsx`: never blocks first render on root Supabase hydration, so Telegram auto-login can start from `AuthGate`.
 - `src/components/AuthGate.tsx`: starts Telegram auto-login from `window.Telegram.WebApp.initData`.
 - `src/store/useAppStore.ts`: `startTelegramSession` Edge Function/auth flow.
 - `supabase/functions/telegram-auth/index.ts`: validates Telegram `initData` and returns Supabase credentials.

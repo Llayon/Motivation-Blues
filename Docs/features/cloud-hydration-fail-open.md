@@ -25,7 +25,7 @@ Prevent the startup cloud loading screen from blocking access when Supabase Auth
 
 ## Acceptance Criteria
 
-- The startup loader does not stay visible indefinitely when Supabase is unavailable.
+- The static/start screen renders without waiting for Supabase when cloud is unavailable.
 - Local mode remains usable after cloud failure.
 - Old cloud responses cannot overwrite newer app state.
 - Existing editor autosave recovery remains unchanged.

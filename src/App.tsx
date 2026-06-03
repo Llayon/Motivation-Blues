@@ -53,7 +53,6 @@ export default function App() {
     useAppStore.persist.hasHydrated()
   );
   const profile = useAppStore((state) => state.profile);
-  const isHydrating = useAppStore((state) => state.isHydrating);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
   const isTelegram = isTelegramEnvironment();
 
@@ -79,7 +78,7 @@ export default function App() {
     }
 
     if (!isTelegram) {
-      void hydrateFromSupabase({ blockUi: true });
+      void hydrateFromSupabase({ blockUi: false });
     }
 
     const {
@@ -98,13 +97,13 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, [hasPersistedStoreHydrated, hydrateFromSupabase, isTelegram]);
 
-  if (!hasPersistedStoreHydrated || (isHydrating && !isTelegram)) {
+  if (!hasPersistedStoreHydrated) {
     return (
       <main className="auth-screen">
         <section className="auth-card glass-panel">
-          <p className="eyebrow">Supabase</p>
-          <h1>Подключаю облачный сезон...</h1>
-          <p className="hero-copy">Проверяю сессию и загружаю банк постов.</p>
+          <p className="eyebrow">Motivation Blues</p>
+          <h1>Открываю письменную комнату...</h1>
+          <p className="hero-copy">Поднимаю локальные тексты. Облако подключится фоном.</p>
         </section>
       </main>
     );

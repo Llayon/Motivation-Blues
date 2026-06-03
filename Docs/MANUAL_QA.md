@@ -58,7 +58,7 @@
 - Request magic link on GitHub Pages.
 - Confirm redirect lands inside the app path.
 - Simulate unavailable Supabase or disable network.
-- Confirm the startup loader exits and AuthGate remains usable.
+- Confirm the static/start screen appears quickly and remains usable while cloud sync fails in the background.
 - Click `Вернуться к текстам`.
 - Confirm local dashboard opens and writing can continue.
 

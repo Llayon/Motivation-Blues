@@ -14,19 +14,19 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 
 ## State Flow
 
-1. `App` waits for Zustand persist hydration, then runs a bounded Supabase session check if Supabase env is configured.
+1. `App` waits only for Zustand persist hydration, renders the local/static shell, and then runs Supabase session hydration in the background if Supabase env is configured.
 2. `useAppStore` loads profile, posts, daily progress, capsules, and inventory.
 3. UI reads state directly from Zustand.
 4. Cloud mode writes posts and reward actions through Supabase tables/RPC.
 5. Local mode keeps the same behavior in local Zustand persistence.
-6. If cloud hydration stalls or fails, the app fails open: fullscreen loading ends, local data is preserved when present, and the Auth gate lets the user continue locally or retry cloud sync.
+6. If cloud hydration stalls or fails, the app fails open: the first screen remains usable, local data is preserved when present, and the Auth gate lets the user continue locally or retry cloud sync.
 
 ## Telegram Mini App Startup
 
 - File: `src/lib/telegramApp.ts`.
 - `src/main.tsx` initializes Telegram Web App SDK when `window.Telegram.WebApp` exists.
 - `AuthGate` reads `window.Telegram.WebApp.initData` and starts `startTelegramSession`.
-- In Telegram Mini App mode, `App` must not render the blocking Supabase boot loader before `AuthGate`; otherwise Telegram auth cannot start.
+- `App` must not render a blocking Supabase boot loader before `AuthGate`; otherwise Telegram auth cannot start and normal browser users wait on cloud before seeing static UI.
 - Root Supabase hydration can still run from auth-state changes after Telegram sign-in.
 
 ## Editor Autosave
@@ -68,7 +68,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Cloud data loading and post persistence helpers: `src/store/cloudData.ts`.
 - Store actions, local mode, and RPC orchestration: `src/store/useAppStore.ts`.
 - Cloud boot timeout helper: `src/lib/cloudHydration.ts`.
-- Initial hydration may block UI only up to `CLOUD_HYDRATION_TIMEOUT_MS`; auth-state refreshes and post/capsule refetches run in background mode.
+- Initial boot hydration should run in background mode (`blockUi: false`) so the first render is static-first. `CLOUD_HYDRATION_TIMEOUT_MS` bounds background/auth refreshes and explicit retry actions.
 - Hydration uses an internal request id so late responses from older Supabase requests cannot overwrite newer app state.
 - Migrations: `supabase/migrations/`.
 - Config: `supabase/config.toml`.

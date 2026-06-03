@@ -17,8 +17,8 @@ Mitigation: keep IndexedDB buffer, ordered writes, and clear buffer on successfu
 
 ## Cloud Hydration Stall
 
-Risk: Supabase Auth or REST requests hang and leave the user on the startup loader.
-Mitigation: bound cloud hydration with a short timeout, preserve local state when available, run later refreshes in background, and expose retry from the Auth gate.
+Risk: Supabase Auth or REST requests hang and make the static app feel unavailable.
+Mitigation: render the local/static shell before cloud hydration, bound cloud calls with a short timeout, preserve local state when available, and expose retry from the Auth gate.
 
 ## Large JS Bundle
 
