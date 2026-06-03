@@ -159,6 +159,12 @@ async function selectEditorText(page: Page, text: string) {
 test('cloud hydration failure still renders the static shell instead of blocking first render', async ({
   page
 }) => {
+  let telegramSdkRequests = 0;
+
+  await page.route('https://telegram.org/js/telegram-web-app.js', (route) => {
+    telegramSdkRequests += 1;
+    return route.abort();
+  });
   await page.route('**/auth/v1/**', (route) => route.abort());
   await page.route('**/rest/v1/**', (route) => route.abort());
 
@@ -167,6 +173,8 @@ test('cloud hydration failure still renders the static shell instead of blocking
     page.getByRole('heading', { name: '100 постов за 40 дней. Пиши для себя.' })
   ).toBeVisible({ timeout: 2_000 });
   await expect(page.getByText('Открываю письменную комнату...')).toBeHidden();
+  await page.waitForTimeout(250);
+  expect(telegramSdkRequests).toBe(0);
 
   await page.getByTestId('start-local-mode').click();
   await expect(page.getByText(/Local .*local@author\.test|Local .*author/i)).toBeVisible();
@@ -203,7 +211,7 @@ test('Telegram Mini App auth starts from the static shell without root cloud blo
     });
   });
 
-  await page.goto('/');
+  await page.goto('/?tgWebAppData=test-launch');
 
   await expect(
     page.getByRole('heading', { name: '100 постов за 40 дней. Пиши для себя.' })

@@ -22,6 +22,11 @@ Result: added Prettier, ESLint, architecture boundary check, advisory size budge
 Goal: finish code-quality follow-ups after introducing LLM-first gates.
 Result: capsule/collection screens now lazy-load their 3D chunks, editor/store/style files were split below size budgets, and Knip dead-code findings were resolved.
 
+### Startup performance pass
+
+Goal: keep the static/start shell independent from third-party SDKs and non-current product screens.
+Result: Telegram SDK is loaded dynamically only for Telegram launch URLs, normal browser startup does not request it, and product route components lazy-load from `App`.
+
 ## High Priority
 
 ### 1. Extend autosave conflict UX to drafts

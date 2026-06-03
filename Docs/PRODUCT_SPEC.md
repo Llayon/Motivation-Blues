@@ -109,7 +109,7 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 
 ## Out Of Scope For MVP
 
-- Telegram integration.
+- Telegram publishing, channel sync, or social network integration.
 - AI writing assistance.
 - AI review.
 - Currency or monetization.

@@ -20,6 +20,11 @@ Mitigation: keep IndexedDB buffer, ordered writes, and clear buffer on successfu
 Risk: Supabase Auth or REST requests hang and make the static app feel unavailable.
 Mitigation: render the local/static shell before cloud hydration, bound cloud calls with a short timeout, preserve local state when available, and expose retry from the Auth gate.
 
+## Third-Party Startup Blocker
+
+Risk: a third-party SDK delays the first React render or fails before the app shell is visible.
+Mitigation: do not put third-party scripts in `index.html`; dynamically load Telegram SDK only when launch parameters indicate a Telegram Mini App session.
+
 ## Large JS Bundle
 
 Risk: Three/R3F inflate initial load.

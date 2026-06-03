@@ -9,7 +9,7 @@ Use this before committing or pushing changes.
 - No `.env`, `.env.local`, `dist/`, `node_modules/`, or `supabase/.temp/` files are staged.
 - No Supabase service-role keys appear in code, docs, or workflow env.
 - Applied Supabase migrations were not edited.
-- Product scope still avoids AI generation, currency, tickets, shop, and Telegram integration unless the spec changed.
+- Product scope still avoids AI generation, currency, tickets, shop, and Telegram publishing/channel sync unless the spec changed.
 
 ## Verification
 

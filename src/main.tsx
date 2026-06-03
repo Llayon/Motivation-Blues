@@ -5,7 +5,7 @@ import './styles.css';
 import { initTelegramApp } from './lib/telegramApp';
 
 // Initialize Telegram Mini App environment if running inside Telegram
-initTelegramApp();
+void initTelegramApp();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -13,6 +13,7 @@
 - Supabase Auth magic-link flow.
 - Telegram Mini App (TMA) integration (SDK initialization, expanded viewport) so the app runs natively inside Telegram.
 - Seamless Telegram Auth via Supabase Edge Functions, providing zero-click auto-login for TMA users without email entry.
+- Telegram SDK loads dynamically only for Telegram launch URLs, so normal browser startup is not blocked by third-party script loading.
 - Cloud-backed posts, progress, capsules, and inventory.
 - Local fallback mode for browser-only sessions.
 - 40-day season with 100 banked posts.
@@ -23,6 +24,7 @@
 - Capsule queue without currency or tickets.
 - Voxel-style 3D placeholders with R3F.
 - Capsule and collection 3D surfaces are lazy-loaded so the writing flow does not import R3F/Three upfront.
+- Product route screens are lazy-loaded from `App` so the auth/start shell does not eagerly import editor, bank, season, export, or reward routes.
 - TXT export for banked posts.
 - IndexedDB editor autosave buffer with localStorage fallback.
 - Static-first boot: local/AuthGate UI renders immediately while Supabase hydration runs in the background.
@@ -49,6 +51,7 @@
 - `VITE_BASE_PATH=/Motivation-Blues/` is required for GitHub Pages.
 - The editor must be local-first: active writing state is saved to IndexedDB independently from Supabase.
 - Cloud hydration must not block first render: Supabase may be slow or unavailable, but the local/static shell should remain usable while cloud sync runs in the background.
+- Third-party SDKs must not block first render; Telegram SDK is dynamic and launch-param gated.
 - Capsules are queued and opened manually so writing flow is not interrupted.
 - Editing a banked post is a content update, not a new banking event; it must not increment counters or create rewards.
 - Tag filtering in the bank uses AND semantics when multiple tags are selected.
@@ -93,6 +96,7 @@
 - Optimized `App.tsx` auth state listener to avoid redundant hydration calls.
 - Fixed Telegram Mini App startup ordering so `AuthGate` mounts and starts `telegram-auth` from the static shell.
 - Switched boot to static-first so Supabase hydration no longer blocks the first screen.
+- Removed the blocking Telegram SDK script from `index.html`, added dynamic TMA SDK loading, and lazy-loaded product route screens.
 
 ## Maintenance Rule
 

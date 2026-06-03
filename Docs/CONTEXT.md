@@ -15,7 +15,7 @@ Motivation Blues is a light, gamified writing editor for beginner bloggers. The 
 
 ## Non-Goals
 
-- No Telegram integration in MVP.
+- No Telegram publishing, channel sync, or social network integration in MVP.
 - No AI generation or AI review in MVP.
 - No currency, tickets, shop, or monetized gacha in MVP.
 - No social network or public profiles in MVP.

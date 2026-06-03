@@ -1,6 +1,20 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { isTelegramEnvironment } from '../lib/telegramApp';
+import {
+  hasTelegramLaunchParams,
+  initTelegramApp,
+  isTelegramEnvironment
+} from '../lib/telegramApp';
+
+type TelegramStartupState = 'none' | 'loading' | 'ready' | 'failed';
+
+function getInitialTelegramStartupState(): TelegramStartupState {
+  if (isTelegramEnvironment()) {
+    return 'ready';
+  }
+
+  return hasTelegramLaunchParams() ? 'loading' : 'none';
+}
 
 export function AuthGate() {
   const [email, setEmail] = useState('');
@@ -14,13 +28,34 @@ export function AuthGate() {
   const cloudError = useAppStore((state) => state.cloudError);
   const startTelegramSession = useAppStore((state) => state.startTelegramSession);
   const isHydrating = useAppStore((state) => state.isHydrating);
+  const [telegramStartupState, setTelegramStartupState] = useState<TelegramStartupState>(
+    getInitialTelegramStartupState
+  );
 
-  const isTelegram = isTelegramEnvironment();
+  const isTelegram = telegramStartupState === 'loading' || telegramStartupState === 'ready';
   const hasAttemptedTgAuth = useRef(false);
 
   useEffect(() => {
+    if (telegramStartupState !== 'loading') {
+      return;
+    }
+
+    let isCancelled = false;
+
+    void initTelegramApp().then((isReady) => {
+      if (!isCancelled) {
+        setTelegramStartupState(isReady ? 'ready' : 'failed');
+      }
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [telegramStartupState]);
+
+  useEffect(() => {
     if (
-      isTelegram &&
+      telegramStartupState === 'ready' &&
       cloudConfigured &&
       window.Telegram?.WebApp?.initData &&
       !hasAttemptedTgAuth.current
@@ -29,7 +64,7 @@ export function AuthGate() {
       // Automatically attempt login when in Telegram
       startTelegramSession(window.Telegram.WebApp.initData);
     }
-  }, [isTelegram, cloudConfigured, startTelegramSession]);
+  }, [telegramStartupState, cloudConfigured, startTelegramSession]);
 
   async function handleMagicLink(event?: FormEvent) {
     event?.preventDefault();
@@ -91,7 +126,13 @@ export function AuthGate() {
 
         {isTelegram && !cloudError ? (
           <div className="telegram-auth-status">
-            <p>{isHydrating ? 'Связываемся с Telegram...' : 'Вход через Telegram...'}</p>
+            <p>
+              {telegramStartupState === 'loading'
+                ? 'Открываю Telegram...'
+                : isHydrating
+                  ? 'Связываемся с Telegram...'
+                  : 'Вход через Telegram...'}
+            </p>
           </div>
         ) : (
           <form
@@ -137,6 +178,9 @@ export function AuthGate() {
         </div>
         {!cloudConfigured ? (
           <p className="muted">Облачный вход не настроен, тексты будут храниться локально.</p>
+        ) : null}
+        {telegramStartupState === 'failed' ? (
+          <p className="status-line">Telegram не ответил. Можно войти по email или локально.</p>
         ) : null}
         {cloudError ? <p className="status-line negative">{cloudError}</p> : null}
         {status ? <p className="status-line">{status}</p> : null}

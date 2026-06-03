@@ -9,6 +9,7 @@
 - Export formatting.
 - Bank tag counts and filter semantics.
 - Telegram-style formatting helpers and safe-link parsing.
+- Telegram launch parameter detection.
 - Cloud hydration timeout helper.
 - LLM workflow scripts: `npm run verify`, `npm run verify:pages`, and `npm run docs:changed-check`.
 - ADR enforcement script: `npm run adr:check`.
@@ -33,6 +34,7 @@
 - Export banked posts.
 - Confirm export keeps raw Telegram-style markup.
 - Simulate unavailable Supabase and confirm the static/start screen appears immediately while cloud sync fails in the background.
+- Confirm normal browser startup does not request the Telegram SDK.
 - For workflow/doc changes, review `Docs/CODEMAP.md`, `Docs/TRACEABILITY.md`, `Docs/BOUNDARIES.md`, and `Docs/COMMIT_CHECKLIST.md` for consistency.
 
 ## Playwright E2E
@@ -50,6 +52,7 @@
 - Editor formatting menu inserts raw markup and Bank preview renders it safely.
 - Draft selection asks before replacing an unfinished manuscript.
 - Cloud hydration failure still renders the static/start screen instead of blocking first render.
+- Normal browser startup does not request Telegram SDK.
 - Telegram Mini App startup mounts `AuthGate` and starts `telegram-auth` without waiting for root cloud hydration.
 - Capsule and collection routes lazy-load reward chunks without breaking navigation.
 

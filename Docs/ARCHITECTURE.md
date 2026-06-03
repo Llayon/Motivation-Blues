@@ -7,7 +7,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 ## Frontend
 
 - Entry: `src/main.tsx`.
-- Root view routing: `src/App.tsx` with Zustand `activeView`; 3D reward screens are lazy-loaded.
+- Root view routing: `src/App.tsx` with Zustand `activeView`; product route screens are lazy-loaded.
 - UI components: `src/components/`.
 - Domain constants and helpers: `src/lib/`, `src/data/`.
 - Global state: `src/store/useAppStore.ts`; cloud mapping/loading helpers live in `src/store/cloudData.ts`.
@@ -24,8 +24,9 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 ## Telegram Mini App Startup
 
 - File: `src/lib/telegramApp.ts`.
-- `src/main.tsx` initializes Telegram Web App SDK when `window.Telegram.WebApp` exists.
-- `AuthGate` reads `window.Telegram.WebApp.initData` and starts `startTelegramSession`.
+- `src/main.tsx` starts non-blocking Telegram environment initialization.
+- `src/lib/telegramApp.ts` loads the Telegram Web App SDK dynamically only when Telegram launch parameters are present.
+- `AuthGate` waits for the dynamic SDK state, then reads `window.Telegram.WebApp.initData` and starts `startTelegramSession`.
 - `App` must not render a blocking Supabase boot loader before `AuthGate`; otherwise Telegram auth cannot start and normal browser users wait on cloud before seeing static UI.
 - Root Supabase hydration can still run from auth-state changes after Telegram sign-in.
 
@@ -89,6 +90,6 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 ## 3D
 
 - Files: `src/components/CapsuleQueue.tsx`, `src/components/Collection.tsx`, `src/components/VoxelShowcase.tsx`.
-- `CapsuleQueue` and `Collection` are imported with `React.lazy` from `src/App.tsx` so Three/R3F is not part of the initial dashboard/editor route.
+- `CapsuleQueue` and `Collection` are imported with `React.lazy` from `src/App.tsx` so Three/R3F is not part of the initial auth/dashboard/editor route.
 - Current implementation uses procedural placeholder voxel-style meshes.
 - Future GLTF assets should preserve source materials; lighting can be adjusted but model materials should not be rewritten unless deliberately updating asset art.

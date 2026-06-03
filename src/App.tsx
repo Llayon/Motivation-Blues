@@ -1,16 +1,24 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { AuthGate } from './components/AuthGate';
-import { Bank } from './components/Bank';
 import { ClassicToast } from './components/ClassicToast';
-import { Dashboard } from './components/Dashboard';
-import { ExportPanel } from './components/ExportPanel';
 import { Nav } from './components/Nav';
-import { SeasonPass } from './components/SeasonPass';
-import { ZenEditor } from './components/ZenEditor';
-import { isTelegramEnvironment } from './lib/telegramApp';
+import { hasTelegramLaunchParams, isTelegramEnvironment } from './lib/telegramApp';
 import { isSupabaseConfigured, supabase } from './services/supabase';
 import { useAppStore } from './store/useAppStore';
 
+const Dashboard = lazy(() =>
+  import('./components/Dashboard').then((module) => ({ default: module.Dashboard }))
+);
+const ZenEditor = lazy(() =>
+  import('./components/ZenEditor').then((module) => ({ default: module.ZenEditor }))
+);
+const Bank = lazy(() => import('./components/Bank').then((module) => ({ default: module.Bank })));
+const SeasonPass = lazy(() =>
+  import('./components/SeasonPass').then((module) => ({ default: module.SeasonPass }))
+);
+const ExportPanel = lazy(() =>
+  import('./components/ExportPanel').then((module) => ({ default: module.ExportPanel }))
+);
 const CapsuleQueue = lazy(() =>
   import('./components/CapsuleQueue').then((module) => ({ default: module.CapsuleQueue }))
 );
@@ -29,17 +37,9 @@ function ActiveView() {
     case 'season':
       return <SeasonPass />;
     case 'capsules':
-      return (
-        <Suspense fallback={<p className="muted">Готовлю капсулы...</p>}>
-          <CapsuleQueue />
-        </Suspense>
-      );
+      return <CapsuleQueue />;
     case 'collection':
-      return (
-        <Suspense fallback={<p className="muted">Протираю полку...</p>}>
-          <Collection />
-        </Suspense>
-      );
+      return <Collection />;
     case 'export':
       return <ExportPanel />;
     case 'dashboard':
@@ -54,7 +54,7 @@ export default function App() {
   );
   const profile = useAppStore((state) => state.profile);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
-  const isTelegram = isTelegramEnvironment();
+  const isTelegramLaunch = isTelegramEnvironment() || hasTelegramLaunchParams();
 
   useEffect(() => {
     const unsubscribe = useAppStore.persist.onFinishHydration(() => {
@@ -77,7 +77,7 @@ export default function App() {
       return;
     }
 
-    if (!isTelegram) {
+    if (!isTelegramLaunch) {
       void hydrateFromSupabase({ blockUi: false });
     }
 
@@ -95,7 +95,7 @@ export default function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, [hasPersistedStoreHydrated, hydrateFromSupabase, isTelegram]);
+  }, [hasPersistedStoreHydrated, hydrateFromSupabase, isTelegramLaunch]);
 
   if (!hasPersistedStoreHydrated) {
     return (
@@ -119,7 +119,9 @@ export default function App() {
       <div className="aurora aurora-two" />
       <Nav />
       <main className="app-main">
-        <ActiveView />
+        <Suspense fallback={<p className="muted">Открываю раздел...</p>}>
+          <ActiveView />
+        </Suspense>
       </main>
       <ClassicToast />
     </div>
