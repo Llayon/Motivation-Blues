@@ -30,6 +30,16 @@ Mitigation: do not put third-party scripts in `index.html`; dynamically load Tel
 Risk: Three/R3F inflate initial load.
 Mitigation: lazy-load capsule and collection screens.
 
+## Stale Service Worker Cache
+
+Risk: a deployed update is hidden behind an older cached app shell.
+Mitigation: keep navigation network-first, version service worker cache names, delete old caches on activation, and smoke-test production after deploy.
+
+## PWA Offline Sync Confusion
+
+Risk: users expect installability to mean cloud writes work offline.
+Mitigation: document PWA-lite as app-shell caching only; add explicit outbox/sync feature before promising offline cloud writes.
+
 ## GitHub Pages Subpath
 
 Risk: assets break because Vite base path is wrong.

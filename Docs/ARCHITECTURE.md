@@ -87,6 +87,16 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - URL: `https://llayon.github.io/Motivation-Blues/`.
 - Supabase magic-link redirects must include the same URL and local dev URLs.
 
+## PWA-Lite
+
+- Manifest: `public/manifest.webmanifest`.
+- Service worker: `public/sw.js`.
+- Registration helper: `src/lib/registerServiceWorker.ts`.
+- `index.html` links the manifest and theme metadata through Vite `BASE_URL`.
+- Service worker registration uses `import.meta.env.BASE_URL` so GitHub Pages scope remains `/Motivation-Blues/`.
+- The worker caches same-origin app shell/assets only; Supabase, Telegram SDK, and other cross-origin requests are not cached.
+- PWA-lite is installability and static-shell caching, not offline cloud sync.
+
 ## 3D
 
 - Files: `src/components/CapsuleQueue.tsx`, `src/components/Collection.tsx`, `src/components/VoxelShowcase.tsx`.

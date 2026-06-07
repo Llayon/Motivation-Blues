@@ -107,6 +107,13 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Export format is `.txt` with separators.
 - Drafts are not exported.
 
+## PWA-Lite
+
+- App can be installed where the browser supports PWA installation.
+- Service worker caches the static app shell and same-origin assets.
+- Offline app shell access must not imply offline cloud sync.
+- Active editor recovery remains handled by IndexedDB autosave.
+
 ## Out Of Scope For MVP
 
 - Telegram publishing, channel sync, or social network integration.
@@ -116,3 +123,4 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Social features.
 - Public profiles.
 - WYSIWYG rich text editing.
+- Offline cloud write sync.

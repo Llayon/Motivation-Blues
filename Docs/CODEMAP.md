@@ -25,6 +25,16 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `supabase/migrations/`: schema, RLS, RPC definitions.
 - `Docs/DATA_CONTRACTS.md`: table and RPC contracts.
 
+## PWA-Lite
+
+- `index.html`: manifest, theme color, and app entry links.
+- `public/manifest.webmanifest`: installability metadata and icons.
+- `public/sw.js`: app shell/static asset cache; same-origin only.
+- `public/icons/`: installable and maskable icon assets.
+- `src/lib/registerServiceWorker.ts`: production service worker registration and current-page asset reporting.
+- `src/lib/registerServiceWorker.test.ts`: unit checks for cacheable asset collection.
+- `Docs/adr/0010-pwa-lite-app-shell-cache.md`: accepted PWA-lite boundary.
+
 ## Telegram Mini App
 
 - `index.html`: static document shell; it must not include blocking third-party startup scripts.

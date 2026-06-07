@@ -45,6 +45,8 @@ These rules keep LLM-generated changes from crossing layers accidentally.
 - Keep GitHub Pages subpath support: `VITE_BASE_PATH=/Motivation-Blues/`.
 - Magic-link redirects must remain compatible with `https://llayon.github.io/Motivation-Blues/`.
 - Deploy-affecting changes should run `npm run verify:pages`.
+- Service worker cache must stay same-origin/static-shell only unless a separate offline sync ADR is accepted.
+- Do not cache Supabase API, Telegram SDK, auth responses, or user-private cloud data in the service worker.
 
 ## Quality Gates
 

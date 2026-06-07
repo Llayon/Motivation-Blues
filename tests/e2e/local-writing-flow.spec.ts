@@ -156,6 +156,33 @@ async function selectEditorText(page: Page, text: string) {
   await expect(page.getByTestId('formatting-menu')).toBeVisible();
 }
 
+test('PWA manifest and service worker assets are available', async ({ page, request }) => {
+  await page.goto('/');
+
+  const manifestHref = await page.locator('link[rel="manifest"]').getAttribute('href');
+  expect(manifestHref).toBeTruthy();
+
+  const manifestResponse = await request.get(manifestHref!);
+  expect(manifestResponse.ok()).toBe(true);
+
+  const manifest = (await manifestResponse.json()) as {
+    display?: string;
+    start_url?: string;
+    icons?: Array<{ sizes?: string; purpose?: string }>;
+  };
+
+  expect(manifest.display).toBe('standalone');
+  expect(manifest.start_url).toBe('.');
+  expect(manifest.icons?.some((icon) => icon.sizes === '192x192')).toBe(true);
+  expect(manifest.icons?.some((icon) => icon.sizes === '512x512')).toBe(true);
+  expect(manifest.icons?.some((icon) => icon.purpose === 'maskable')).toBe(true);
+
+  const serviceWorkerResponse = await request.get('/sw.js');
+  expect(serviceWorkerResponse.ok()).toBe(true);
+  expect(serviceWorkerResponse.headers()['content-type']).toContain('javascript');
+  expect(await serviceWorkerResponse.text()).toContain('CACHE_URLS');
+});
+
 test('cloud hydration failure still renders the static shell instead of blocking first render', async ({
   page
 }) => {

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Motivation Blues">
+  <defs>
+    <linearGradient id="bg" x1="80" x2="440" y1="72" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d7fff5" />
+      <stop offset="0.58" stop-color="#eff7ff" />
+      <stop offset="1" stop-color="#f5eadb" />
+    </linearGradient>
+    <linearGradient id="ink" x1="150" x2="374" y1="132" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1d4ed8" />
+      <stop offset="1" stop-color="#38bdf8" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="118" fill="url(#bg)" />
+  <rect x="118" y="96" width="276" height="320" rx="44" fill="#ffffff" opacity="0.78" />
+  <path d="M174 165h164v44H174zM174 240h128v34H174zM174 300h148v34H174z" fill="url(#ink)" />
+  <path d="M354 356c34-45 53-89 26-112-18-15-44-6-56 16-13 23-10 60 30 96Z" fill="#0f172a" opacity="0.86" />
+  <circle cx="354" cy="206" r="18" fill="#0f172a" opacity="0.78" />
+</svg>

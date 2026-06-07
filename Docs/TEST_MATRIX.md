@@ -10,6 +10,7 @@
 - Bank tag counts and filter semantics.
 - Telegram-style formatting helpers and safe-link parsing.
 - Telegram launch parameter detection.
+- PWA service worker registration helpers.
 - Cloud hydration timeout helper.
 - LLM workflow scripts: `npm run verify`, `npm run verify:pages`, and `npm run docs:changed-check`.
 - ADR enforcement script: `npm run adr:check`.
@@ -35,6 +36,9 @@
 - Confirm export keeps raw Telegram-style markup.
 - Simulate unavailable Supabase and confirm the static/start screen appears immediately while cloud sync fails in the background.
 - Confirm normal browser startup does not request the Telegram SDK.
+- Install the PWA from production when supported.
+- Reload once, disable network, and confirm the cached app shell opens.
+- Confirm cloud writes still show an error when offline rather than silently queuing.
 - For workflow/doc changes, review `Docs/CODEMAP.md`, `Docs/TRACEABILITY.md`, `Docs/BOUNDARIES.md`, and `Docs/COMMIT_CHECKLIST.md` for consistency.
 
 ## Playwright E2E
@@ -53,6 +57,7 @@
 - Draft selection asks before replacing an unfinished manuscript.
 - Cloud hydration failure still renders the static/start screen instead of blocking first render.
 - Normal browser startup does not request Telegram SDK.
+- PWA manifest and service worker assets are available.
 - Telegram Mini App startup mounts `AuthGate` and starts `telegram-auth` without waiting for root cloud hydration.
 - Capsule and collection routes lazy-load reward chunks without breaking navigation.
 
@@ -94,6 +99,7 @@
 - `npm run build`.
 - `npm run verify:pages`.
 - Build output keeps the main `index` chunk below 500 kB and emits the 3D chunk separately.
+- Pages build includes `manifest.webmanifest`, `sw.js`, and icon assets.
 - `npm run search:assist -- "bankPost"` returns code/docs locations.
 - `npm run commitlint:last` after committing.
 - GitHub Actions deploy succeeds.

@@ -25,6 +25,7 @@
 - Voxel-style 3D placeholders with R3F.
 - Capsule and collection 3D surfaces are lazy-loaded so the writing flow does not import R3F/Three upfront.
 - Product route screens are lazy-loaded from `App` so the auth/start shell does not eagerly import editor, bank, season, export, or reward routes.
+- PWA-lite installability with manifest, icons, and same-origin app-shell service worker cache.
 - TXT export for banked posts.
 - IndexedDB editor autosave buffer with localStorage fallback.
 - Static-first boot: local/AuthGate UI renders immediately while Supabase hydration runs in the background.
@@ -52,6 +53,7 @@
 - The editor must be local-first: active writing state is saved to IndexedDB independently from Supabase.
 - Cloud hydration must not block first render: Supabase may be slow or unavailable, but the local/static shell should remain usable while cloud sync runs in the background.
 - Third-party SDKs must not block first render; Telegram SDK is dynamic and launch-param gated.
+- PWA-lite caches the static shell and assets only; offline cloud writes, background sync, and merge/conflict handling require a separate sync feature.
 - Capsules are queued and opened manually so writing flow is not interrupted.
 - Editing a banked post is a content update, not a new banking event; it must not increment counters or create rewards.
 - Tag filtering in the bank uses AND semantics when multiple tags are selected.
@@ -71,6 +73,7 @@
 - Supabase RLS must remain strict: users can only access their own rows.
 - Autosave changes can accidentally weaken recovery guarantees.
 - Supabase Auth/REST requests can stall on startup; the app mitigates this with static-first boot, bounded background refreshes, and a visible retry path.
+- Service worker caches can become stale after deploys; Pages build and manual production smoke should verify app shell updates.
 - GitHub Actions currently forces JavaScript actions to Node 24 to avoid upcoming runner deprecation issues.
 - CI now runs unit tests and Playwright E2E before build/deploy.
 
@@ -97,6 +100,7 @@
 - Fixed Telegram Mini App startup ordering so `AuthGate` mounts and starts `telegram-auth` from the static shell.
 - Switched boot to static-first so Supabase hydration no longer blocks the first screen.
 - Removed the blocking Telegram SDK script from `index.html`, added dynamic TMA SDK loading, and lazy-loaded product route screens.
+- Added PWA-lite manifest, icons, service worker app-shell cache, and registration helper.
 
 ## Maintenance Rule
 

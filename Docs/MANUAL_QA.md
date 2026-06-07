@@ -67,6 +67,17 @@
 - Confirm H1, H2, email input, primary CTA, and secondary CTA match `Docs/PRODUCT_SPEC.md`.
 - Confirm the page feels like a premium writing room, not a generic SaaS landing.
 
+## PWA-Lite
+
+- Open production URL.
+- Confirm the browser exposes an install action when supported.
+- Install the app.
+- Reload once while online so the service worker can cache the current shell.
+- Disable network.
+- Reopen or refresh the installed app.
+- Confirm the cached app shell appears.
+- Confirm cloud actions still report failure when offline rather than silently claiming sync.
+
 ## Dashboard
 
 - Confirm daily focus copy is supportive.

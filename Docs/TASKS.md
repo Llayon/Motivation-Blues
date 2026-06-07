@@ -27,6 +27,11 @@ Result: capsule/collection screens now lazy-load their 3D chunks, editor/store/s
 Goal: keep the static/start shell independent from third-party SDKs and non-current product screens.
 Result: Telegram SDK is loaded dynamically only for Telegram launch URLs, normal browser startup does not request it, and product route components lazy-load from `App`.
 
+### PWA-lite installability
+
+Goal: make the app installable and keep the static writing room available from cache on repeat visits.
+Result: added manifest, icons, service worker app-shell cache, production registration, and PWA smoke tests. Offline cloud sync remains out of scope.
+
 ## High Priority
 
 ### 1. Extend autosave conflict UX to drafts
@@ -37,7 +42,15 @@ Files likely involved: `src/components/ZenEditor.tsx`, `src/lib/editorBuffer.ts`
 Acceptance criteria: user can keep buffer, load selected draft, or save buffer as draft.
 Verification: manual QA in `Docs/MANUAL_QA.md`.
 
-### 2. Add error boundary
+### 2. Add local-first sync queue
+
+Goal: let cloud-mode user actions be recorded locally when offline and replayed safely when network returns.
+Context: PWA-lite caches the app shell, but cloud writes still require network and there is no outbox/merge policy.
+Files likely involved: `src/store/useAppStore.ts`, new IndexedDB outbox helper under `src/lib/`, Supabase RPC/write paths, conflict UX.
+Acceptance criteria: pending draft/bank/update/archive actions survive reload, retry on reconnect, and expose clear failed/conflict states.
+Verification: unit tests for outbox state transitions and Playwright offline/reconnect flow.
+
+### 3. Add error boundary
 
 Goal: avoid blank page on runtime UI errors.
 Context: production is a static SPA on GitHub Pages.
@@ -47,19 +60,19 @@ Verification: build passes and manual injected error test.
 
 ## Medium Priority
 
-### 3. Add Supabase contract tests
+### 4. Add Supabase contract tests
 
 Goal: automate RLS and RPC checks for user ownership, `bank_post`, and `open_capsule`.
 Context: `Docs/TRACEABILITY.md` currently marks Supabase contract tests as planned.
 Acceptance criteria: tests prove own-row access, foreign-row rejection, idempotent banking, and sealed-capsule validation.
 
-### 4. Add visual regression smoke tests
+### 5. Add visual regression smoke tests
 
 Goal: catch major layout/copy regressions on landing, dashboard, editor, bank, and capsules.
 Context: UI/copy QA is documented but still manual.
 Acceptance criteria: screenshot or structured Playwright checks run in CI without making tests brittle.
 
-### 5. Improve collection visuals
+### 6. Improve collection visuals
 
 Goal: make figurines feel more like glossy collectible toys.
 Context: current models are procedural placeholders.
@@ -67,12 +80,12 @@ Acceptance criteria: no runtime material mutation of imported assets unless inte
 
 ## Low Priority
 
-### 6. Add richer phrase library
+### 7. Add richer phrase library
 
 Goal: expand static classic feedback variety without adding AI.
 Acceptance criteria: phrase bank remains static and typed.
 
-### 7. Add theme polish
+### 8. Add theme polish
 
 Goal: refine light glassmorphism system and responsive layout.
 Acceptance criteria: mobile editor remains usable.
