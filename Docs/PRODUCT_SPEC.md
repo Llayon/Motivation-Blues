@@ -119,6 +119,8 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - A route-level UI crash should show a readable recovery fallback instead of a blank page.
 - Navigation should remain usable when an active view crashes.
 - Editor autosave and cloud outbox data must remain independent from the recovery fallback.
+- The fallback should save a local-only crash report and let the user copy it for debugging.
+- Crash reports must not include user email, editor text, drafts, banked post content, or secrets.
 
 ## PWA-Lite
 

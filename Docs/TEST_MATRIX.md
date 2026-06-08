@@ -13,7 +13,8 @@
 - PWA service worker registration helpers.
 - Local-first sync outbox fallback queueing and state transitions.
 - Cloud hydration timeout helper.
-- Route error boundary fallback and editor buffer survival through Playwright.
+- Route crash report creation, storage, malformed reads, formatting, and clipboard copy.
+- Route error boundary fallback, crash report copy, and editor buffer survival through Playwright.
 - LLM workflow scripts: `npm run verify`, `npm run verify:pages`, and `npm run docs:changed-check`.
 - ADR enforcement script: `npm run adr:check`.
 - Code quality scripts: `npm run format:check`, `npm run lint`, `npm run architecture:check`, `npm run size:check`, and `npm run deadcode`.
@@ -60,7 +61,7 @@
 - Opening a banked post for edit does not silently overwrite an unrelated autosave buffer.
 - Editor formatting menu inserts raw markup and Bank preview renders it safely.
 - Draft selection asks before replacing an unfinished manuscript.
-- Route error boundary shows fallback and does not lose IndexedDB editor buffer.
+- Route error boundary shows fallback, stores/copies a local crash report, and does not lose IndexedDB editor buffer.
 - Cloud hydration failure still renders the static/start screen instead of blocking first render.
 - Normal browser startup does not request Telegram SDK.
 - PWA manifest and service worker assets are available.

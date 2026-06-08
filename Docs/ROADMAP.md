@@ -10,6 +10,7 @@
 - Capsule queue and collection.
 - IndexedDB autosave.
 - Route-level ErrorBoundary.
+- Local-only production crash reports.
 
 ## v0.2 Reliability
 

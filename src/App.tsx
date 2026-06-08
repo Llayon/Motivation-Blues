@@ -62,12 +62,30 @@ export default function App() {
     useAppStore.persist.hasHydrated()
   );
   const activeView = useAppStore((state) => state.activeView);
+  const cloudConfigured = useAppStore((state) => state.cloudConfigured);
+  const cloudError = useAppStore((state) => state.cloudError);
+  const mode = useAppStore((state) => state.mode);
   const profile = useAppStore((state) => state.profile);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
   const refreshSyncStatus = useAppStore((state) => state.refreshSyncStatus);
   const setActiveView = useAppStore((state) => state.setActiveView);
+  const syncStatus = useAppStore((state) => state.syncStatus);
   const syncOutbox = useAppStore((state) => state.syncOutbox);
   const isTelegramLaunch = isTelegramEnvironment() || hasTelegramLaunchParams();
+  const diagnosticsContext = {
+    activeView,
+    cloudConfigured,
+    cloudError,
+    isTelegramLaunch,
+    mode,
+    syncStatus: {
+      pendingCount: syncStatus.pendingCount,
+      syncingCount: syncStatus.syncingCount,
+      failedCount: syncStatus.failedCount,
+      conflictCount: syncStatus.conflictCount,
+      lastError: syncStatus.lastError
+    }
+  };
 
   function handleRouteErrorReset() {
     if (import.meta.env.DEV && typeof window !== 'undefined') {
@@ -157,7 +175,11 @@ export default function App() {
       <div className="aurora aurora-two" />
       <Nav />
       <main className="app-main">
-        <ErrorBoundary key={activeView} onReset={handleRouteErrorReset}>
+        <ErrorBoundary
+          key={activeView}
+          diagnosticsContext={diagnosticsContext}
+          onReset={handleRouteErrorReset}
+        >
           <Suspense fallback={<p className="muted">Открываю раздел...</p>}>
             <ActiveView />
           </Suspense>

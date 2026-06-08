@@ -42,6 +42,11 @@ Result: added IndexedDB/localStorage outbox, queue-on-failure for draft/bank/upd
 Goal: avoid blank pages on route-level React render errors.
 Result: added `ErrorBoundary` around lazy active views, recovery fallback copy, dashboard reset/reload actions, route crash E2E coverage, feature brief, and ADR.
 
+### Production crash diagnostics
+
+Goal: make production route crashes debuggable without remote telemetry.
+Result: added local-only crash reports, build metadata injection, copy action in the fallback, unit coverage, E2E assertions, feature brief, and ADR.
+
 ## High Priority
 
 ### 1. Extend autosave conflict UX to drafts

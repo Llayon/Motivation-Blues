@@ -9,6 +9,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Entry: `src/main.tsx`.
 - Root view routing: `src/App.tsx` with Zustand `activeView`; product route screens are lazy-loaded.
 - Route error recovery: `src/components/ErrorBoundary.tsx` wraps lazy route content so a route crash does not blank the app shell.
+- Crash diagnostics: `src/lib/crashReport.ts` creates local-only route crash reports for user-controlled copy/debugging.
 - UI components: `src/components/`.
 - Domain constants and helpers: `src/lib/`, `src/data/`.
 - Global state: `src/store/useAppStore.ts`; cloud mapping/loading helpers live in `src/store/cloudData.ts`.
@@ -22,7 +23,16 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 5. Supported cloud write failures for draft/bank/update/archive are recorded in the local sync outbox and replayed later.
 6. Local mode keeps the same behavior in local Zustand persistence.
 7. If cloud hydration stalls or fails, the app fails open: the first screen remains usable, local data is preserved when present, and the Auth gate lets the user continue locally or retry cloud sync.
-8. If a lazy product route crashes during render, `ErrorBoundary` shows a recovery fallback while keeping navigation visible.
+8. If a lazy product route crashes during render, `ErrorBoundary` shows a recovery fallback while keeping navigation visible and stores a local-only crash report.
+
+## Runtime Diagnostics
+
+- Crash report helper: `src/lib/crashReport.ts`.
+- Storage: latest report in localStorage key `motivation-blues-crash-report`.
+- Scope: route render/lifecycle crashes caught by `ErrorBoundary`.
+- Copy path: the fallback screen exposes `Скопировать отчет`.
+- Privacy boundary: reports include route/runtime/build metadata and error stacks, but not user email, editor text, banked post content, query/hash values, Supabase tokens, or service-role credentials.
+- Build metadata is injected by `vite.config.ts` as `__APP_VERSION__` and `__APP_BUILD_SHA__`.
 
 ## Telegram Mini App Startup
 

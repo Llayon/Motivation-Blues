@@ -27,6 +27,9 @@
 - Confirm autosave status updates.
 - In local dev, open `/?__simulateRouteError=1`.
 - Confirm the fallback says the room stumbled and the navigation remains visible.
+- Confirm the fallback shows a locally saved diagnostic report id.
+- Click `Скопировать отчет`.
+- Paste into a scratch note and confirm it contains technical metadata, not the written post body or email.
 - Click `Вернуться в кабинет`.
 - Reopen editor.
 - Confirm the typed buffer is still restored.

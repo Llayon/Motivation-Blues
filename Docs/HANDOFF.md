@@ -10,6 +10,7 @@ Use this file to give the next LLM session a compact starting point. Update it a
 - Telegram SDK is dynamically loaded only for Telegram launch URLs; normal browser startup should not request it.
 - Product route screens lazy-load from `App`; auth/start shell stays light.
 - Route-level ErrorBoundary keeps navigation/shell visible if an active view crashes.
+- ErrorBoundary stores a local-only crash report and exposes copy from the fallback.
 - PWA-lite is implemented with manifest, icons, and a same-origin app-shell service worker cache.
 - Supported cloud draft/bank/update/archive failures are queued in a local-first outbox and retried from the app runtime.
 - Banked posts can be edited without duplicating progress or capsules.
@@ -35,6 +36,7 @@ Use this file to give the next LLM session a compact starting point. Update it a
 - Service worker production updates need manual smoke until automated deploy checks cover cache behavior.
 - Outbox v1 has no cross-device merge UI and does not queue capsule opening.
 - ErrorBoundary does not catch event-handler or async errors outside React render/lifecycle.
+- Crash diagnostics are local-only; do not add remote telemetry without a new ADR and privacy review.
 
 ## Next Best Tasks
 

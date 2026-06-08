@@ -33,7 +33,12 @@ Mitigation: lazy-load capsule and collection screens.
 ## Runtime Blank Page
 
 Risk: a React render error in a route blanks the app and makes users think their text is lost.
-Mitigation: keep route content inside `ErrorBoundary`, keep navigation outside the boundary, and preserve editor autosave/outbox storage independently.
+Mitigation: keep route content inside `ErrorBoundary`, keep navigation outside the boundary, preserve editor autosave/outbox storage independently, and save a local-only crash report that the user can copy.
+
+## Diagnostic Privacy Leak
+
+Risk: crash diagnostics accidentally capture private writing content, email, URL tokens, or secrets.
+Mitigation: route crash reports include build/runtime/route/error metadata only; sanitize URL values and do not serialize posts, editor buffers, Supabase tokens, or user email.
 
 ## Stale Service Worker Cache
 

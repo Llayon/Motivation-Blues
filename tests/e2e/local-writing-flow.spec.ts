@@ -299,6 +299,24 @@ test('route error boundary keeps shell usable without losing editor buffer', asy
   await page.goto('/?__simulateRouteError=1');
   await expect(page.getByTestId('error-boundary')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Редактор', exact: true })).toBeVisible();
+  await expect(page.getByText('Диагностический отчет сохранен локально')).toBeVisible();
+
+  const crashReport = await page.evaluate(() => {
+    const raw = window.localStorage.getItem('motivation-blues-crash-report');
+    return raw ? JSON.parse(raw) : null;
+  });
+  expect(crashReport).toMatchObject({
+    error: { message: 'Simulated active view crash.' },
+    route: { activeView: 'editor' },
+    state: { mode: 'local' }
+  });
+
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.getByRole('button', { name: 'Скопировать отчет' }).click();
+  await expect(page.getByText('Отчет скопирован. Можно отправить разработчику.')).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+    .toContain('"message": "Simulated active view crash."');
 
   await page.getByRole('button', { name: 'Вернуться в кабинет' }).click();
   await expect(page.getByText('0/100 постов в банке')).toBeVisible();
