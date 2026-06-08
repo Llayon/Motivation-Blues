@@ -11,6 +11,7 @@
 - IndexedDB autosave.
 - Route-level ErrorBoundary.
 - Local-only production crash reports.
+- Hidden Diagnostics Hub.
 
 ## v0.2 Reliability
 

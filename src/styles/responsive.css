@@ -244,6 +244,10 @@
     grid-template-columns: 1fr;
   }
 
+  .diagnostics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .focus-note {
     grid-column: auto;
   }
@@ -267,6 +271,7 @@
   .content-panel,
   .stat-card,
   .focus-note,
+  .diagnostics-layout,
   .draft-rail,
   .zen-editor,
   .export-preview,
@@ -278,6 +283,15 @@
   .top-nav nav {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .diagnostics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diagnostics-card dl div {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
   }
 
   .top-nav nav button {

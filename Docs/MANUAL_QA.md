@@ -34,6 +34,17 @@
 - Reopen editor.
 - Confirm the typed buffer is still restored.
 
+## Diagnostics Hub
+
+- Open `/?debug=1&access_token=fake#refresh_token=fake`.
+- Confirm the diagnostics screen appears before login if no profile exists.
+- Confirm cards show build, environment, cloud, queue, PWA, and crash summary.
+- Click `Скопировать диагностику`.
+- Paste into a scratch note and confirm it contains technical metadata only.
+- Confirm the pasted snapshot does not include `fake`, email, editor text, draft text, banked text, or tokens.
+- Click `Вернуться`.
+- Confirm the normal start/dashboard flow returns and the `debug` query is removed.
+
 ## Drafts
 
 - Save text as draft.

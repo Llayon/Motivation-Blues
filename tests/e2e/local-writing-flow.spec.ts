@@ -263,6 +263,32 @@ test('Telegram Mini App auth starts from the static shell without root cloud blo
   await expect(page.getByText('Telegram auth unavailable in test')).toBeVisible();
 });
 
+test('manual diagnostics screen copies a sanitized support snapshot', async ({ page }) => {
+  await page.goto('/?debug=1&access_token=secret#refresh_token=secret');
+  await expect(page.getByTestId('diagnostics-hub')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Диагностика письменной комнаты' })).toBeVisible();
+  await expect(page.getByTestId('diagnostics-mode')).toBeVisible();
+  await expect(page.getByTestId('diagnostics-service-worker')).toBeVisible();
+  await expect(page.getByTestId('diagnostics-preview')).toContainText('"schemaVersion": 1');
+  await expect(page.getByTestId('diagnostics-preview')).not.toContainText('secret');
+
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.getByRole('button', { name: 'Скопировать диагностику' }).click();
+  await expect(
+    page.getByText('Диагностика скопирована. Можно отправить разработчику.')
+  ).toBeVisible();
+  const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clipboardText).toContain('"debugRoute": true');
+  expect(clipboardText).toContain('"profilePresent": false');
+  expect(clipboardText).not.toContain('secret');
+  expect(clipboardText).not.toContain('local@author.test');
+
+  await page.getByRole('button', { name: 'Вернуться' }).click();
+  await expect(
+    page.getByRole('heading', { name: '100 постов за 40 дней. Пиши для себя.' })
+  ).toBeVisible();
+});
+
 test('IndexedDB autosave restores active editor buffer after reload', async ({ page }) => {
   await startLocalMode(page);
   await openEditor(page);

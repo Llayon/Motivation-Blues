@@ -121,6 +121,8 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Editor autosave and cloud outbox data must remain independent from the recovery fallback.
 - The fallback should save a local-only crash report and let the user copy it for debugging.
 - Crash reports must not include user email, editor text, drafts, banked post content, or secrets.
+- A hidden `?debug=1` diagnostics screen should let the user copy a safe support snapshot for startup, Telegram, Supabase, PWA, outbox, and crash-report debugging.
+- Diagnostics snapshots must not include user email, editor text, drafts, banked post content, query/hash values, tokens, or secrets.
 
 ## PWA-Lite
 

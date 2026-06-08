@@ -40,6 +40,11 @@ Mitigation: keep route content inside `ErrorBoundary`, keep navigation outside t
 Risk: crash diagnostics accidentally capture private writing content, email, URL tokens, or secrets.
 Mitigation: route crash reports include build/runtime/route/error metadata only; sanitize URL values and do not serialize posts, editor buffers, Supabase tokens, or user email.
 
+## Support Snapshot Overexposure
+
+Risk: the manual diagnostics screen becomes a broad data dump that leaks content or credentials.
+Mitigation: keep `?debug=1` hidden and local-only; snapshot counts and technical metadata only, sanitize URL values, and never serialize posts, editor buffers, email, Supabase tokens, or service-role keys.
+
 ## Stale Service Worker Cache
 
 Risk: a deployed update is hidden behind an older cached app shell.

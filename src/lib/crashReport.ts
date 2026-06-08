@@ -80,7 +80,7 @@ function createCrashReportId(createdAt: string) {
   return `crash-${createdAt.replace(/[^0-9]/g, '').slice(0, 14)}-${suffix}`;
 }
 
-function sanitizeHref(href: string): string {
+export function sanitizeHref(href: string): string {
   try {
     const url = new URL(href);
     const queryKeys = Array.from(url.searchParams.keys()).sort();
@@ -169,6 +169,14 @@ export function saveCrashReport(report: CrashReport): void {
   }
 }
 
+export function clearCrashReport(): void {
+  try {
+    localStorage.removeItem(CRASH_REPORT_STORAGE_KEY);
+  } catch {
+    // Diagnostics cleanup must never make the support screen fail.
+  }
+}
+
 export function readCrashReport(): CrashReport | null {
   try {
     const raw = localStorage.getItem(CRASH_REPORT_STORAGE_KEY);
@@ -186,9 +194,7 @@ export function readCrashReport(): CrashReport | null {
   }
 }
 
-export async function copyCrashReport(report: CrashReport): Promise<void> {
-  const text = formatCrashReport(report);
-
+export async function copyTextToClipboard(text: string): Promise<void> {
   if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(text);
     return;
@@ -213,4 +219,8 @@ export async function copyCrashReport(report: CrashReport): Promise<void> {
   } finally {
     document.body.removeChild(textarea);
   }
+}
+
+export async function copyCrashReport(report: CrashReport): Promise<void> {
+  await copyTextToClipboard(formatCrashReport(report));
 }

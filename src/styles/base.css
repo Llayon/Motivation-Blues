@@ -373,6 +373,98 @@ textarea:focus {
   white-space: pre-wrap;
 }
 
+.diagnostics-layout {
+  display: grid;
+  gap: 1rem;
+  max-width: 1180px;
+  margin: 2rem auto;
+  padding: clamp(1.25rem, 4vw, 2.2rem);
+  border-radius: 2rem;
+}
+
+.diagnostics-heading {
+  display: grid;
+  gap: 0.8rem;
+  max-width: 840px;
+}
+
+.diagnostics-heading h1 {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.diagnostics-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.diagnostics-actions {
+  align-items: center;
+}
+
+.diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.diagnostics-card {
+  padding: 1rem;
+  border: 1px solid rgba(116, 135, 158, 0.16);
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.diagnostics-card h2 {
+  margin: 0 0 0.8rem;
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.diagnostics-card dl {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.diagnostics-card dl div {
+  display: grid;
+  grid-template-columns: minmax(6rem, 0.7fr) minmax(0, 1fr);
+  gap: 0.7rem;
+}
+
+.diagnostics-card dt {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.diagnostics-card dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.diagnostics-preview {
+  overflow: auto;
+  max-width: 100%;
+  max-height: 24rem;
+  margin: 0;
+  padding: 1rem;
+  border-radius: 1.2rem;
+  background: rgba(24, 32, 51, 0.9);
+  color: #f5f9ff;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

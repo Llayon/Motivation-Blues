@@ -26,6 +26,13 @@ const CapsuleQueue = lazy(() =>
 const Collection = lazy(() =>
   import('./components/Collection').then((module) => ({ default: module.Collection }))
 );
+const DiagnosticsHub = lazy(() =>
+  import('./components/DiagnosticsHub').then((module) => ({ default: module.DiagnosticsHub }))
+);
+
+function hasDiagnosticsRoute() {
+  return typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug');
+}
 
 function ActiveView() {
   const activeView = useAppStore((state) => state.activeView);
@@ -61,6 +68,7 @@ export default function App() {
   const [hasPersistedStoreHydrated, setHasPersistedStoreHydrated] = useState(
     useAppStore.persist.hasHydrated()
   );
+  const [isDiagnosticsRoute, setIsDiagnosticsRoute] = useState(hasDiagnosticsRoute);
   const activeView = useAppStore((state) => state.activeView);
   const cloudConfigured = useAppStore((state) => state.cloudConfigured);
   const cloudError = useAppStore((state) => state.cloudError);
@@ -97,6 +105,16 @@ export default function App() {
     setActiveView('dashboard');
   }
 
+  function handleCloseDiagnostics() {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('debug');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+
+    setIsDiagnosticsRoute(false);
+  }
+
   useEffect(() => {
     const unsubscribe = useAppStore.persist.onFinishHydration(() => {
       setHasPersistedStoreHydrated(true);
@@ -107,6 +125,15 @@ export default function App() {
     }
 
     return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    function handlePopState() {
+      setIsDiagnosticsRoute(hasDiagnosticsRoute());
+    }
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   useEffect(() => {
@@ -162,6 +189,26 @@ export default function App() {
           <p className="hero-copy">Поднимаю локальные тексты. Облако подключится фоном.</p>
         </section>
       </main>
+    );
+  }
+
+  if (isDiagnosticsRoute) {
+    return (
+      <div className="app-shell">
+        <div className="aurora aurora-one" />
+        <div className="aurora aurora-two" />
+        <main className="app-main">
+          <ErrorBoundary
+            key="diagnostics"
+            diagnosticsContext={diagnosticsContext}
+            onReset={handleCloseDiagnostics}
+          >
+            <Suspense fallback={<p className="muted">Собираю диагностику...</p>}>
+              <DiagnosticsHub onClose={handleCloseDiagnostics} />
+            </Suspense>
+          </ErrorBoundary>
+        </main>
+      </div>
     );
   }
 

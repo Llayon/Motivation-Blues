@@ -106,6 +106,20 @@ High-signal files:
 - `Docs/adr/0012-route-error-boundary.md`
 - `Docs/adr/0013-production-crash-report.md`
 
+## Manual Diagnostics Hub
+
+```bash
+npm run search:assist -- "DiagnosticsHub|createDiagnosticsSnapshot|debug=1|Скопировать диагностику"
+```
+
+High-signal files:
+
+- `src/components/DiagnosticsHub.tsx`
+- `src/lib/diagnostics.ts`
+- `src/App.tsx`
+- `tests/e2e/local-writing-flow.spec.ts`
+- `Docs/adr/0014-manual-diagnostics-hub.md`
+
 ## Tests
 
 ```bash

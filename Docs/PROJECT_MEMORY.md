@@ -32,6 +32,7 @@
 - Static-first boot: local/AuthGate UI renders immediately while Supabase hydration runs in the background.
 - Route-level ErrorBoundary keeps the shell/navigation usable if an active view crashes.
 - Production route crashes save a local-only diagnostic report that the user can copy from the fallback screen.
+- Hidden `?debug=1` Diagnostics Hub can copy a local-only support snapshot for startup, Telegram, Supabase, PWA, outbox, and crash-report debugging.
 - Banked posts can be reopened in the editor and updated without duplicating season progress or capsules.
 - Bank view supports text search and tag chips for navigation.
 - Editor supports Telegram-style plain-text formatting for bold, italic, and links.
@@ -79,6 +80,7 @@
 - Service worker caches can become stale after deploys; Pages build and manual production smoke should verify app shell updates.
 - ErrorBoundary catches route render/lifecycle crashes, but event-handler and async errors still need local handling.
 - Crash reports are intentionally local-only and must not include user writing content, email, auth tokens, or secrets.
+- Diagnostics Hub snapshots are intentionally local-only and must not include user writing content, email, query/hash values, auth tokens, or secrets.
 - Outbox local optimistic state can temporarily diverge from Supabase until replay succeeds.
 - GitHub Actions currently forces JavaScript actions to Node 24 to avoid upcoming runner deprecation issues.
 - CI now runs unit tests and Playwright E2E before build/deploy.
@@ -111,6 +113,7 @@
 - Added Telegram Mini App fullscreen request on startup with `expand()` fallback for older clients.
 - Added a route-level ErrorBoundary with fallback recovery and Playwright coverage for editor buffer survival.
 - Added local-only production crash reports with build/runtime metadata and copyable fallback diagnostics.
+- Added hidden `?debug=1` Diagnostics Hub with privacy-safe support snapshots and copy/retry/cleanup actions.
 
 ## Maintenance Rule
 

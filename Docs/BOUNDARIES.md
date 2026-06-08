@@ -40,6 +40,7 @@ These rules keep LLM-generated changes from crossing layers accidentally.
 - Three/R3F imports should stay behind lazy reward screens and must not move into always-loaded dashboard/editor routes.
 - Route error boundaries should keep navigation/shell visible and must not weaken editor autosave recovery.
 - Crash diagnostics must remain local-only and must not include editor text, banked content, user email, Supabase tokens, or service-role keys.
+- Manual diagnostics must stay hidden/user-controlled and must not expose editor text, banked content, user email, query/hash values, Supabase tokens, or service-role keys.
 - Red or punitive progress copy should appear only for real missed previous days.
 - Follow `Docs/COPY_GUIDE.md` for copy changes.
 

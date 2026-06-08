@@ -47,6 +47,11 @@ Result: added `ErrorBoundary` around lazy active views, recovery fallback copy, 
 Goal: make production route crashes debuggable without remote telemetry.
 Result: added local-only crash reports, build metadata injection, copy action in the fallback, unit coverage, E2E assertions, feature brief, and ADR.
 
+### Manual diagnostics hub
+
+Goal: let users/testers copy a safe support snapshot before a crash occurs.
+Result: added hidden `?debug=1` diagnostics screen, sanitized snapshot helper, cloud/outbox retry actions, crash-report cleanup, unit/E2E coverage, feature brief, and ADR.
+
 ## High Priority
 
 ### 1. Extend autosave conflict UX to drafts

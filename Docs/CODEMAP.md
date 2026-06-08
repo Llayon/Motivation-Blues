@@ -5,10 +5,12 @@ Use this file as the first map before broad code search. It points an LLM agent 
 ## App Entry And Routing
 
 - `src/main.tsx`: React root.
-- `src/App.tsx`: static-first boot, background Supabase hydration, outbox status/retry lifecycle, auth gate, active view switch, lazy product routes, and route error boundary/diagnostics context wiring.
+- `src/App.tsx`: static-first boot, background Supabase hydration, outbox status/retry lifecycle, auth gate, active view switch, hidden diagnostics route, lazy product routes, and route error boundary/diagnostics context wiring.
 - `src/components/Nav.tsx`: main navigation between dashboard, editor, bank, season, capsules, collection, export, and compact outbox sync status.
 - `src/components/ErrorBoundary.tsx`: route-level render/lifecycle crash fallback for active views plus copyable local crash report UI.
 - `src/lib/crashReport.ts`: typed local-only crash report creation, localStorage persistence, formatting, and clipboard copy.
+- `src/components/DiagnosticsHub.tsx`: hidden manual support screen for `?debug=1`.
+- `src/lib/diagnostics.ts`: privacy-safe support snapshot creation and formatting.
 
 ## Global State And Product Loop
 
@@ -116,7 +118,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 ## Tests
 
 - `src/lib/*.test.ts`: unit coverage for pure helpers.
-- `tests/e2e/local-writing-flow.spec.ts`: local-mode, autosave, route error boundary/crash report, formatting, banking, capsules, tags, export, and cloud fallback smoke tests.
+- `tests/e2e/local-writing-flow.spec.ts`: local-mode, autosave, diagnostics hub, route error boundary/crash report, formatting, banking, capsules, tags, export, and cloud fallback smoke tests.
 - `playwright.config.ts`: E2E web server and browser config.
 
 ## Quality Automation

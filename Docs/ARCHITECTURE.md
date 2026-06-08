@@ -10,6 +10,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Root view routing: `src/App.tsx` with Zustand `activeView`; product route screens are lazy-loaded.
 - Route error recovery: `src/components/ErrorBoundary.tsx` wraps lazy route content so a route crash does not blank the app shell.
 - Crash diagnostics: `src/lib/crashReport.ts` creates local-only route crash reports for user-controlled copy/debugging.
+- Manual diagnostics: `src/components/DiagnosticsHub.tsx` opens through `?debug=1` and copies a sanitized support snapshot from `src/lib/diagnostics.ts`.
 - UI components: `src/components/`.
 - Domain constants and helpers: `src/lib/`, `src/data/`.
 - Global state: `src/store/useAppStore.ts`; cloud mapping/loading helpers live in `src/store/cloudData.ts`.
@@ -28,10 +29,13 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 ## Runtime Diagnostics
 
 - Crash report helper: `src/lib/crashReport.ts`.
+- Manual support snapshot helper: `src/lib/diagnostics.ts`.
 - Storage: latest report in localStorage key `motivation-blues-crash-report`.
 - Scope: route render/lifecycle crashes caught by `ErrorBoundary`.
 - Copy path: the fallback screen exposes `Скопировать отчет`.
+- Manual path: `?debug=1` opens `DiagnosticsHub` after Zustand persistence hydration and before auth/profile gating.
 - Privacy boundary: reports include route/runtime/build metadata and error stacks, but not user email, editor text, banked post content, query/hash values, Supabase tokens, or service-role credentials.
+- Support snapshots include build/runtime/cloud/outbox/PWA counters and latest crash report summary, but not user email, editor text, banked post content, query/hash values, Supabase tokens, or service-role credentials.
 - Build metadata is injected by `vite.config.ts` as `__APP_VERSION__` and `__APP_BUILD_SHA__`.
 
 ## Telegram Mini App Startup
