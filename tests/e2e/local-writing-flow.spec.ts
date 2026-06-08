@@ -217,11 +217,15 @@ test('Telegram Mini App auth starts from the static shell without root cloud blo
       status: 200,
       contentType: 'application/javascript',
       body: `
+        window.__telegramRequestFullscreenCalls = 0;
         window.Telegram = {
           WebApp: {
             initData: 'query_id=test&user=%7B%22id%22%3A42%7D&auth_date=1700000000&hash=test',
             ready: function () {},
-            expand: function () {}
+            expand: function () {},
+            requestFullscreen: function () {
+              window.__telegramRequestFullscreenCalls += 1;
+            }
           }
         };
       `
@@ -245,6 +249,17 @@ test('Telegram Mini App auth starts from the static shell without root cloud blo
   ).toBeVisible({ timeout: 2_000 });
   await expect(page.getByText('Открываю письменную комнату...')).toBeHidden();
   await expect.poll(() => telegramAuthRequests, { timeout: 2_000 }).toBe(1);
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            (window as Window & { __telegramRequestFullscreenCalls?: number })
+              .__telegramRequestFullscreenCalls ?? 0
+        ),
+      { timeout: 2_000 }
+    )
+    .toBeGreaterThan(0);
   await expect(page.getByText('Telegram auth unavailable in test')).toBeVisible();
 });
 

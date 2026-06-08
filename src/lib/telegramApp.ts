@@ -9,7 +9,9 @@ let telegramSdkPromise: Promise<boolean> | null = null;
 interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
+  requestFullscreen?: () => void;
   initData: string;
+  isFullscreen?: boolean;
 }
 
 declare global {
@@ -105,6 +107,9 @@ export async function initTelegramApp(): Promise<boolean> {
   try {
     WebApp.ready();
     WebApp.expand();
+    if (!WebApp.isFullscreen) {
+      WebApp.requestFullscreen?.();
+    }
     return true;
   } catch {
     return false;

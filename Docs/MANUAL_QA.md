@@ -62,6 +62,13 @@
 - Click `Вернуться к текстам`.
 - Confirm local dashboard opens and writing can continue.
 
+## Telegram Mini App
+
+- Open the app through the Telegram bot.
+- Confirm the app expands immediately and enters fullscreen on Telegram clients that support fullscreen Mini Apps.
+- Confirm older clients still open expanded through `expand()`.
+- Confirm `telegram-auth` starts from the landing/static shell instead of waiting on the root Supabase loader.
+
 ## Cloud Outbox
 
 - Start an authenticated cloud session.

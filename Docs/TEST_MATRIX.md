@@ -37,6 +37,7 @@
 - Confirm export keeps raw Telegram-style markup.
 - Simulate unavailable Supabase and confirm the static/start screen appears immediately while cloud sync fails in the background.
 - Confirm normal browser startup does not request the Telegram SDK.
+- Confirm Telegram Mini App startup requests fullscreen when the client exposes the fullscreen API.
 - Install the PWA from production when supported.
 - Reload once, disable network, and confirm the cached app shell opens.
 - In cloud mode, block Supabase network, save draft/bank/update/archive, confirm local state updates and the nav sync pill appears.
@@ -60,7 +61,7 @@
 - Cloud hydration failure still renders the static/start screen instead of blocking first render.
 - Normal browser startup does not request Telegram SDK.
 - PWA manifest and service worker assets are available.
-- Telegram Mini App startup mounts `AuthGate` and starts `telegram-auth` without waiting for root cloud hydration.
+- Telegram Mini App startup mounts `AuthGate`, requests fullscreen when supported, and starts `telegram-auth` without waiting for root cloud hydration.
 - Capsule and collection routes lazy-load reward chunks without breaking navigation.
 - Future: cloud offline write/reconnect replay E2E once Supabase mocking is stable.
 

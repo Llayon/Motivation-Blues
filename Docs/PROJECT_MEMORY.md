@@ -11,7 +11,7 @@
 ## Implemented Features
 
 - Supabase Auth magic-link flow.
-- Telegram Mini App (TMA) integration (SDK initialization, expanded viewport) so the app runs natively inside Telegram.
+- Telegram Mini App (TMA) integration (SDK initialization, expanded viewport, and fullscreen request when supported) so the app runs natively inside Telegram.
 - Seamless Telegram Auth via Supabase Edge Functions, providing zero-click auto-login for TMA users without email entry.
 - Telegram SDK loads dynamically only for Telegram launch URLs, so normal browser startup is not blocked by third-party script loading.
 - Cloud-backed posts, progress, capsules, and inventory.
@@ -104,6 +104,7 @@
 - Removed the blocking Telegram SDK script from `index.html`, added dynamic TMA SDK loading, and lazy-loaded product route screens.
 - Added PWA-lite manifest, icons, service worker app-shell cache, and registration helper.
 - Added a local-first cloud write outbox with stable-id post upsert, queue-on-failure store actions, nav sync status, and retry on hydration/online.
+- Added Telegram Mini App fullscreen request on startup with `expand()` fallback for older clients.
 
 ## Maintenance Rule
 

@@ -43,7 +43,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 ## Telegram Mini App
 
 - `index.html`: static document shell; it must not include blocking third-party startup scripts.
-- `src/lib/telegramApp.ts`: Telegram launch detection, dynamic SDK loading, `ready()`, and `expand()`.
+- `src/lib/telegramApp.ts`: Telegram launch detection, dynamic SDK loading, `ready()`, `expand()`, and optional fullscreen request.
 - `src/main.tsx`: starts non-blocking Telegram environment initialization while rendering React.
 - `src/App.tsx`: never blocks first render on root Supabase hydration, so Telegram auto-login can start from `AuthGate`.
 - `src/components/AuthGate.tsx`: starts Telegram auto-login from `window.Telegram.WebApp.initData`.
