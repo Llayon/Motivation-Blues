@@ -10,7 +10,7 @@ Use this file to give the next LLM session a compact starting point. Update it a
 - Telegram SDK is dynamically loaded only for Telegram launch URLs; normal browser startup should not request it.
 - Product route screens lazy-load from `App`; auth/start shell stays light.
 - PWA-lite is implemented with manifest, icons, and a same-origin app-shell service worker cache.
-- PWA-lite does not implement offline cloud writes; local-first sync queue is the next sync step.
+- Supported cloud draft/bank/update/archive failures are queued in a local-first outbox and retried from the app runtime.
 - Banked posts can be edited without duplicating progress or capsules.
 - Telegram-style formatting is stored as raw text and safely previewed.
 - Capsule and collection screens lazy-load the 3D/R3F chunk; initial dashboard/editor bundle stays below 500 kB.
@@ -22,6 +22,8 @@ Use this file to give the next LLM session a compact starting point. Update it a
 ## Last Verified
 
 - 2026-06-02: `npm audit`
+- 2026-06-08: `npm test`
+- 2026-06-08: `npm run build`
 - 2026-06-02: `npm run quality:full` (`format:check`, `lint`, `architecture:check`, `size:check`, `adr:check`, docs check, unit tests, build, Playwright E2E, Pages build, Knip)
 
 ## Known Risks
@@ -30,10 +32,11 @@ Use this file to give the next LLM session a compact starting point. Update it a
 - Supabase contract/RLS tests are planned but not automated yet.
 - Visual QA remains manual; no screenshot regression suite yet.
 - Service worker production updates need manual smoke until automated deploy checks cover cache behavior.
+- Outbox v1 has no cross-device merge UI and does not queue capsule opening.
 
 ## Next Best Tasks
 
-1. Add a local-first sync queue/outbox for offline cloud writes.
-2. Add an ErrorBoundary so runtime UI errors do not blank the app.
-3. Add Supabase contract tests for RLS and RPC behavior.
-4. Add screenshot-based visual QA for landing, dashboard, editor, bank, and capsule screens.
+1. Add an ErrorBoundary so runtime UI errors do not blank the app.
+2. Add Supabase contract tests for RLS and RPC behavior.
+3. Add screenshot-based visual QA for landing, dashboard, editor, bank, and capsule screens.
+4. Add explicit outbox conflict/merge UX before promising multi-device offline editing.

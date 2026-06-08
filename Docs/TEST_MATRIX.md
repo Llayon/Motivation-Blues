@@ -11,6 +11,7 @@
 - Telegram-style formatting helpers and safe-link parsing.
 - Telegram launch parameter detection.
 - PWA service worker registration helpers.
+- Local-first sync outbox fallback queueing and state transitions.
 - Cloud hydration timeout helper.
 - LLM workflow scripts: `npm run verify`, `npm run verify:pages`, and `npm run docs:changed-check`.
 - ADR enforcement script: `npm run adr:check`.
@@ -38,7 +39,8 @@
 - Confirm normal browser startup does not request the Telegram SDK.
 - Install the PWA from production when supported.
 - Reload once, disable network, and confirm the cached app shell opens.
-- Confirm cloud writes still show an error when offline rather than silently queuing.
+- In cloud mode, block Supabase network, save draft/bank/update/archive, confirm local state updates and the nav sync pill appears.
+- Restore network or click the sync pill and confirm queued cloud writes replay, then the pill clears after hydration.
 - For workflow/doc changes, review `Docs/CODEMAP.md`, `Docs/TRACEABILITY.md`, `Docs/BOUNDARIES.md`, and `Docs/COMMIT_CHECKLIST.md` for consistency.
 
 ## Playwright E2E
@@ -60,6 +62,7 @@
 - PWA manifest and service worker assets are available.
 - Telegram Mini App startup mounts `AuthGate` and starts `telegram-auth` without waiting for root cloud hydration.
 - Capsule and collection routes lazy-load reward chunks without breaking navigation.
+- Future: cloud offline write/reconnect replay E2E once Supabase mocking is stable.
 
 ## Supabase
 
@@ -69,6 +72,7 @@
 - `bank_post` is idempotent for already-banked posts.
 - `open_capsule` rejects opened or foreign capsules.
 - Startup remains usable if Supabase Auth/REST is unavailable or slow.
+- Cloud post writes use stable ids and `upsert` so queued draft/bank/update replay can create or update the same row.
 
 ## LLM Workflow
 

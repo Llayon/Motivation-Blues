@@ -62,6 +62,18 @@
 - Click `Вернуться к текстам`.
 - Confirm local dashboard opens and writing can continue.
 
+## Cloud Outbox
+
+- Start an authenticated cloud session.
+- Block Supabase network or disable network after the app shell is loaded.
+- Save a draft.
+- Confirm the draft appears locally and the nav shows a waiting/retry cloud sync pill.
+- Save a post to bank.
+- Confirm local progress updates and the sync pill count increases.
+- Restore network.
+- Click the sync pill or trigger browser `online`.
+- Confirm queued writes replay and the sync pill clears after cloud hydration.
+
 ## Landing
 
 - Confirm H1, H2, email input, primary CTA, and secondary CTA match `Docs/PRODUCT_SPEC.md`.
@@ -76,7 +88,7 @@
 - Disable network.
 - Reopen or refresh the installed app.
 - Confirm the cached app shell appears.
-- Confirm cloud actions still report failure when offline rather than silently claiming sync.
+- Confirm the service worker does not cache Supabase/Auth/Telegram responses; cloud write replay should come from the app-runtime outbox.
 
 ## Dashboard
 

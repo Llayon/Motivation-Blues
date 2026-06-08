@@ -8,6 +8,7 @@ These rules keep LLM-generated changes from crossing layers accidentally.
 
 - UI components read and call actions from `src/store/useAppStore.ts`; they should not write directly to Supabase.
 - Cloud persistence lives in `src/store/useAppStore.ts` and `src/services/supabase.ts`.
+- Durable cloud write retry state lives in `src/lib/syncOutbox.ts`; UI should not write to IndexedDB outbox directly.
 - Pure calculations belong in `src/lib/` and should have unit tests when practical.
 - Shared product shapes belong in `src/types.ts`.
 
@@ -45,7 +46,7 @@ These rules keep LLM-generated changes from crossing layers accidentally.
 - Keep GitHub Pages subpath support: `VITE_BASE_PATH=/Motivation-Blues/`.
 - Magic-link redirects must remain compatible with `https://llayon.github.io/Motivation-Blues/`.
 - Deploy-affecting changes should run `npm run verify:pages`.
-- Service worker cache must stay same-origin/static-shell only unless a separate offline sync ADR is accepted.
+- Service worker cache must stay same-origin/static-shell only; cloud write sync belongs to the app-runtime outbox unless a new ADR changes that boundary.
 - Do not cache Supabase API, Telegram SDK, auth responses, or user-private cloud data in the service worker.
 
 ## Quality Gates

@@ -38,7 +38,17 @@ Mitigation: keep navigation network-first, version service worker cache names, d
 ## PWA Offline Sync Confusion
 
 Risk: users expect installability to mean cloud writes work offline.
-Mitigation: document PWA-lite as app-shell caching only; add explicit outbox/sync feature before promising offline cloud writes.
+Mitigation: document PWA-lite as app-shell caching only; route supported offline cloud writes through the app-runtime outbox, not the service worker.
+
+## Outbox Divergence
+
+Risk: local optimistic posts/progress differ from Supabase until queued writes replay.
+Mitigation: keep a visible sync pill, replay on hydration and browser `online`, use stable post ids with Supabase `upsert`, and make `bankPost` replay check cloud status before calling `bank_post`.
+
+## Outbox Conflict UX
+
+Risk: the same post is changed from another device before queued local writes replay.
+Mitigation: v1 exposes failed/conflict status buckets but does not auto-merge; add explicit conflict resolution before supporting multi-device offline editing as a product promise.
 
 ## GitHub Pages Subpath
 

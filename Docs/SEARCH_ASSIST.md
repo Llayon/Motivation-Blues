@@ -73,6 +73,24 @@ High-signal files:
 - `src/services/supabase.ts`
 - `src/store/useAppStore.ts`
 
+## Cloud Outbox
+
+```bash
+npm run search:assist -- "syncOutbox|enqueueSyncOperation|listReplayableSyncOperations"
+npm run search:assist -- "Ждет облако|Повторить облако|sync-status"
+```
+
+High-signal files:
+
+- `src/lib/syncOutbox.ts`
+- `src/lib/syncOutboxStorage.ts`
+- `src/store/useAppStore.ts`
+- `src/store/localPostState.ts`
+- `src/store/syncReplay.ts`
+- `src/store/cloudData.ts`
+- `src/components/Nav.tsx`
+- `Docs/adr/0011-local-first-sync-outbox.md`
+
 ## Tests
 
 ```bash

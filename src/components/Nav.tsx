@@ -17,6 +17,22 @@ export function Nav() {
   const profile = useAppStore((state) => state.profile);
   const signOut = useAppStore((state) => state.signOut);
   const mode = useAppStore((state) => state.mode);
+  const syncStatus = useAppStore((state) => state.syncStatus);
+  const syncOutbox = useAppStore((state) => state.syncOutbox);
+  const queuedSyncCount =
+    syncStatus.pendingCount +
+    syncStatus.syncingCount +
+    syncStatus.failedCount +
+    syncStatus.conflictCount;
+  const hasSyncProblems = syncStatus.failedCount > 0 || syncStatus.conflictCount > 0;
+  const shouldShowSyncStatus = mode === 'cloud' && queuedSyncCount > 0;
+  let syncLabel = `Ждет облако: ${queuedSyncCount}`;
+
+  if (hasSyncProblems) {
+    syncLabel = `Повторить облако: ${queuedSyncCount}`;
+  } else if (syncStatus.isSyncing || syncStatus.syncingCount > 0) {
+    syncLabel = `Синхронизирую: ${queuedSyncCount}`;
+  }
 
   return (
     <header className="top-nav glass-panel">
@@ -40,6 +56,17 @@ export function Nav() {
         <span>
           {mode === 'cloud' ? 'Cloud' : 'Local'} · {profile?.email}
         </span>
+        {shouldShowSyncStatus ? (
+          <button
+            className={`sync-pill ${hasSyncProblems ? 'sync-pill-problem' : ''}`}
+            data-testid="sync-status"
+            disabled={syncStatus.isSyncing}
+            type="button"
+            onClick={() => void syncOutbox()}
+          >
+            {syncLabel}
+          </button>
+        ) : null}
         <button type="button" onClick={() => void signOut()}>
           Выйти
         </button>

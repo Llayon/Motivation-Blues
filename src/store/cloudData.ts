@@ -231,6 +231,7 @@ export async function saveCloudPost(
   const existing = input.id ? posts.find((post) => post.id === input.id) : undefined;
   const content = input.content.trim();
   const payload = {
+    ...(input.id ? { id: input.id } : {}),
     user_id: profile.id,
     title: input.title.trim(),
     content,
@@ -241,11 +242,10 @@ export async function saveCloudPost(
     updated_at: new Date().toISOString()
   };
 
-  const result = existing
+  const result = input.id
     ? await supabase
         .from('posts')
-        .update(payload)
-        .eq('id', existing.id)
+        .upsert(payload, { onConflict: 'id' })
         .select('*')
         .single<DbPost>()
     : await supabase.from('posts').insert(payload).select('*').single<DbPost>();

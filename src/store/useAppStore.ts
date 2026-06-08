@@ -1,13 +1,28 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { collectibleItems } from '../data/items';
 import { createClassicFeedback } from '../data/classicPhrases';
 import { getLocalTimezone, loadCloudHydrationSnapshot, saveCloudPost } from './cloudData';
 import { CLOUD_HYDRATION_TIMEOUT_MS, withCloudTimeout } from '../lib/cloudHydration';
-import { countWords, normalizeTags } from '../lib/postText';
-import { getCrossedMilestones, getDailyGoal, getLocalDateKey, getSeasonDay } from '../lib/season';
-import { pickRandom, pickWeightedRarity } from '../lib/random';
+import { pickWeightedRarity } from '../lib/random';
 import { isSupabaseConfigured, supabase } from '../services/supabase';
+import {
+  createSyncOperation,
+  enqueueSyncOperation,
+  getOutboxSummary,
+  listReplayableSyncOperations,
+  markFailed,
+  markSyncing,
+  markSynced,
+  type SyncOutboxSummary
+} from '../lib/syncOutbox';
+import {
+  buildLocalBankedState,
+  buildLocalDraftState,
+  chooseItemByRarity,
+  ensureInputId,
+  updatePost
+} from './localPostState';
+import { replaySyncOperation } from './syncReplay';
 import type {
   Capsule,
   ClassicFeedback,
@@ -15,7 +30,6 @@ import type {
   InventoryItem,
   Post,
   PostInput,
-  Rarity,
   UserProfile,
   ViewId
 } from '../types';
@@ -25,6 +39,11 @@ type AppMode = 'local' | 'cloud';
 type HydrateFromSupabaseOptions = {
   blockUi?: boolean;
   timeoutMs?: number;
+  syncPending?: boolean;
+};
+
+type SyncStatus = SyncOutboxSummary & {
+  isSyncing: boolean;
 };
 
 interface AppState {
@@ -33,6 +52,7 @@ interface AppState {
   cloudConfigured: boolean;
   isHydrating: boolean;
   cloudError: string | null;
+  syncStatus: SyncStatus;
   profile: UserProfile | null;
   posts: Post[];
   dailyProgress: DailyProgress[];
@@ -45,6 +65,8 @@ interface AppState {
   openPostInEditor: (postId: string) => void;
   clearEditorTarget: () => void;
   hydrateFromSupabase: (options?: HydrateFromSupabaseOptions) => Promise<void>;
+  refreshSyncStatus: () => Promise<void>;
+  syncOutbox: () => Promise<void>;
   requestMagicLink: (email: string, redirectUrl: string) => Promise<string | null>;
   startSession: (email: string) => void;
   startTelegramSession: (initData: string) => Promise<void>;
@@ -59,64 +81,19 @@ interface AppState {
 }
 
 let latestHydrationRequestId = 0;
+let isSyncRunnerActive = false;
 
-function createPost(userId: string, input: PostInput, status: Post['status']): Post {
-  const now = new Date().toISOString();
-  const content = input.content.trim();
+const EMPTY_SYNC_STATUS: SyncStatus = {
+  pendingCount: 0,
+  syncingCount: 0,
+  failedCount: 0,
+  conflictCount: 0,
+  lastError: null,
+  isSyncing: false
+};
 
-  return {
-    id: input.id ?? crypto.randomUUID(),
-    userId,
-    title: input.title.trim(),
-    content,
-    status,
-    charCount: content.length,
-    wordCount: countWords(content),
-    tags: normalizeTags(input.tags),
-    createdAt: now,
-    updatedAt: now,
-    bankedAt: status === 'banked' ? now : undefined
-  };
-}
-
-function updatePost(existing: Post, input: PostInput, status?: Post['status']): Post {
-  const now = new Date().toISOString();
-  const content = input.content.trim();
-  const nextStatus = status ?? existing.status;
-
-  return {
-    ...existing,
-    title: input.title.trim(),
-    content,
-    tags: normalizeTags(input.tags),
-    status: nextStatus,
-    charCount: content.length,
-    wordCount: countWords(content),
-    updatedAt: now,
-    bankedAt: nextStatus === 'banked' ? (existing.bankedAt ?? now) : existing.bankedAt
-  };
-}
-
-function buildCapsule(
-  userId: string,
-  triggerKey: string,
-  createdFrom: string,
-  capsuleType: Capsule['capsuleType']
-): Capsule {
-  return {
-    id: crypto.randomUUID(),
-    userId,
-    triggerKey,
-    createdFrom,
-    capsuleType,
-    status: 'sealed',
-    acquiredAt: new Date().toISOString()
-  };
-}
-
-function chooseItemByRarity(rarity: Rarity) {
-  const pool = collectibleItems.filter((item) => item.rarity === rarity);
-  return pickRandom(pool.length > 0 ? pool : collectibleItems);
+function getSyncWaitMessage() {
+  return 'Сохранено локально. Облако догонит, когда связь вернется.';
 }
 
 export const useAppStore = create<AppState>()(
@@ -127,6 +104,7 @@ export const useAppStore = create<AppState>()(
       cloudConfigured: isSupabaseConfigured,
       isHydrating: isSupabaseConfigured,
       cloudError: null,
+      syncStatus: EMPTY_SYNC_STATUS,
       profile: null,
       posts: [],
       dailyProgress: [],
@@ -198,6 +176,10 @@ export const useAppStore = create<AppState>()(
             mode: 'cloud',
             cloudError: null
           });
+
+          if (options.syncPending !== false) {
+            void get().syncOutbox();
+          }
         } catch (error) {
           // Even if we're not the latest request, if we hit a timeout or error,
           // we should consider if we need to unblock the UI.
@@ -208,6 +190,68 @@ export const useAppStore = create<AppState>()(
 
           const message = error instanceof Error ? error.message : 'Supabase sync failed.';
           set({ isHydrating: false, cloudError: message });
+        }
+      },
+      refreshSyncStatus: async () => {
+        const summary = await getOutboxSummary();
+        set({
+          syncStatus: {
+            ...summary,
+            isSyncing: isSyncRunnerActive
+          }
+        });
+      },
+      syncOutbox: async () => {
+        if (isSyncRunnerActive) {
+          return;
+        }
+
+        if (!supabase) {
+          await get().refreshSyncStatus();
+          return;
+        }
+
+        isSyncRunnerActive = true;
+        const initialSummary = await getOutboxSummary();
+        set({
+          syncStatus: {
+            ...initialSummary,
+            isSyncing: true
+          }
+        });
+
+        let didSyncAny = false;
+
+        try {
+          const operations = await listReplayableSyncOperations();
+
+          for (const operation of operations) {
+            await markSyncing(operation.id);
+            await get().refreshSyncStatus();
+
+            try {
+              await replaySyncOperation(operation, get().posts);
+              await markSynced(operation.id);
+              didSyncAny = true;
+            } catch (error) {
+              const message =
+                error instanceof Error ? error.message : 'Cloud sync operation failed.';
+              await markFailed(operation.id, message);
+            }
+          }
+        } finally {
+          isSyncRunnerActive = false;
+          const summary = await getOutboxSummary();
+          set({
+            syncStatus: {
+              ...summary,
+              isSyncing: false
+            }
+          });
+        }
+
+        if (didSyncAny) {
+          await get().hydrateFromSupabase({ blockUi: false, syncPending: false });
         }
       },
       requestMagicLink: async (email, redirectUrl) => {
@@ -244,6 +288,7 @@ export const useAppStore = create<AppState>()(
           editorTargetPostId: null,
           activeView: 'dashboard',
           cloudError: null,
+          syncStatus: EMPTY_SYNC_STATUS,
           isHydrating: false
         });
       },
@@ -299,7 +344,8 @@ export const useAppStore = create<AppState>()(
           feedback: null,
           latestRevealItemId: null,
           editorTargetPostId: null,
-          cloudError: null
+          cloudError: null,
+          syncStatus: EMPTY_SYNC_STATUS
         });
       },
       saveDraft: async (input) => {
@@ -308,9 +354,11 @@ export const useAppStore = create<AppState>()(
           return null;
         }
 
+        const stableInput = ensureInputId(input);
+
         if (mode === 'cloud' && supabase) {
           try {
-            const nextPost = await saveCloudPost(profile, posts, input);
+            const nextPost = await saveCloudPost(profile, posts, stableInput);
             set({
               posts: posts.some((post) => post.id === nextPost.id)
                 ? posts.map((post) => (post.id === nextPost.id ? nextPost : post))
@@ -320,23 +368,33 @@ export const useAppStore = create<AppState>()(
             return nextPost.id;
           } catch (error) {
             const message = error instanceof Error ? error.message : 'Draft save failed.';
-            set({ cloudError: message });
-            return null;
+            const localDraft = buildLocalDraftState(profile, posts, stableInput);
+            await enqueueSyncOperation(
+              createSyncOperation('saveDraft', stableInput.id!, {
+                profile,
+                input: stableInput
+              })
+            );
+            const summary = await getOutboxSummary();
+            set({
+              posts: localDraft.posts,
+              cloudError: `${getSyncWaitMessage()} Последняя ошибка: ${message}`,
+              syncStatus: {
+                ...summary,
+                isSyncing: isSyncRunnerActive
+              }
+            });
+            return localDraft.nextPost.id;
           }
         }
 
-        const existing = input.id ? posts.find((post) => post.id === input.id) : undefined;
-        const nextPost = existing
-          ? updatePost(existing, input, existing.status === 'banked' ? 'banked' : 'draft')
-          : createPost(profile.id, input, 'draft');
+        const localDraft = buildLocalDraftState(profile, posts, stableInput);
 
         set({
-          posts: existing
-            ? posts.map((post) => (post.id === nextPost.id ? nextPost : post))
-            : [nextPost, ...posts]
+          posts: localDraft.posts
         });
 
-        return nextPost.id;
+        return localDraft.nextPost.id;
       },
       bankPost: async (input) => {
         const { profile, posts, dailyProgress, capsules, mode } = get();
@@ -344,11 +402,14 @@ export const useAppStore = create<AppState>()(
           return;
         }
 
-        const existing = input.id ? posts.find((post) => post.id === input.id) : undefined;
+        const stableInput = ensureInputId(input);
+        const existing = stableInput.id
+          ? posts.find((post) => post.id === stableInput.id)
+          : undefined;
 
         if (mode === 'cloud' && supabase) {
           try {
-            const savedPost = await saveCloudPost(profile, posts, input, existing?.status);
+            const savedPost = await saveCloudPost(profile, posts, stableInput, existing?.status);
             if (existing?.status !== 'banked') {
               const { error } = await supabase.rpc('bank_post', { post_id: savedPost.id });
               if (error) {
@@ -363,87 +424,33 @@ export const useAppStore = create<AppState>()(
             });
           } catch (error) {
             const message = error instanceof Error ? error.message : 'Bank post failed.';
-            set({ cloudError: message });
-          }
-          return;
-        }
-
-        if (existing?.status === 'banked') {
-          const updated = updatePost(existing, input, 'banked');
-          set({
-            posts: posts.map((post) => (post.id === updated.id ? updated : post)),
-            feedback: createClassicFeedback(updated.charCount)
-          });
-          return;
-        }
-
-        const previousTotal = profile.totalBankedPosts;
-        const nextPost = existing
-          ? updatePost(existing, input, 'banked')
-          : createPost(profile.id, input, 'banked');
-        const nextTotal = Math.min(100, previousTotal + 1);
-        const now = new Date();
-        const dateKey = getLocalDateKey(now);
-        const seasonDay = getSeasonDay(profile.seasonStartAt, now);
-        const goalPosts = getDailyGoal(seasonDay);
-        const progressId = `${profile.id}:${dateKey}`;
-        const existingProgress = dailyProgress.find((progress) => progress.dateKey === dateKey);
-        const previousDailyCount = existingProgress?.bankedCount ?? 0;
-        const nextDailyCount = previousDailyCount + 1;
-        const nextCapsules = [...capsules];
-        const existingTriggerKeys = new Set(capsules.map((capsule) => capsule.triggerKey));
-
-        if (
-          previousDailyCount < goalPosts &&
-          nextDailyCount >= goalPosts &&
-          !existingTriggerKeys.has(`daily:${dateKey}`)
-        ) {
-          nextCapsules.unshift(
-            buildCapsule(
-              profile.id,
-              `daily:${dateKey}`,
-              `День ${seasonDay}: дневная норма`,
-              'daily'
-            )
-          );
-          existingTriggerKeys.add(`daily:${dateKey}`);
-        }
-
-        for (const milestone of getCrossedMilestones(previousTotal, nextTotal)) {
-          const triggerKey = `milestone:${milestone}`;
-          if (!existingTriggerKeys.has(triggerKey)) {
-            nextCapsules.unshift(
-              buildCapsule(profile.id, triggerKey, `${milestone} постов в банке`, 'milestone')
+            const localBanked = buildLocalBankedState(
+              profile,
+              posts,
+              dailyProgress,
+              capsules,
+              stableInput
             );
+            await enqueueSyncOperation(
+              createSyncOperation('bankPost', stableInput.id!, {
+                profile,
+                input: stableInput
+              })
+            );
+            const summary = await getOutboxSummary();
+            set({
+              ...localBanked,
+              cloudError: `${getSyncWaitMessage()} Последняя ошибка: ${message}`,
+              syncStatus: {
+                ...summary,
+                isSyncing: isSyncRunnerActive
+              }
+            });
           }
+          return;
         }
 
-        const nextProgress: DailyProgress = {
-          id: existingProgress?.id ?? progressId,
-          userId: profile.id,
-          dateKey,
-          seasonDay,
-          goalPosts,
-          bankedCount: nextDailyCount,
-          goalCapsuleAwarded: existingProgress?.goalCapsuleAwarded || nextDailyCount >= goalPosts
-        };
-
-        set({
-          profile: {
-            ...profile,
-            totalBankedPosts: nextTotal
-          },
-          posts: existing
-            ? posts.map((post) => (post.id === nextPost.id ? nextPost : post))
-            : [nextPost, ...posts],
-          dailyProgress: existingProgress
-            ? dailyProgress.map((progress) =>
-                progress.id === nextProgress.id ? nextProgress : progress
-              )
-            : [nextProgress, ...dailyProgress],
-          capsules: nextCapsules,
-          feedback: createClassicFeedback(nextPost.charCount)
-        });
+        set(buildLocalBankedState(profile, posts, dailyProgress, capsules, stableInput));
       },
       updateBankedPost: async (input) => {
         const { profile, posts, mode } = get();
@@ -451,14 +458,15 @@ export const useAppStore = create<AppState>()(
           return false;
         }
 
-        const existing = posts.find((post) => post.id === input.id);
+        const stableInput = ensureInputId(input);
+        const existing = posts.find((post) => post.id === stableInput.id);
         if (!existing || existing.status !== 'banked') {
           return false;
         }
 
         if (mode === 'cloud' && supabase) {
           try {
-            const updated = await saveCloudPost(profile, posts, input, 'banked');
+            const updated = await saveCloudPost(profile, posts, stableInput, 'banked');
             set({
               posts: posts.map((post) => (post.id === updated.id ? updated : post)),
               editorTargetPostId: null,
@@ -468,12 +476,28 @@ export const useAppStore = create<AppState>()(
             return true;
           } catch (error) {
             const message = error instanceof Error ? error.message : 'Banked post update failed.';
-            set({ cloudError: message });
-            return false;
+            const updated = updatePost(existing, stableInput, 'banked');
+            await enqueueSyncOperation(
+              createSyncOperation('updateBankedPost', stableInput.id!, {
+                profile,
+                input: stableInput
+              })
+            );
+            const summary = await getOutboxSummary();
+            set({
+              posts: posts.map((post) => (post.id === updated.id ? updated : post)),
+              editorTargetPostId: null,
+              cloudError: `${getSyncWaitMessage()} Последняя ошибка: ${message}`,
+              syncStatus: {
+                ...summary,
+                isSyncing: isSyncRunnerActive
+              }
+            });
+            return true;
           }
         }
 
-        const updated = updatePost(existing, input, 'banked');
+        const updated = updatePost(existing, stableInput, 'banked');
         set({
           posts: posts.map((post) => (post.id === updated.id ? updated : post)),
           editorTargetPostId: null
@@ -481,7 +505,7 @@ export const useAppStore = create<AppState>()(
         return true;
       },
       archivePost: async (postId) => {
-        const { posts, mode } = get();
+        const { profile, posts, mode } = get();
 
         if (mode === 'cloud' && supabase) {
           const { error } = await supabase
@@ -490,7 +514,27 @@ export const useAppStore = create<AppState>()(
             .eq('id', postId);
 
           if (error) {
-            set({ cloudError: error.message });
+            if (profile) {
+              await enqueueSyncOperation(
+                createSyncOperation('archivePost', postId, {
+                  profile,
+                  postId
+                })
+              );
+            }
+            const summary = await getOutboxSummary();
+            set({
+              posts: posts.map((post) =>
+                post.id === postId
+                  ? { ...post, status: 'archived', updatedAt: new Date().toISOString() }
+                  : post
+              ),
+              cloudError: `${getSyncWaitMessage()} Последняя ошибка: ${error.message}`,
+              syncStatus: {
+                ...summary,
+                isSyncing: isSyncRunnerActive
+              }
+            });
             return;
           }
 

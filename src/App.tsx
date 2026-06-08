@@ -54,6 +54,8 @@ export default function App() {
   );
   const profile = useAppStore((state) => state.profile);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
+  const refreshSyncStatus = useAppStore((state) => state.refreshSyncStatus);
+  const syncOutbox = useAppStore((state) => state.syncOutbox);
   const isTelegramLaunch = isTelegramEnvironment() || hasTelegramLaunchParams();
 
   useEffect(() => {
@@ -96,6 +98,21 @@ export default function App() {
 
     return () => subscription.unsubscribe();
   }, [hasPersistedStoreHydrated, hydrateFromSupabase, isTelegramLaunch]);
+
+  useEffect(() => {
+    if (!hasPersistedStoreHydrated) {
+      return;
+    }
+
+    void refreshSyncStatus();
+
+    function handleOnline() {
+      void syncOutbox();
+    }
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [hasPersistedStoreHydrated, refreshSyncStatus, syncOutbox]);
 
   if (!hasPersistedStoreHydrated) {
     return (

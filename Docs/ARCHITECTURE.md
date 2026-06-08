@@ -18,8 +18,9 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 2. `useAppStore` loads profile, posts, daily progress, capsules, and inventory.
 3. UI reads state directly from Zustand.
 4. Cloud mode writes posts and reward actions through Supabase tables/RPC.
-5. Local mode keeps the same behavior in local Zustand persistence.
-6. If cloud hydration stalls or fails, the app fails open: the first screen remains usable, local data is preserved when present, and the Auth gate lets the user continue locally or retry cloud sync.
+5. Supported cloud write failures for draft/bank/update/archive are recorded in the local sync outbox and replayed later.
+6. Local mode keeps the same behavior in local Zustand persistence.
+7. If cloud hydration stalls or fails, the app fails open: the first screen remains usable, local data is preserved when present, and the Auth gate lets the user continue locally or retry cloud sync.
 
 ## Telegram Mini App Startup
 
@@ -42,6 +43,21 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Clear behavior: explicit new editor or successful bank save clears the buffer.
 - Banked edit flow: `Bank` calls `openPostInEditor(postId)`, Zustand stores `editorTargetPostId`, and `ZenEditor` loads that post after checking the local buffer.
 - Conflict behavior: unrelated emergency buffers are kept visible until the user explicitly keeps the buffer or opens the selected draft/banked post.
+
+## Local-First Cloud Outbox
+
+- Outbox API: `src/lib/syncOutbox.ts`.
+- Outbox storage adapter: `src/lib/syncOutboxStorage.ts`.
+- Storage: IndexedDB database `motivation-blues-sync-outbox`, object store `sync-operations`.
+- Fallback: `localStorage`.
+- Scope: cloud-mode `saveDraft`, `bankPost`, `updateBankedPost`, and `archivePost`.
+- Local optimistic post/progress state helpers: `src/store/localPostState.ts`.
+- Replay helper: `src/store/syncReplay.ts`.
+- UI status: `src/components/Nav.tsx` shows waiting/syncing/retry counts when queued operations exist.
+- Replay triggers: successful authenticated cloud hydration and browser `online` from `src/App.tsx`.
+- Post writes use stable client-generated ids and Supabase `upsert` so replay can create or update the same row.
+- `bankPost` replay checks current cloud post status before calling `bank_post` to avoid double-counting an already-banked post.
+- `openCapsule` remains online-only in v1 because reward rolls need a separate idempotency/conflict policy.
 
 ## Editor Formatting
 
@@ -95,7 +111,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - `index.html` links the manifest and theme metadata through Vite `BASE_URL`.
 - Service worker registration uses `import.meta.env.BASE_URL` so GitHub Pages scope remains `/Motivation-Blues/`.
 - The worker caches same-origin app shell/assets only; Supabase, Telegram SDK, and other cross-origin requests are not cached.
-- PWA-lite is installability and static-shell caching, not offline cloud sync.
+- PWA-lite is installability and static-shell caching. Offline cloud write replay is handled by the app-runtime outbox, not the service worker.
 
 ## 3D
 

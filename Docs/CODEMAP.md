@@ -5,13 +5,15 @@ Use this file as the first map before broad code search. It points an LLM agent 
 ## App Entry And Routing
 
 - `src/main.tsx`: React root.
-- `src/App.tsx`: static-first boot, background Supabase hydration, auth gate, active view switch, and lazy product routes.
-- `src/components/Nav.tsx`: main navigation between dashboard, editor, bank, season, capsules, collection, and export.
+- `src/App.tsx`: static-first boot, background Supabase hydration, outbox status/retry lifecycle, auth gate, active view switch, and lazy product routes.
+- `src/components/Nav.tsx`: main navigation between dashboard, editor, bank, season, capsules, collection, export, and compact outbox sync status.
 
 ## Global State And Product Loop
 
-- `src/store/useAppStore.ts`: central Zustand store for mode, profile, posts, daily progress, capsules, inventory, feedback, local actions, and RPC orchestration.
+- `src/store/useAppStore.ts`: central Zustand store for mode, profile, posts, daily progress, capsules, inventory, feedback, local actions, outbox orchestration, and RPC orchestration.
 - `src/store/cloudData.ts`: Supabase profile/post/progress/capsule/inventory loading and post persistence mapping.
+- `src/store/localPostState.ts`: optimistic local draft/bank/post/progress/capsule state builders.
+- `src/store/syncReplay.ts`: replay of queued cloud write operations against Supabase.
 - `src/types.ts`: shared product types.
 - `src/lib/season.ts`: 40-day schedule, daily goals, season days, levels, milestones.
 - `src/lib/random.ts`: random item and rarity helpers.
@@ -20,8 +22,11 @@ Use this file as the first map before broad code search. It points an LLM agent 
 
 - `src/services/supabase.ts`: Supabase client setup.
 - `src/store/cloudData.ts`: cloud data loading and post writes.
-- `src/store/useAppStore.ts`: cloud hydration orchestration and RPC calls.
+- `src/store/useAppStore.ts`: cloud hydration orchestration, outbox runner, and RPC calls.
 - `src/lib/cloudHydration.ts`: bounded timeout for background cloud hydration and explicit retry flows.
+- `src/lib/syncOutbox.ts`: public cloud-write outbox API and status transitions.
+- `src/lib/syncOutboxStorage.ts`: IndexedDB/localStorage outbox persistence.
+- `src/lib/syncOutbox.test.ts`: outbox fallback queue and state transition tests.
 - `supabase/migrations/`: schema, RLS, RPC definitions.
 - `Docs/DATA_CONTRACTS.md`: table and RPC contracts.
 
@@ -56,6 +61,18 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `src/store/useAppStore.ts`: draft, bank, banked-edit, and editor target actions.
 - `Docs/adr/0003-indexeddb-autosave.md`: accepted autosave decision.
 - `tests/e2e/local-writing-flow.spec.ts`: autosave and conflict E2E coverage.
+
+## Local-First Cloud Outbox
+
+- `src/lib/syncOutbox.ts`: durable pending cloud write operations and status transitions.
+- `src/lib/syncOutboxStorage.ts`: IndexedDB/localStorage persistence for pending operations.
+- `src/store/useAppStore.ts`: queue-on-failure orchestration for draft, bank, banked update, and archive.
+- `src/store/localPostState.ts`: local optimistic state for failed cloud writes.
+- `src/store/syncReplay.ts`: Supabase replay logic for queued operations.
+- `src/store/cloudData.ts`: stable-id Supabase post `upsert` for replay.
+- `src/App.tsx`: status refresh and browser `online` retry.
+- `src/components/Nav.tsx`: visible waiting/syncing/retry pill.
+- `Docs/adr/0011-local-first-sync-outbox.md`: accepted outbox boundary and conflict scope.
 
 ## Formatting
 

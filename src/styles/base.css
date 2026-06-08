@@ -302,6 +302,23 @@ textarea:focus {
   white-space: nowrap;
 }
 
+.nav-profile .sync-pill {
+  border: 1px solid rgba(74, 144, 226, 0.18);
+  background: rgba(255, 255, 255, 0.46);
+  color: var(--muted);
+}
+
+.nav-profile .sync-pill:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+}
+
+.nav-profile .sync-pill-problem {
+  border-color: rgba(207, 61, 85, 0.2);
+  background: rgba(255, 235, 239, 0.76);
+  color: #b62843;
+}
+
 .app-main {
   width: min(1480px, calc(100vw - 2rem));
   margin: 0 auto;

@@ -32,6 +32,11 @@ Result: Telegram SDK is loaded dynamically only for Telegram launch URLs, normal
 Goal: make the app installable and keep the static writing room available from cache on repeat visits.
 Result: added manifest, icons, service worker app-shell cache, production registration, and PWA smoke tests. Offline cloud sync remains out of scope.
 
+### Local-first sync outbox
+
+Goal: let cloud-mode user actions be recorded locally when Supabase is offline or slow and replayed safely later.
+Result: added IndexedDB/localStorage outbox, queue-on-failure for draft/bank/update/archive, stable-id Supabase post upsert, runtime replay on hydration/online, nav sync status, feature brief, ADR, and unit tests.
+
 ## High Priority
 
 ### 1. Extend autosave conflict UX to drafts
@@ -42,15 +47,7 @@ Files likely involved: `src/components/ZenEditor.tsx`, `src/lib/editorBuffer.ts`
 Acceptance criteria: user can keep buffer, load selected draft, or save buffer as draft.
 Verification: manual QA in `Docs/MANUAL_QA.md`.
 
-### 2. Add local-first sync queue
-
-Goal: let cloud-mode user actions be recorded locally when offline and replayed safely when network returns.
-Context: PWA-lite caches the app shell, but cloud writes still require network and there is no outbox/merge policy.
-Files likely involved: `src/store/useAppStore.ts`, new IndexedDB outbox helper under `src/lib/`, Supabase RPC/write paths, conflict UX.
-Acceptance criteria: pending draft/bank/update/archive actions survive reload, retry on reconnect, and expose clear failed/conflict states.
-Verification: unit tests for outbox state transitions and Playwright offline/reconnect flow.
-
-### 3. Add error boundary
+### 2. Add error boundary
 
 Goal: avoid blank page on runtime UI errors.
 Context: production is a static SPA on GitHub Pages.

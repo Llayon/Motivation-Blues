@@ -107,11 +107,18 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Export format is `.txt` with separators.
 - Drafts are not exported.
 
+## Cloud Sync
+
+- In cloud mode, explicit draft save, bank save, banked-post update, and archive actions should update local UI even if Supabase is temporarily unavailable.
+- Failed supported cloud writes are stored in a local outbox and replayed when the app hydrates with an authenticated cloud session or the browser comes back online.
+- The user should see a compact waiting/syncing/retry status when queued cloud writes exist.
+- Capsule opening remains online-only.
+
 ## PWA-Lite
 
 - App can be installed where the browser supports PWA installation.
 - Service worker caches the static app shell and same-origin assets.
-- Offline app shell access must not imply offline cloud sync.
+- Offline app shell access must not imply service-worker cloud sync; cloud write replay is handled by the app runtime outbox.
 - Active editor recovery remains handled by IndexedDB autosave.
 
 ## Out Of Scope For MVP
@@ -123,4 +130,4 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - Social features.
 - Public profiles.
 - WYSIWYG rich text editing.
-- Offline cloud write sync.
+- Background Sync API, automatic multi-device merge, or full offline conflict resolution.

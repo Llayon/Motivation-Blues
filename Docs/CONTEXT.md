@@ -25,6 +25,7 @@ Motivation Blues is a light, gamified writing editor for beginner bloggers. The 
 - Static SPA hosted on GitHub Pages.
 - PWA-lite app shell cache is available for installability and repeat-load resilience.
 - Supabase cloud handles Auth, Postgres, RLS, and RPC.
+- Cloud-mode draft/bank/update/archive failures are queued in a local-first outbox and retried from the app runtime.
 - URL: `https://llayon.github.io/Motivation-Blues/`
 - Repository: `https://github.com/Llayon/Motivation-Blues`
 
