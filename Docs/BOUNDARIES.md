@@ -38,6 +38,7 @@ These rules keep LLM-generated changes from crossing layers accidentally.
 - Preserve the calm, premium, lightly ironic literary-club tone.
 - Reward animations and capsule opening must not interrupt typing.
 - Three/R3F imports should stay behind lazy reward screens and must not move into always-loaded dashboard/editor routes.
+- Route error boundaries should keep navigation/shell visible and must not weaken editor autosave recovery.
 - Red or punitive progress copy should appear only for real missed previous days.
 - Follow `Docs/COPY_GUIDE.md` for copy changes.
 

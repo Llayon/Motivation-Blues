@@ -114,6 +114,12 @@ Motivation Blues is a 40-day writing challenge editor. The user writes 100 ready
 - The user should see a compact waiting/syncing/retry status when queued cloud writes exist.
 - Capsule opening remains online-only.
 
+## Runtime Recovery
+
+- A route-level UI crash should show a readable recovery fallback instead of a blank page.
+- Navigation should remain usable when an active view crashes.
+- Editor autosave and cloud outbox data must remain independent from the recovery fallback.
+
 ## PWA-Lite
 
 - App can be installed where the browser supports PWA installation.

@@ -91,6 +91,19 @@ High-signal files:
 - `src/components/Nav.tsx`
 - `Docs/adr/0011-local-first-sync-outbox.md`
 
+## Route Error Boundary
+
+```bash
+npm run search:assist -- "ErrorBoundary|__simulateRouteError|Комната споткнулась"
+```
+
+High-signal files:
+
+- `src/components/ErrorBoundary.tsx`
+- `src/App.tsx`
+- `tests/e2e/local-writing-flow.spec.ts`
+- `Docs/adr/0012-route-error-boundary.md`
+
 ## Tests
 
 ```bash

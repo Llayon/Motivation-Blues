@@ -30,6 +30,7 @@
 - TXT export for banked posts.
 - IndexedDB editor autosave buffer with localStorage fallback.
 - Static-first boot: local/AuthGate UI renders immediately while Supabase hydration runs in the background.
+- Route-level ErrorBoundary keeps the shell/navigation usable if an active view crashes.
 - Banked posts can be reopened in the editor and updated without duplicating season progress or capsules.
 - Bank view supports text search and tag chips for navigation.
 - Editor supports Telegram-style plain-text formatting for bold, italic, and links.
@@ -75,6 +76,7 @@
 - Autosave changes can accidentally weaken recovery guarantees.
 - Supabase Auth/REST requests can stall on startup; the app mitigates this with static-first boot, bounded background refreshes, and a visible retry path.
 - Service worker caches can become stale after deploys; Pages build and manual production smoke should verify app shell updates.
+- ErrorBoundary catches route render/lifecycle crashes, but event-handler and async errors still need local handling.
 - Outbox local optimistic state can temporarily diverge from Supabase until replay succeeds.
 - GitHub Actions currently forces JavaScript actions to Node 24 to avoid upcoming runner deprecation issues.
 - CI now runs unit tests and Playwright E2E before build/deploy.
@@ -105,6 +107,7 @@
 - Added PWA-lite manifest, icons, service worker app-shell cache, and registration helper.
 - Added a local-first cloud write outbox with stable-id post upsert, queue-on-failure store actions, nav sync status, and retry on hydration/online.
 - Added Telegram Mini App fullscreen request on startup with `expand()` fallback for older clients.
+- Added a route-level ErrorBoundary with fallback recovery and Playwright coverage for editor buffer survival.
 
 ## Maintenance Rule
 

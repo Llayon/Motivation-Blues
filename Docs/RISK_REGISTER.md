@@ -30,6 +30,11 @@ Mitigation: do not put third-party scripts in `index.html`; dynamically load Tel
 Risk: Three/R3F inflate initial load.
 Mitigation: lazy-load capsule and collection screens.
 
+## Runtime Blank Page
+
+Risk: a React render error in a route blanks the app and makes users think their text is lost.
+Mitigation: keep route content inside `ErrorBoundary`, keep navigation outside the boundary, and preserve editor autosave/outbox storage independently.
+
 ## Stale Service Worker Cache
 
 Risk: a deployed update is hidden behind an older cached app shell.

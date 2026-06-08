@@ -37,6 +37,11 @@ Result: added manifest, icons, service worker app-shell cache, production regist
 Goal: let cloud-mode user actions be recorded locally when Supabase is offline or slow and replayed safely later.
 Result: added IndexedDB/localStorage outbox, queue-on-failure for draft/bank/update/archive, stable-id Supabase post upsert, runtime replay on hydration/online, nav sync status, feature brief, ADR, and unit tests.
 
+### Route error boundary
+
+Goal: avoid blank pages on route-level React render errors.
+Result: added `ErrorBoundary` around lazy active views, recovery fallback copy, dashboard reset/reload actions, route crash E2E coverage, feature brief, and ADR.
+
 ## High Priority
 
 ### 1. Extend autosave conflict UX to drafts
@@ -47,29 +52,21 @@ Files likely involved: `src/components/ZenEditor.tsx`, `src/lib/editorBuffer.ts`
 Acceptance criteria: user can keep buffer, load selected draft, or save buffer as draft.
 Verification: manual QA in `Docs/MANUAL_QA.md`.
 
-### 2. Add error boundary
-
-Goal: avoid blank page on runtime UI errors.
-Context: production is a static SPA on GitHub Pages.
-Files likely involved: `src/App.tsx`, new `src/components/ErrorBoundary.tsx`.
-Acceptance criteria: app shows a readable fallback and does not lose active editor buffer.
-Verification: build passes and manual injected error test.
-
 ## Medium Priority
 
-### 4. Add Supabase contract tests
+### 2. Add Supabase contract tests
 
 Goal: automate RLS and RPC checks for user ownership, `bank_post`, and `open_capsule`.
 Context: `Docs/TRACEABILITY.md` currently marks Supabase contract tests as planned.
 Acceptance criteria: tests prove own-row access, foreign-row rejection, idempotent banking, and sealed-capsule validation.
 
-### 5. Add visual regression smoke tests
+### 3. Add visual regression smoke tests
 
 Goal: catch major layout/copy regressions on landing, dashboard, editor, bank, and capsules.
 Context: UI/copy QA is documented but still manual.
 Acceptance criteria: screenshot or structured Playwright checks run in CI without making tests brittle.
 
-### 6. Improve collection visuals
+### 4. Improve collection visuals
 
 Goal: make figurines feel more like glossy collectible toys.
 Context: current models are procedural placeholders.
@@ -77,12 +74,12 @@ Acceptance criteria: no runtime material mutation of imported assets unless inte
 
 ## Low Priority
 
-### 7. Add richer phrase library
+### 5. Add richer phrase library
 
 Goal: expand static classic feedback variety without adding AI.
 Acceptance criteria: phrase bank remains static and typed.
 
-### 8. Add theme polish
+### 6. Add theme polish
 
 Goal: refine light glassmorphism system and responsive layout.
 Acceptance criteria: mobile editor remains usable.

@@ -284,6 +284,33 @@ test('IndexedDB autosave restores active editor buffer after reload', async ({ p
   await expect(page.getByTestId('editor-tags')).toHaveValue('autosave, recovery');
 });
 
+test('route error boundary keeps shell usable without losing editor buffer', async ({ page }) => {
+  await startLocalMode(page);
+  await openEditor(page);
+
+  await writePostFields(
+    page,
+    'Буфер перед аварией',
+    'Этот текст должен остаться в столе, даже если один раздел приложения споткнулся.',
+    'error-boundary'
+  );
+  await waitForEditorBufferTags(page, 'error-boundary');
+
+  await page.goto('/?__simulateRouteError=1');
+  await expect(page.getByTestId('error-boundary')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Редактор', exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Вернуться в кабинет' }).click();
+  await expect(page.getByText('0/100 постов в банке')).toBeVisible();
+
+  await openEditor(page);
+  await expect(page.getByTestId('editor-title')).toHaveValue('Буфер перед аварией');
+  await expect(page.getByTestId('editor-content')).toHaveValue(
+    'Этот текст должен остаться в столе, даже если один раздел приложения споткнулся.'
+  );
+  await expect(page.getByTestId('editor-tags')).toHaveValue('error-boundary');
+});
+
 test('editor uses literary focus copy and manuscript length statuses', async ({ page }) => {
   await startLocalMode(page);
   await openEditor(page);

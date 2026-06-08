@@ -8,6 +8,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 
 - Entry: `src/main.tsx`.
 - Root view routing: `src/App.tsx` with Zustand `activeView`; product route screens are lazy-loaded.
+- Route error recovery: `src/components/ErrorBoundary.tsx` wraps lazy route content so a route crash does not blank the app shell.
 - UI components: `src/components/`.
 - Domain constants and helpers: `src/lib/`, `src/data/`.
 - Global state: `src/store/useAppStore.ts`; cloud mapping/loading helpers live in `src/store/cloudData.ts`.
@@ -21,6 +22,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 5. Supported cloud write failures for draft/bank/update/archive are recorded in the local sync outbox and replayed later.
 6. Local mode keeps the same behavior in local Zustand persistence.
 7. If cloud hydration stalls or fails, the app fails open: the first screen remains usable, local data is preserved when present, and the Auth gate lets the user continue locally or retry cloud sync.
+8. If a lazy product route crashes during render, `ErrorBoundary` shows a recovery fallback while keeping navigation visible.
 
 ## Telegram Mini App Startup
 

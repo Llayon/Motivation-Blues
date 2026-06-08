@@ -13,6 +13,7 @@
 - PWA service worker registration helpers.
 - Local-first sync outbox fallback queueing and state transitions.
 - Cloud hydration timeout helper.
+- Route error boundary fallback and editor buffer survival through Playwright.
 - LLM workflow scripts: `npm run verify`, `npm run verify:pages`, and `npm run docs:changed-check`.
 - ADR enforcement script: `npm run adr:check`.
 - Code quality scripts: `npm run format:check`, `npm run lint`, `npm run architecture:check`, `npm run size:check`, and `npm run deadcode`.
@@ -38,6 +39,7 @@
 - Simulate unavailable Supabase and confirm the static/start screen appears immediately while cloud sync fails in the background.
 - Confirm normal browser startup does not request the Telegram SDK.
 - Confirm Telegram Mini App startup requests fullscreen when the client exposes the fullscreen API.
+- Simulate a route render error and confirm the fallback appears while navigation and editor buffer recovery still work.
 - Install the PWA from production when supported.
 - Reload once, disable network, and confirm the cached app shell opens.
 - In cloud mode, block Supabase network, save draft/bank/update/archive, confirm local state updates and the nav sync pill appears.
@@ -58,6 +60,7 @@
 - Opening a banked post for edit does not silently overwrite an unrelated autosave buffer.
 - Editor formatting menu inserts raw markup and Bank preview renders it safely.
 - Draft selection asks before replacing an unfinished manuscript.
+- Route error boundary shows fallback and does not lose IndexedDB editor buffer.
 - Cloud hydration failure still renders the static/start screen instead of blocking first render.
 - Normal browser startup does not request Telegram SDK.
 - PWA manifest and service worker assets are available.

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { AuthGate } from './components/AuthGate';
 import { ClassicToast } from './components/ClassicToast';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Nav } from './components/Nav';
 import { hasTelegramLaunchParams, isTelegramEnvironment } from './lib/telegramApp';
 import { isSupabaseConfigured, supabase } from './services/supabase';
@@ -29,6 +30,14 @@ const Collection = lazy(() =>
 function ActiveView() {
   const activeView = useAppStore((state) => state.activeView);
 
+  if (
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('__simulateRouteError')
+  ) {
+    throw new Error('Simulated active view crash.');
+  }
+
   switch (activeView) {
     case 'editor':
       return <ZenEditor />;
@@ -52,11 +61,23 @@ export default function App() {
   const [hasPersistedStoreHydrated, setHasPersistedStoreHydrated] = useState(
     useAppStore.persist.hasHydrated()
   );
+  const activeView = useAppStore((state) => state.activeView);
   const profile = useAppStore((state) => state.profile);
   const hydrateFromSupabase = useAppStore((state) => state.hydrateFromSupabase);
   const refreshSyncStatus = useAppStore((state) => state.refreshSyncStatus);
+  const setActiveView = useAppStore((state) => state.setActiveView);
   const syncOutbox = useAppStore((state) => state.syncOutbox);
   const isTelegramLaunch = isTelegramEnvironment() || hasTelegramLaunchParams();
+
+  function handleRouteErrorReset() {
+    if (import.meta.env.DEV && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('__simulateRouteError');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+
+    setActiveView('dashboard');
+  }
 
   useEffect(() => {
     const unsubscribe = useAppStore.persist.onFinishHydration(() => {
@@ -136,9 +157,11 @@ export default function App() {
       <div className="aurora aurora-two" />
       <Nav />
       <main className="app-main">
-        <Suspense fallback={<p className="muted">Открываю раздел...</p>}>
-          <ActiveView />
-        </Suspense>
+        <ErrorBoundary key={activeView} onReset={handleRouteErrorReset}>
+          <Suspense fallback={<p className="muted">Открываю раздел...</p>}>
+            <ActiveView />
+          </Suspense>
+        </ErrorBoundary>
       </main>
       <ClassicToast />
     </div>

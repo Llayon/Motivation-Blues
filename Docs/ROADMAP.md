@@ -9,6 +9,7 @@
 - Banked posts and season progress.
 - Capsule queue and collection.
 - IndexedDB autosave.
+- Route-level ErrorBoundary.
 
 ## v0.2 Reliability
 
@@ -35,5 +36,4 @@
 
 - Add Playwright smoke tests.
 - Test Supabase RLS failure cases.
-- Add basic error boundary.
 - Add release checklist automation.

@@ -20,6 +20,17 @@
 - Click `Новый`.
 - Confirm editor clears and stale buffer does not restore.
 
+## Route Error Boundary
+
+- Open editor.
+- Type a title, body, and tags.
+- Confirm autosave status updates.
+- In local dev, open `/?__simulateRouteError=1`.
+- Confirm the fallback says the room stumbled and the navigation remains visible.
+- Click `Вернуться в кабинет`.
+- Reopen editor.
+- Confirm the typed buffer is still restored.
+
 ## Drafts
 
 - Save text as draft.
