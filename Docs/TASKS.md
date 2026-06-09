@@ -57,6 +57,11 @@ Result: added hidden `?debug=1` diagnostics screen, sanitized snapshot helper, c
 Goal: verify the published GitHub Pages app after deployment.
 Result: added production Playwright config, unauthenticated smoke tests, `npm run test:prod-smoke`, post-deploy GitHub Actions job, production smoke checklist, feature brief, and ADR.
 
+### Critical writing route preload
+
+Goal: prevent the first editor/bank click from waiting on intermittent GitHub Pages lazy chunk delivery.
+Result: kept route-level code splitting, but preloads dashboard, editor, and bank chunks after first paint while leaving 3D reward routes lazy.
+
 ## High Priority
 
 ### 1. Extend autosave conflict UX to drafts

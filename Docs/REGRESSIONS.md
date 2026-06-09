@@ -13,6 +13,7 @@ Record fixed regressions here so future LLM sessions know which behaviors are fr
 | 2026-06-02 | App could hang on Supabase loading screen during TMA integration           | Missing timeout in Telegram auth flow and race condition in pre-empted hydrations  | Added `withCloudTimeout` to TMA auth and refactored store hydration to be race-resilient   | `src/lib/cloudHydration.test.ts` and refined `hydrateFromSupabase` logic                         |
 | 2026-06-03 | TMA could stay on the root Supabase loader before Telegram auth started    | `AuthGate` contained Telegram auto-login but was mounted only after boot hydration | Skip the blocking root Supabase loader in Telegram Mini App mode                           | `tests/e2e/local-writing-flow.spec.ts` Telegram Mini App auth test                               |
 | 2026-06-03 | First screen could wait on slow Supabase despite static SPA behavior       | Boot hydration used `blockUi: true` and the root loader observed cloud hydration   | Run boot hydration in the background and render after persisted local state is ready       | `tests/e2e/local-writing-flow.spec.ts` cloud fallback test, `Docs/adr/0008-static-first-boot.md` |
+| 2026-06-09 | First editor/bank open could wait 15-20s on tiny lazy route chunks         | Critical writing routes were only fetched after the user clicked them              | Preload `Dashboard`, `ZenEditor`, and `Bank` chunks after first paint                      | `npm run test:prod-smoke` plus manual Playwright production timing                               |
 
 ## Rule
 

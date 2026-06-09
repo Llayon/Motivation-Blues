@@ -41,6 +41,7 @@
 - Confirm export keeps raw Telegram-style markup.
 - Simulate unavailable Supabase and confirm the static/start screen appears immediately while cloud sync fails in the background.
 - Confirm normal browser startup does not request the Telegram SDK.
+- Confirm first production editor open does not visibly wait on lazy chunk loading after the landing page has painted.
 - Confirm Telegram Mini App startup requests fullscreen when the client exposes the fullscreen API.
 - Open `?debug=1`, copy diagnostics, and confirm no email, post text, query values, hash values, or tokens appear.
 - Simulate a route render error and confirm the fallback appears while navigation and editor buffer recovery still work.

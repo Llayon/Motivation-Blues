@@ -25,6 +25,7 @@
 - Voxel-style 3D placeholders with R3F.
 - Capsule and collection 3D surfaces are lazy-loaded so the writing flow does not import R3F/Three upfront.
 - Product route screens are lazy-loaded from `App` so the auth/start shell does not eagerly import editor, bank, season, export, or reward routes.
+- Dashboard, editor, and bank chunks are preloaded after first paint to avoid waiting on lazy route delivery during the first writing click.
 - PWA-lite installability with manifest, icons, and same-origin app-shell service worker cache.
 - Local-first cloud write outbox with IndexedDB/localStorage fallback for draft, bank, banked update, and archive retries.
 - TXT export for banked posts.
@@ -79,6 +80,7 @@
 - Autosave changes can accidentally weaken recovery guarantees.
 - Supabase Auth/REST requests can stall on startup; the app mitigates this with static-first boot, bounded background refreshes, and a visible retry path.
 - Service worker caches can become stale after deploys; Pages build and manual production smoke should verify app shell updates.
+- GitHub Pages can intermittently delay tiny lazy route chunks; keep critical writing routes warmed after first paint.
 - ErrorBoundary catches route render/lifecycle crashes, but event-handler and async errors still need local handling.
 - Crash reports are intentionally local-only and must not include user writing content, email, auth tokens, or secrets.
 - Diagnostics Hub snapshots are intentionally local-only and must not include user writing content, email, query/hash values, auth tokens, or secrets.
@@ -117,6 +119,7 @@
 - Added local-only production crash reports with build/runtime metadata and copyable fallback diagnostics.
 - Added hidden `?debug=1` Diagnostics Hub with privacy-safe support snapshots and copy/retry/cleanup actions.
 - Added post-deploy production smoke for GitHub Pages with manual checklist and Playwright coverage.
+- Added first-paint preloading for dashboard/editor/bank after production timing showed intermittent 15-20s lazy chunk waits.
 
 ## Maintenance Rule
 

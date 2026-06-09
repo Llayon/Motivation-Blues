@@ -20,6 +20,8 @@ The app is a static GitHub Pages SPA with local-first writing safety. Static-fir
 - Dynamically load Telegram Web App SDK only for Telegram launch URLs.
 - Keep normal browser launches from requesting Telegram SDK.
 - Lazy-load dashboard/editor/bank/season/export/capsule/collection route components.
+- Preload critical writing routes (`Dashboard`, `ZenEditor`, `Bank`) after the first paint so the
+  first user click does not wait on GitHub Pages lazy chunk delivery.
 - Add automated checks for Telegram SDK loading behavior and static shell availability.
 
 ## Out Of Scope
@@ -33,6 +35,8 @@ The app is a static GitHub Pages SPA with local-first writing safety. Static-fir
 - Normal browser startup renders the landing/static shell without requesting `https://telegram.org/js/telegram-web-app.js`.
 - Telegram Mini App startup loads the SDK dynamically and still starts `telegram-auth`.
 - Non-current route components are split from the initial route bundle.
+- Dashboard/editor/bank remain split from the initial bundle but are warmed in the background after
+  startup.
 - Existing local writing, autosave, bank, capsule, export, and TMA E2E flows still pass.
 
 ## Files Likely Involved

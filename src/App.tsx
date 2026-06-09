@@ -7,13 +7,15 @@ import { hasTelegramLaunchParams, isTelegramEnvironment } from './lib/telegramAp
 import { isSupabaseConfigured, supabase } from './services/supabase';
 import { useAppStore } from './store/useAppStore';
 
-const Dashboard = lazy(() =>
-  import('./components/Dashboard').then((module) => ({ default: module.Dashboard }))
-);
-const ZenEditor = lazy(() =>
-  import('./components/ZenEditor').then((module) => ({ default: module.ZenEditor }))
-);
-const Bank = lazy(() => import('./components/Bank').then((module) => ({ default: module.Bank })));
+const loadDashboard = () =>
+  import('./components/Dashboard').then((module) => ({ default: module.Dashboard }));
+const loadZenEditor = () =>
+  import('./components/ZenEditor').then((module) => ({ default: module.ZenEditor }));
+const loadBank = () => import('./components/Bank').then((module) => ({ default: module.Bank }));
+
+const Dashboard = lazy(loadDashboard);
+const ZenEditor = lazy(loadZenEditor);
+const Bank = lazy(loadBank);
 const SeasonPass = lazy(() =>
   import('./components/SeasonPass').then((module) => ({ default: module.SeasonPass }))
 );
@@ -29,6 +31,10 @@ const Collection = lazy(() =>
 const DiagnosticsHub = lazy(() =>
   import('./components/DiagnosticsHub').then((module) => ({ default: module.DiagnosticsHub }))
 );
+
+function preloadCoreWritingViews() {
+  void Promise.allSettled([loadDashboard(), loadZenEditor(), loadBank()]);
+}
 
 function hasDiagnosticsRoute() {
   return typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debug');
@@ -135,6 +141,15 @@ export default function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    if (!hasPersistedStoreHydrated || isDiagnosticsRoute) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(preloadCoreWritingViews, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [hasPersistedStoreHydrated, isDiagnosticsRoute]);
 
   useEffect(() => {
     if (!hasPersistedStoreHydrated) {

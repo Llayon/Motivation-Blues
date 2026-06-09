@@ -5,7 +5,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 ## App Entry And Routing
 
 - `src/main.tsx`: React root.
-- `src/App.tsx`: static-first boot, background Supabase hydration, outbox status/retry lifecycle, auth gate, active view switch, hidden diagnostics route, lazy product routes, and route error boundary/diagnostics context wiring.
+- `src/App.tsx`: static-first boot, background Supabase hydration, outbox status/retry lifecycle, auth gate, active view switch, hidden diagnostics route, lazy product routes, first-paint preload for core writing routes, and route error boundary/diagnostics context wiring.
 - `src/components/Nav.tsx`: main navigation between dashboard, editor, bank, season, capsules, collection, export, and compact outbox sync status.
 - `src/components/ErrorBoundary.tsx`: route-level render/lifecycle crash fallback for active views plus copyable local crash report UI.
 - `src/lib/crashReport.ts`: typed local-only crash report creation, localStorage persistence, formatting, and clipboard copy.
