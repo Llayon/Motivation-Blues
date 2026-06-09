@@ -42,6 +42,7 @@
 - Search Assist docs and `npm run search:assist -- "pattern"` support LLM navigation through the codebase.
 - CODEMAP, TRACEABILITY, BOUNDARIES, REGRESSIONS, HANDOFF, COPY_GUIDE, and COMMIT_CHECKLIST document the LLM-first workflow.
 - `npm run verify`, `npm run verify:full`, and `npm run verify:pages` provide repeatable verification commands.
+- `npm run test:prod-smoke` verifies the published GitHub Pages app shell, static assets, Telegram SDK gating, and Diagnostics Hub sanitization.
 - Prettier, ESLint, architecture boundary checks, advisory size budgets, and Knip reporting are wired into quality scripts.
 - Oversized editor/store/style files were split into controller/helper modules and stylesheet slices; `npm run size:check` is clean.
 - Knip dead-code reporting is clean after removing accidental public exports and configuring expected binaries.
@@ -84,6 +85,7 @@
 - Outbox local optimistic state can temporarily diverge from Supabase until replay succeeds.
 - GitHub Actions currently forces JavaScript actions to Node 24 to avoid upcoming runner deprecation issues.
 - CI now runs unit tests and Playwright E2E before build/deploy.
+- CI runs a post-deploy production smoke job against the published GitHub Pages URL.
 
 ## Recent History
 
@@ -114,6 +116,7 @@
 - Added a route-level ErrorBoundary with fallback recovery and Playwright coverage for editor buffer survival.
 - Added local-only production crash reports with build/runtime metadata and copyable fallback diagnostics.
 - Added hidden `?debug=1` Diagnostics Hub with privacy-safe support snapshots and copy/retry/cleanup actions.
+- Added post-deploy production smoke for GitHub Pages with manual checklist and Playwright coverage.
 
 ## Maintenance Rule
 

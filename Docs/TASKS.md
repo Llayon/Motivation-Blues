@@ -52,6 +52,11 @@ Result: added local-only crash reports, build metadata injection, copy action in
 Goal: let users/testers copy a safe support snapshot before a crash occurs.
 Result: added hidden `?debug=1` diagnostics screen, sanitized snapshot helper, cloud/outbox retry actions, crash-report cleanup, unit/E2E coverage, feature brief, and ADR.
 
+### Production smoke after deploy
+
+Goal: verify the published GitHub Pages app after deployment.
+Result: added production Playwright config, unauthenticated smoke tests, `npm run test:prod-smoke`, post-deploy GitHub Actions job, production smoke checklist, feature brief, and ADR.
+
 ## High Priority
 
 ### 1. Extend autosave conflict UX to drafts

@@ -8,6 +8,7 @@
     "src/**/*.tsx",
     "tests/**/*.ts",
     "vite.config.ts",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "playwright.prod.config.ts"
   ]
 }

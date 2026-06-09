@@ -62,6 +62,7 @@ npm run dev
 ```bash
 npm test
 npm run test:e2e
+npm run test:prod-smoke
 npm run build
 npm run search:assist -- "bankPost"
 npm run commitlint:last
@@ -90,6 +91,14 @@ $env:VITE_BASE_PATH='/Motivation-Blues/'
 npm run build
 Remove-Item Env:\VITE_BASE_PATH
 ```
+
+Проверка опубликованного production URL:
+
+```bash
+npm run test:prod-smoke
+```
+
+Подробный чеклист: `Docs/PRODUCTION_SMOKE.md`.
 
 ## Supabase Cloud
 

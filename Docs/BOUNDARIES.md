@@ -49,6 +49,7 @@ These rules keep LLM-generated changes from crossing layers accidentally.
 - Keep GitHub Pages subpath support: `VITE_BASE_PATH=/Motivation-Blues/`.
 - Magic-link redirects must remain compatible with `https://llayon.github.io/Motivation-Blues/`.
 - Deploy-affecting changes should run `npm run verify:pages`.
+- Production smoke should stay unauthenticated and must not use real user data, Supabase service-role keys, or private content.
 - Service worker cache must stay same-origin/static-shell only; cloud write sync belongs to the app-runtime outbox unless a new ADR changes that boundary.
 - Do not cache Supabase API, Telegram SDK, auth responses, or user-private cloud data in the service worker.
 

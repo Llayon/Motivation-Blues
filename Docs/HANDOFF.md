@@ -20,6 +20,7 @@ Use this file to give the next LLM session a compact starting point. Update it a
 - LLM-first workflow docs now include code map, traceability, boundaries, regression log, copy guide, checklists, and ADR/feature templates.
 - CI enforces ADR updates for architecture-sensitive changes through `npm run adr:check`.
 - Code quality automation now includes Prettier, ESLint, architecture boundary checks, advisory size budgets, clean Knip reporting, and aggregate quality scripts.
+- GitHub Actions runs `npm run test:prod-smoke` after Pages deploy; see `Docs/PRODUCTION_SMOKE.md`.
 - Store/editor/style oversized files have been split into smaller modules and `npm run size:check` is clean.
 
 ## Last Verified
@@ -39,6 +40,7 @@ Use this file to give the next LLM session a compact starting point. Update it a
 - ErrorBoundary does not catch event-handler or async errors outside React render/lifecycle.
 - Crash diagnostics are local-only; do not add remote telemetry without a new ADR and privacy review.
 - Diagnostics Hub must not grow into a content dump; keep email, text, query/hash values, tokens, and secrets out of snapshots.
+- Production smoke depends on public network/GitHub Pages propagation; rerun before changing app code if only the smoke job fails.
 
 ## Next Best Tasks
 

@@ -119,6 +119,7 @@ The app is a static SPA deployed to GitHub Pages. Supabase provides Auth, Postgr
 - Base path: `VITE_BASE_PATH=/Motivation-Blues/`.
 - URL: `https://llayon.github.io/Motivation-Blues/`.
 - Supabase magic-link redirects must include the same URL and local dev URLs.
+- Production smoke: `npm run test:prod-smoke` uses `playwright.prod.config.ts` and runs after GitHub Pages deploy.
 
 ## PWA-Lite
 

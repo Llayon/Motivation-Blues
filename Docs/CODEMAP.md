@@ -120,6 +120,8 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `src/lib/*.test.ts`: unit coverage for pure helpers.
 - `tests/e2e/local-writing-flow.spec.ts`: local-mode, autosave, diagnostics hub, route error boundary/crash report, formatting, banking, capsules, tags, export, and cloud fallback smoke tests.
 - `playwright.config.ts`: E2E web server and browser config.
+- `playwright.prod.config.ts`: published GitHub Pages smoke config without a local web server.
+- `tests/prod-smoke/production.spec.ts`: unauthenticated production URL smoke for app shell, static assets, Telegram SDK gating, and Diagnostics Hub sanitization.
 
 ## Quality Automation
 
@@ -130,6 +132,7 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `knip.json`: Knip dead-code entry/project configuration.
 - `package.json`: aggregate `quality` and `quality:full` scripts.
 - `src/styles.css`: imports split global styles from `src/styles/`.
+- `.github/workflows/deploy-pages.yml`: CI build/deploy plus post-deploy production smoke.
 
 ## LLM-First Docs
 
@@ -141,3 +144,4 @@ Use this file as the first map before broad code search. It points an LLM agent 
 - `Docs/HANDOFF.md`: current handoff state for future sessions.
 - `Docs/COPY_GUIDE.md`: product copy tone and examples.
 - `Docs/COMMIT_CHECKLIST.md`: pre-commit and pre-push checklist.
+- `Docs/PRODUCTION_SMOKE.md`: manual and automated published-URL smoke checklist.

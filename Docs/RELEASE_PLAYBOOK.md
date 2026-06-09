@@ -26,6 +26,12 @@ GitHub Pages base-path verification:
 npm run verify:pages
 ```
 
+Published production smoke:
+
+```bash
+npm run test:prod-smoke
+```
+
 ## Database Changes
 
 1. Add a new migration under `supabase/migrations/`.
@@ -52,6 +58,14 @@ gh run watch <run-id> --repo Llayon/Motivation-Blues --exit-status
 ```powershell
 (Invoke-WebRequest -UseBasicParsing https://llayon.github.io/Motivation-Blues/).StatusCode
 ```
+
+8. Run or inspect production smoke:
+
+```bash
+npm run test:prod-smoke
+```
+
+See `Docs/PRODUCTION_SMOKE.md` for the manual checklist.
 
 ## After Release
 

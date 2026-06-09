@@ -120,6 +120,20 @@ High-signal files:
 - `tests/e2e/local-writing-flow.spec.ts`
 - `Docs/adr/0014-manual-diagnostics-hub.md`
 
+## Production Smoke
+
+```bash
+npm run search:assist -- "test:prod-smoke|playwright.prod|PROD_SMOKE_BASE_URL|production-smoke"
+```
+
+High-signal files:
+
+- `playwright.prod.config.ts`
+- `tests/prod-smoke/production.spec.ts`
+- `.github/workflows/deploy-pages.yml`
+- `Docs/PRODUCTION_SMOKE.md`
+- `Docs/adr/0015-production-smoke-after-pages-deploy.md`
+
 ## Tests
 
 ```bash
@@ -133,3 +147,4 @@ Default verification for code changes:
 - `npm run test:e2e` for editor/local-mode/core-loop changes
 - `npm run build`
 - `npm run verify:pages` for deploy/base-path changes
+- `npm run test:prod-smoke` for post-deploy production URL checks when network is available

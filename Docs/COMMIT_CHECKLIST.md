@@ -18,6 +18,7 @@ Use this before committing or pushing changes.
 - Run `npm run build` for TypeScript/build validation.
 - Run `npm run test:e2e` for editor, local mode, core loop, formatting, auth, or navigation changes.
 - Run `npm run verify:pages` for deploy, routing, base-path, magic-link redirect, or workflow changes.
+- Run `npm run test:prod-smoke` for post-deploy production URL checks when network is available.
 - Run `npm run adr:check` for architecture-sensitive changes.
 - Run `npm run deadcode` before cleanup/refactor work to see Knip findings.
 - Run `npm run verify:full` before substantial releases when time allows.

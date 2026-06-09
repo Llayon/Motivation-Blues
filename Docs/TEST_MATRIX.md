@@ -19,6 +19,7 @@
 - LLM workflow scripts: `npm run verify`, `npm run verify:pages`, and `npm run docs:changed-check`.
 - ADR enforcement script: `npm run adr:check`.
 - Code quality scripts: `npm run format:check`, `npm run lint`, `npm run architecture:check`, `npm run size:check`, and `npm run deadcode`.
+- Production smoke checks published GitHub Pages shell, static assets, Telegram SDK gating, and Diagnostics Hub sanitization.
 
 ## Manual Smoke
 
@@ -116,3 +117,5 @@
 - `npm run commitlint:last` after committing.
 - GitHub Actions deploy succeeds.
 - Production URL returns HTTP 200.
+- `npm run test:prod-smoke` passes after GitHub Pages deploy.
+- GitHub Actions `production-smoke` job succeeds.

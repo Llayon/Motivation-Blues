@@ -12,6 +12,7 @@
 - Route-level ErrorBoundary.
 - Local-only production crash reports.
 - Hidden Diagnostics Hub.
+- Post-deploy production smoke.
 
 ## v0.2 Reliability
 
